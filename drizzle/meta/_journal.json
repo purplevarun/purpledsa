@@ -8,6 +8,13 @@
       "when": 1788848261959,
       "tag": "0000_chubby_liz_osborn",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788855690214,
+      "tag": "0001_good_salo",
+      "breakpoints": true
     }
   ]
 }

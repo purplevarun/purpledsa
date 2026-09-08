@@ -30,7 +30,6 @@ stop_app() {
 
 if [ "$#" -eq 0 ]; then
   docker compose up -d
-  start_app
   exit 0
 fi
 
@@ -38,12 +37,15 @@ case "$1" in
   up)
     shift
     docker compose up -d "$@"
-    start_app
     ;;
   down)
     shift
-    stop_app
     docker compose down "$@"
+    ;;
+  dev)
+    shift
+    docker compose up -d "$@"
+    start_app
     ;;
   *)
     docker compose "$@"

@@ -6,7 +6,7 @@ climb the leaderboard against everyone else using the app.
 
 - ✅ NeetCode 150 — all 150 problems, 18 patterns, with LeetCode/NeetCode links
 - ✅ Top Interview Questions — ~45 additional frequently-asked SWE interview problems
-- ✅ GitHub sign-in, per-user progress saved to Postgres
+- ✅ Simple username/password login stored in the same Postgres DB
 - ✅ Public leaderboard ranked by problems solved
 - ✅ Dark/light mode, fast, simple UI
 - ✅ 100% free to host (Vercel + Neon free tiers)
@@ -14,7 +14,7 @@ climb the leaderboard against everyone else using the app.
 ## Tech stack
 
 - [Next.js](https://nextjs.org) (App Router) + TypeScript + Tailwind CSS v4
-- [Auth.js (NextAuth v5)](https://authjs.dev) with the GitHub provider
+- [Auth.js (NextAuth v5)](https://authjs.dev) with a credential-based username/password flow
 - [Drizzle ORM](https://orm.drizzle.team) + Postgres via [postgres.js](https://github.com/porsager/postgres)
   (works identically against local Docker Postgres and hosted [Neon](https://neon.tech) —
   chosen over Prisma, which requires native binary downloads that some
@@ -28,59 +28,73 @@ climb the leaderboard against everyone else using the app.
    npm install
    ```
 
-2. **Start a local Postgres with Docker**
+2. **Start the local Postgres and app**
 
    ```bash
-   docker compose up -d
+   ./run up
    ```
 
-   This runs Postgres 16 in a container, listening on `localhost:5432` with a
-   `purpledsa` user/db and trust auth (local-only, no [REDACTED_SQL_PASSWORD_1]word needed). No account or
-   free-tier signup needed for local testing. For production you'll still want
-   a hosted Postgres — see [neon.tech](https://neon.tech) (free tier) — but
-   you don't need it to test locally.
+   This runs Postgres 16 in Docker on `localhost:5432` with a `purpledsa` DB and
+   starts the Next.js app on `http://localhost:3000`.
 
-3. **Create a GitHub OAuth App** at
-   [github.com/settings/developers](https://github.com/settings/developers):
-   - Homepage URL: `http://localhost:3000`
-   - Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
-
-4. **Copy the env file and fill in the values**
+3. **Create a `.env.local` file with the local DB**
 
    ```bash
    cp .env.example .env.local
-   npx auth secret   # generates AUTH_SECRET into .env.local
    ```
 
-   `DATABASE_URL` in `.env.example` already points at the local Docker Postgres
-   from step 2 — no changes needed there for local testing.
-
-5. **Create and apply the database schema**
+   Your local `.env.local` should include:
 
    ```bash
-   npm run db:generate   # generates SQL migration files in drizzle/
-   npm run db:migrate    # applies them to DATABASE_URL
+   DATABASE_URL="postgresql://purpledsa@localhost:5432/purpledsa"
+   AUTH_SECRET="<generate-with-npx-auth-secret>"
    ```
 
-6. **Run the dev server**
+4. **Create and apply the database schema**
 
    ```bash
-   npm run dev
+   npm run db:generate
+   npm run db:migrate
    ```
 
-   Open [http://localhost:3000](http://localhost:3000).
+   These commands read `.env.local` automatically and work with the local DB.
+
+5. **Sign in**
+
+   Open [http://localhost:3000/login](http://localhost:3000/login) and create a username/password.
+   The first time a user signs in, they are automatically created in the same Postgres DB.
 
 ## Deploying to Vercel (free)
 
 1. Push this repo to GitHub.
 2. Import the repo at [vercel.com/new](https://vercel.com/new).
-3. Add the same environment variables from `.env.local` in the Vercel project
-   settings (use the production GitHub OAuth App callback URL:
-   `https://<your-app>.vercel.app/api/auth/callback/github`).
-4. Deploy. Run `npm run db:migrate` locally with `DATABASE_URL` pointed at your
-   production database (e.g. `DATABASE_URL="<neon-url>" npm run db:migrate`)
-   once to create the tables in production. The migration files in `drizzle/`
-   are committed to the repo, so this is reproducible.
+3. In Vercel, add:
+   - `DATABASE_URL` = your Neon Postgres URL
+   - `AUTH_SECRET` = a generated secret
+4. Deploy. Once the app is live, run:
+
+   ```bash
+   DATABASE_URL="<your-neon-url>" npm run db:migrate
+   ```
+
+   to apply the schema in production.
+
+## Neon setup
+
+1. Create a free project at [neon.tech](https://neon.tech).
+2. Create a database and copy the connection string.
+3. Use the connection string as `DATABASE_URL` in your Vercel environment variables.
+4. Generate a new `AUTH_SECRET` with:
+
+   ```bash
+   npx auth secret
+   ```
+
+5. Deploy the app and run the migration once against Neon:
+
+   ```bash
+   DATABASE_URL="<your-neon-url>" npm run db:migrate
+   ```
 
 > **Note:** if building locally, make sure `NODE_ENV` isn't already exported
 > in your shell (`env -u NODE_ENV npm run build`) — some Next.js versions crash
