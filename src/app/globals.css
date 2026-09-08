@@ -3,37 +3,37 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f7f6fb;
-  --foreground: #201a2b;
-  --card: #ffffff;
-  --border: #e3defa;
-  --muted: #6b6478;
-  --primary: #7c3aed;
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #f5f5f5;
+  --border: #d4d4d4;
+  --muted: #525252;
+  --primary: #111111;
   --primary-foreground: #ffffff;
-  --accent: #a855f7;
-  --easy: #15803d;
-  --easy-bg: #dcfce7;
-  --medium: #b45309;
-  --medium-bg: #fef3c7;
-  --hard: #b91c1c;
-  --hard-bg: #fee2e2;
+  --accent: #111111;
+  --easy: #111111;
+  --easy-bg: #f5f5f5;
+  --medium: #525252;
+  --medium-bg: #eeeeee;
+  --hard: #111111;
+  --hard-bg: #f0f0f0;
 }
 
 .dark {
-  --background: #14101c;
-  --foreground: #ede9f7;
-  --card: #1e1829;
-  --border: #322a44;
-  --muted: #a79cc0;
-  --primary: #a855f7;
-  --primary-foreground: #14101c;
-  --accent: #c084fc;
-  --easy: #4ade80;
-  --easy-bg: #14301f;
-  --medium: #fbbf24;
-  --medium-bg: #332405;
-  --hard: #f87171;
-  --hard-bg: #3a1414;
+  --background: #000000;
+  --foreground: #f5f5f5;
+  --card: #111111;
+  --border: #404040;
+  --muted: #a3a3a3;
+  --primary: #f5f5f5;
+  --primary-foreground: #000000;
+  --accent: #f5f5f5;
+  --easy: #f5f5f5;
+  --easy-bg: #1a1a1a;
+  --medium: #d4d4d4;
+  --medium-bg: #1f1f1f;
+  --hard: #f5f5f5;
+  --hard-bg: #1b1b1b;
 }
 
 @theme inline {
@@ -51,13 +51,42 @@
   --color-medium-bg: var(--medium-bg);
   --color-hard: var(--hard);
   --color-hard-bg: var(--hard-bg);
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+html {
+  background: var(--background);
+  font-family: "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 body {
+  min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+* {
+  font-family: "JetBrains Mono", "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  user-select: none;
+}
+
+.selectable-text,
+.selectable-text * {
+  user-select: text;
+}
+
+body::before {
+  display: none;
+}
+
+.glass-panel,
+.glass-button {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }

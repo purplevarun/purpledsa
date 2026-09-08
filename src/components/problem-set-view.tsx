@@ -97,7 +97,7 @@ export function ProblemSetView({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/" className="text-sm text-muted hover:text-primary">
+        <Link href="/" className="text-sm text-muted hover:text-foreground">
           ← Back to dashboard
         </Link>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight">{set.title}</h1>
@@ -106,17 +106,17 @@ export function ProblemSetView({
           <span className="font-mono text-sm text-muted">
             {solvedCount} / {total} solved
           </span>
-          <div className="h-2 flex-1 max-w-xs overflow-hidden rounded-full bg-border">
+          <div className="h-2 max-w-xs flex-1 overflow-hidden rounded-full bg-border">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all"
+              className="h-full rounded-full bg-foreground transition-all"
               style={{ width: `${pct}%` }}
             />
           </div>
-          <span className="font-mono text-sm text-primary">{pct}%</span>
+          <span className="font-mono text-sm text-foreground">{pct}%</span>
         </div>
         {!isAuthed && (
           <p className="mt-3 rounded-md border border-border bg-card px-3 py-2 text-sm text-muted">
-            <Link href="/login" className="font-medium text-primary hover:underline">
+            <Link href="/login" className="font-medium text-foreground underline-offset-2 hover:underline">
               Sign in
             </Link>{" "}
             to save your progress and appear on the leaderboard.
@@ -130,12 +130,12 @@ export function ProblemSetView({
           placeholder="Search problems…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="min-w-[160px] flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
+          className="min-w-[160px] flex-1 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-foreground"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value as "all" | "todo" | "done")}
-          className="rounded-md border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
+          className="rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-foreground"
         >
           <option value="all">All problems</option>
           <option value="todo">Not done</option>
@@ -152,9 +152,9 @@ export function ProblemSetView({
               <button
                 type="button"
                 onClick={() => toggleTopic(topic.name)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-primary/5"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-black/5 dark:hover:bg-white/5"
               >
-                <span className={`text-primary transition-transform ${isOpen ? "rotate-90" : ""}`}>
+                <span className={`text-foreground transition-transform ${isOpen ? "rotate-90" : ""}`}>
                   ▸
                 </span>
                 <span className="flex-1 font-semibold">{topic.name}</span>
@@ -166,11 +166,17 @@ export function ProblemSetView({
                 <ul className="divide-y divide-border px-2 pb-2">
                   {topic.problems.map((p) => {
                     const isDone = solved.has(p.slug);
+                    const leetcodeUrl = p.url.includes("leetcode.com") ? p.url : `https://leetcode.com/problems/${p.slug}/`;
+                    const neetcodeUrl = p.url.includes("neetcode.io") ? p.url : `https://neetcode.io/problems/${p.slug}`;
+                    const platformLinks = [
+                      { label: "GFG", href: gfgSearchUrl(p.name) },
+                      { label: "LeetCode", href: leetcodeUrl },
+                      { label: "NeetCode", href: neetcodeUrl },
+                    ];
                     return (
                       <li
                         key={p.slug}
-                        className={`flex flex-wrap items-center gap-2 px-2 py-2.5 ${isDone ? "bg-easy-bg/40" : ""
-                          }`}
+                        className={`flex flex-wrap items-center gap-2 px-2 py-2.5 ${isDone ? "bg-black/5 dark:bg-white/5" : ""}`}
                       >
                         <span className="w-8 shrink-0 font-mono text-xs text-muted">
                           {numbering.get(p.slug)}.
@@ -179,25 +185,29 @@ export function ProblemSetView({
                           type="checkbox"
                           checked={isDone}
                           onChange={() => toggle(p.slug)}
-                          className="h-4 w-4 shrink-0 accent-primary"
+                          className="h-4 w-4 shrink-0 accent-black dark:accent-white"
                         />
                         <a
                           href={p.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`min-w-[140px] flex-1 text-sm font-medium hover:text-primary hover:underline ${isDone ? "text-muted line-through" : ""
-                            }`}
+                          className={`selectable-text min-w-[140px] flex-1 text-sm font-medium hover:text-foreground hover:underline ${isDone ? "text-muted line-through" : ""}`}
                         >
                           {p.name}
                         </a>
-                        <a
-                          href={gfgSearchUrl(p.name)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="shrink-0 rounded border border-border px-2 py-0.5 font-mono text-[10px] text-muted hover:border-primary hover:text-primary"
-                        >
-                          GFG
-                        </a>
+                        <div className="ml-auto flex items-center gap-1.5">
+                          {platformLinks.map((platform) => (
+                            <a
+                              key={platform.label}
+                              href={platform.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="rounded border border-border px-2 py-0.5 font-mono text-[10px] text-muted transition-colors hover:border-foreground hover:text-foreground"
+                            >
+                              {platform.label}
+                            </a>
+                          ))}
+                        </div>
                         <span
                           className={`shrink-0 rounded px-2 py-0.5 font-mono text-[10px] font-semibold ${DIFF_CLASS[p.difficulty]}`}
                         >
@@ -206,7 +216,7 @@ export function ProblemSetView({
                         {p.locked && (
                           <span
                             title="LeetCode Premium-locked — link opens the free NeetCode version instead."
-                            className="shrink-0 cursor-help rounded border border-medium bg-medium-bg px-2 py-0.5 font-mono text-[10px] text-medium"
+                            className="shrink-0 cursor-help rounded border border-border bg-card px-2 py-0.5 font-mono text-[10px] text-muted"
                           >
                             🔒
                           </span>

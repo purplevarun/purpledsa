@@ -27,10 +27,10 @@ export default async function HomePage() {
   return (
     <div className="space-y-10">
       <section className="space-y-4 text-center sm:text-left">
-        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
           Track your <span className="text-primary">DSA</span> interview prep.
         </h1>
-        <p className="max-w-2xl text-muted sm:text-lg mx-auto sm:mx-0">
+        <p className="mx-auto max-w-2xl text-muted sm:mx-0 sm:text-lg">
           {totalProblemCount()} curated problems across NeetCode 150 and the most
           frequently asked SWE interview questions. Sign in, check off problems as
           you solve them, and climb the leaderboard.
@@ -38,7 +38,7 @@ export default async function HomePage() {
         {!session?.user && (
           <Link
             href="/login"
-            className="inline-block rounded-md bg-primary px-5 py-2.5 font-medium text-primary-foreground hover:opacity-90"
+            className="inline-block rounded-xl bg-primary px-5 py-2.5 font-medium text-primary-foreground shadow-lg shadow-sky-500/20 transition-opacity hover:opacity-90"
           >
             Sign in to start tracking
           </Link>
@@ -46,16 +46,16 @@ export default async function HomePage() {
       </section>
 
       {session?.user && (
-        <section className="rounded-xl border border-border bg-card p-5">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">
+        <section className="glass-panel rounded-2xl p-5">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
             Your overall progress
           </h2>
-          <p className="mt-1 text-2xl font-bold">
+          <p className="mt-2 text-2xl font-bold">
             {totalSolved} / {totalProblemCount()} solved
           </p>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-border">
+          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-800/70">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all"
+              className="h-full rounded-full bg-gradient-to-r from-sky-400 to-cyan-300 transition-all"
               style={{
                 width: `${totalProblemCount() ? (totalSolved / totalProblemCount()) * 100 : 0}%`,
               }}
@@ -73,9 +73,9 @@ export default async function HomePage() {
             <Link
               key={set.slug}
               href={`/sets/${set.slug}`}
-              className="group rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary"
+              className="glass-panel group rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-300/30"
             >
-              <h3 className="text-lg font-bold group-hover:text-primary">
+              <h3 className="text-lg font-bold text-foreground group-hover:text-primary">
                 {set.title}
               </h3>
               <p className="mt-1 text-sm text-muted">{set.description}</p>
@@ -86,9 +86,9 @@ export default async function HomePage() {
                 {session?.user && <span className="font-mono text-primary">{pct}%</span>}
               </div>
               {session?.user && (
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border">
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-800/70">
                   <div
-                    className="h-full rounded-full bg-primary"
+                    className="h-full rounded-full bg-gradient-to-r from-sky-400 to-cyan-300"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
