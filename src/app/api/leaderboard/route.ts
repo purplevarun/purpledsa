@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
+import { totalProblemCount } from "@/data/problemSets";
 import { db } from "@/db";
 import { progress, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { totalProblemCount } from "@/data/problemSets";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const rows = await db

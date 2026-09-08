@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { auth } from "@/auth";
+import { countProblems, problemSets, totalProblemCount } from "@/data/problemSets";
 import { db } from "@/db";
 import { progress } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { problemSets, countProblems, totalProblemCount } from "@/data/problemSets";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -100,4 +100,3 @@ export default async function HomePage() {
     </div>
   );
 }
-

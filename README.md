@@ -112,4 +112,3 @@ src/
   types/          Shared TypeScript types
 scripts/          One-off data extraction script
 ```
-

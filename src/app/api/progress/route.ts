@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { getProblemSet } from "@/data/problemSets";
 import { db } from "@/db";
 import { progress } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { getProblemSet } from "@/data/problemSets";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   const session = await auth();

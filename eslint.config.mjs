@@ -1,5 +1,5 @@
-import { defineConfig, globalIgnores } from "eslint/config";
 import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 

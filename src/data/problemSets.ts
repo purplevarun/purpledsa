@@ -1,6 +1,7 @@
-import type { ProblemSet } from "@/types/problems";
+import { lldDesign } from "@/data/lldDesign";
 import { neetcode150 } from "@/data/neetcode150";
 import { topInterview } from "@/data/topInterview";
+import type { ProblemSet } from "@/types/problems";
 
 export const problemSets: ProblemSet[] = [
   {
@@ -14,6 +15,12 @@ export const problemSets: ProblemSet[] = [
     title: "Top Interview Questions",
     description: "Frequently-asked SWE interview problems that go beyond the NeetCode 150.",
     topics: topInterview,
+  },
+  {
+    slug: "lld",
+    title: "Low-Level Design (LLD)",
+    description: "Machine-coding / object-oriented design problems — rate limiters, LRU caches, parking lots, and more.",
+    topics: lldDesign,
   },
 ];
 

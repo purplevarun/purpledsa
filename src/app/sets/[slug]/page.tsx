@@ -1,10 +1,10 @@
-import { notFound } from "next/navigation";
 import { auth } from "@/auth";
+import { ProblemSetView } from "@/components/problem-set-view";
+import { countProblems, getProblemSet } from "@/data/problemSets";
 import { db } from "@/db";
 import { progress } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
-import { getProblemSet, countProblems } from "@/data/problemSets";
-import { ProblemSetView } from "@/components/problem-set-view";
+import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 

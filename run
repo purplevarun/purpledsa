@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_PID_FILE=".purpledsa-dev.pid"
+APP_LOG_FILE=".purpledsa-dev.log"
+
+start_app() {
+  if [ -f "$APP_PID_FILE" ] && kill -0 "$(cat "$APP_PID_FILE")" 2>/dev/null; then
+    echo "PurpleDSA app is already running (PID $(cat "$APP_PID_FILE"))."
+    return 0
+  fi
+
+  echo "Starting PurpleDSA app..."
+  nohup env -u NODE_ENV npm run dev >"$APP_LOG_FILE" 2>&1 &
+  echo $! > "$APP_PID_FILE"
+  echo "PurpleDSA app started in background with PID $(cat "$APP_PID_FILE")."
+}
+
+stop_app() {
+  if [ -f "$APP_PID_FILE" ]; then
+    PID="$(cat "$APP_PID_FILE")"
+    if kill -0 "$PID" 2>/dev/null; then
+      echo "Stopping PurpleDSA app (PID $PID)..."
+      kill "$PID" || true
+      wait "$PID" 2>/dev/null || true
+    fi
+    rm -f "$APP_PID_FILE"
+  fi
+}
+
+if [ "$#" -eq 0 ]; then
+  docker compose up -d
+  start_app
+  exit 0
+fi
+
+case "$1" in
+  up)
+    shift
+    docker compose up -d "$@"
+    start_app
+    ;;
+  down)
+    shift
+    stop_app
+    docker compose down "$@"
+    ;;
+  *)
+    docker compose "$@"
+    ;;
+esac

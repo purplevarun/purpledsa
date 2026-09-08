@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import Link from "next/link";
-import type { ProblemSet } from "@/types/problems";
 import { gfgSearchUrl } from "@/lib/links";
+import type { ProblemSet } from "@/types/problems";
+import Link from "next/link";
+import { useMemo, useState, useTransition } from "react";
 
 const DIFF_LABEL: Record<string, string> = { E: "Easy", M: "Medium", H: "Hard" };
 const DIFF_CLASS: Record<string, string> = {
@@ -169,9 +169,8 @@ export function ProblemSetView({
                     return (
                       <li
                         key={p.slug}
-                        className={`flex flex-wrap items-center gap-2 px-2 py-2.5 ${
-                          isDone ? "bg-easy-bg/40" : ""
-                        }`}
+                        className={`flex flex-wrap items-center gap-2 px-2 py-2.5 ${isDone ? "bg-easy-bg/40" : ""
+                          }`}
                       >
                         <span className="w-8 shrink-0 font-mono text-xs text-muted">
                           {numbering.get(p.slug)}.
@@ -186,9 +185,8 @@ export function ProblemSetView({
                           href={p.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`min-w-[140px] flex-1 text-sm font-medium hover:text-primary hover:underline ${
-                            isDone ? "text-muted line-through" : ""
-                          }`}
+                          className={`min-w-[140px] flex-1 text-sm font-medium hover:text-primary hover:underline ${isDone ? "text-muted line-through" : ""
+                            }`}
                         >
                           {p.name}
                         </a>

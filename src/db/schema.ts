@@ -1,10 +1,10 @@
 import {
+  boolean,
+  integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
-  primaryKey,
-  integer,
-  boolean,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";

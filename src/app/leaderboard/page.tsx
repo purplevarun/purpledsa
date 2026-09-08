@@ -1,8 +1,8 @@
-import { db } from "@/db";
-import { progress, users } from "@/db/schema";
-import { eq, sql, desc } from "drizzle-orm";
 import { auth } from "@/auth";
 import { totalProblemCount } from "@/data/problemSets";
+import { db } from "@/db";
+import { progress, users } from "@/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 

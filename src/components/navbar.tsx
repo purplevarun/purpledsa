@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 
 export async function Navbar() {
@@ -22,6 +22,9 @@ export async function Navbar() {
           </Link>
           <Link href="/sets/top-interview" className="hover:text-foreground">
             Top Interview
+          </Link>
+          <Link href="/sets/lld" className="hover:text-foreground">
+            LLD
           </Link>
           <Link href="/leaderboard" className="hover:text-foreground">
             Leaderboard
@@ -69,6 +72,9 @@ export async function Navbar() {
         </Link>
         <Link href="/sets/top-interview" className="hover:text-foreground">
           Top Interview
+        </Link>
+        <Link href="/sets/lld" className="hover:text-foreground">
+          LLD
         </Link>
         <Link href="/leaderboard" className="hover:text-foreground">
           Leaderboard
