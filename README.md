@@ -15,9 +15,10 @@ climb the leaderboard against everyone else using the app.
 
 - [Next.js](https://nextjs.org) (App Router) + TypeScript + Tailwind CSS v4
 - [Auth.js (NextAuth v5)](https://authjs.dev) with the GitHub provider
-- [Drizzle ORM](https://orm.drizzle.team) + [Neon](https://neon.tech) serverless Postgres
-  (chosen over Prisma — no native binary downloads required, which matters on
-  networks/CI that block binary CDNs)
+- [Drizzle ORM](https://orm.drizzle.team) + Postgres via [postgres.js](https://github.com/porsager/postgres)
+  (works identically against local Docker Postgres and hosted [Neon](https://neon.tech) —
+  chosen over Prisma, which requires native binary downloads that some
+  networks/CI block)
 
 ## Local setup
 
@@ -27,8 +28,17 @@ climb the leaderboard against everyone else using the app.
    npm install
    ```
 
-2. **Create a free Postgres database** at [neon.tech](https://neon.tech) (or any
-   Postgres provider) and copy its connection string.
+2. **Start a local Postgres with Docker**
+
+   ```bash
+   docker compose up -d
+   ```
+
+   This runs Postgres 16 in a container, listening on `localhost:5432` with a
+   `purpledsa` user/db and trust auth (local-only, no [REDACTED_SQL_PASSWORD_1]word needed). No account or
+   free-tier signup needed for local testing. For production you'll still want
+   a hosted Postgres — see [neon.tech](https://neon.tech) (free tier) — but
+   you don't need it to test locally.
 
 3. **Create a GitHub OAuth App** at
    [github.com/settings/developers](https://github.com/settings/developers):
@@ -42,10 +52,14 @@ climb the leaderboard against everyone else using the app.
    npx auth secret   # generates AUTH_SECRET into .env.local
    ```
 
-5. **Push the database schema**
+   `DATABASE_URL` in `.env.example` already points at the local Docker Postgres
+   from step 2 — no changes needed there for local testing.
+
+5. **Create and apply the database schema**
 
    ```bash
-   npm run db:push
+   npm run db:generate   # generates SQL migration files in drizzle/
+   npm run db:migrate    # applies them to DATABASE_URL
    ```
 
 6. **Run the dev server**
@@ -63,8 +77,10 @@ climb the leaderboard against everyone else using the app.
 3. Add the same environment variables from `.env.local` in the Vercel project
    settings (use the production GitHub OAuth App callback URL:
    `https://<your-app>.vercel.app/api/auth/callback/github`).
-4. Deploy. Run `npm run db:push` locally (pointed at your production
-   `DATABASE_URL`) once to create the tables in your production database.
+4. Deploy. Run `npm run db:migrate` locally with `DATABASE_URL` pointed at your
+   production database (e.g. `DATABASE_URL="<neon-url>" npm run db:migrate`)
+   once to create the tables in production. The migration files in `drizzle/`
+   are committed to the repo, so this is reproducible.
 
 > **Note:** if building locally, make sure `NODE_ENV` isn't already exported
 > in your shell (`env -u NODE_ENV npm run build`) — some Next.js versions crash

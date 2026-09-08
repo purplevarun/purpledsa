@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: purpledsa
+      # Local-only container, port not exposed beyond localhost's own loopback:
+      # trust auth keeps the local dev connection string password-free.
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: purpledsa
+    ports:
+      - "5432:5432"
+    volumes:
+      - purpledsa_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U purpledsa -d purpledsa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  purpledsa_db_data:
