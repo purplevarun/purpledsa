@@ -4,26 +4,13 @@ set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$PROJECT_DIR"
 
-if [ "$#" -eq 0 ]; then
-  docker compose up -d
-  exit 0
-fi
-
 case "$1" in
-  up)
-    shift
-    docker compose up -d "$@"
-    ;;
-  down)
-    shift
-    docker compose down "$@"
-    ;;
   dev)
     shift
     npm run dev -- "$@"
     ;;
   *)
-    echo "Usage: ./run [up|down|dev]" >&2
+    echo "Usage: ./run dev" >&2
     exit 1
     ;;
 esac
