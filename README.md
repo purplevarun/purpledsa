@@ -1,128 +1,164 @@
 # PurpleDSA
 
-Track your DSA interview prep. Sign in, check off problems as you solve them
-across **NeetCode 150** and a curated **Top Interview Questions** set, and
-climb the leaderboard against everyone else using the app.
+Track your DSA interview prep. Sign in, check off problems as you solve them across NeetCode 150 and a curated Top Interview Questions set, and climb the leaderboard.
 
-- ✅ NeetCode 150 — all 150 problems, 18 patterns, with LeetCode/NeetCode links
-- ✅ Top Interview Questions — ~45 additional frequently-asked SWE interview problems
-- ✅ Simple username/password login stored in the same Postgres DB
-- ✅ Public leaderboard ranked by problems solved
-- ✅ Dark/light mode, fast, simple UI
-- ✅ 100% free to host (Vercel + Neon free tiers)
+- ✅ NeetCode 150 problem coverage
+- ✅ Top Interview Questions set
+- ✅ Username/password auth using a Postgres-backed `user` table
+- ✅ Leaderboard and progress tracking
+- ✅ Minimal dark/light mode UI
+- ✅ Designed to run on Vercel with Supabase Postgres
 
 ## Tech stack
 
-- [Next.js](https://nextjs.org) (App Router) + TypeScript + Tailwind CSS v4
-- [Auth.js (NextAuth v5)](https://authjs.dev) with a credential-based username/password flow
-- [Drizzle ORM](https://orm.drizzle.team) + Postgres via [postgres.js](https://github.com/porsager/postgres)
-  (works identically against local Docker Postgres and hosted [Neon](https://neon.tech) —
-  chosen over Prisma, which requires native binary downloads that some
-  networks/CI block)
+- Vercel for hosting
+- Postgres via Supabase
+- Drizzle ORM
+- Next.js for the current app shell
+- Custom credential auth using the existing `user` table
+- GitHub Actions for DB keepalive
 
-## Local setup
+## What you need for Supabase
 
-1. **Install dependencies**
+1. Create a new project at https://supabase.com
+2. Go to Project Settings → Database
+3. Copy the connection string for Postgres
+4. Add it to your local `.env.local` and Vercel env vars as `DATABASE_URL`
+5. Generate an auth secret and set it as `AUTH_SECRET`
+6. Optionally enable Supabase Auth later if you want email/social login in the future
+
+## Required environment variables
+
+Create a `.env.local` file from `.env.example`:
+
+```bash
+cp .env.example .env.local
+```
+
+Then fill in the values:
+
+```bash
+DATABASE_URL="postgresql://postgres:[YOUR_PASSWORD]@db.xxxxxx.supabase.co:5432/postgres"
+AUTH_SECRET="replace-with-a-random-secret"
+```
+
+Optional:
+
+```bash
+VITE_SUPABASE_URL="https://your-project.supabase.co"
+VITE_SUPABASE_ANON_KEY="your-anon-key"
+```
+
+> Docker is optional. You do not need Docker if you are using Supabase as the real database.
+
+## Local development
+
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-2. **Start the local Postgres and app**
-
-   ```bash
-   ./run up
-   ```
-
-   This runs Postgres 16 in Docker on `localhost:5432` with a `purpledsa` DB and
-   starts the Next.js app on `http://localhost:3000`.
-
-3. **Create a `.env.local` file with the local DB**
+2. Create `.env.local`:
 
    ```bash
    cp .env.example .env.local
    ```
 
-   Your local `.env.local` should include:
+3. Start the app:
 
    ```bash
-   DATABASE_URL="postgresql://purpledsa@localhost:5432/purpledsa"
-   AUTH_SECRET="<generate-with-npx-auth-secret>"
+   ./run dev
    ```
 
-4. **Create and apply the database schema**
+4. Run the DB migration:
 
    ```bash
-   npm run db:generate
    npm run db:migrate
    ```
 
-   These commands read `.env.local` automatically and work with the local DB.
+5. Open the app and sign in.
 
-5. **Sign in**
+## Supabase database setup
 
-   Open [http://localhost:3000/login](http://localhost:3000/login) and create a username/password.
-   The first time a user signs in, they are automatically created in the same Postgres DB.
+Create the required tables in the Supabase SQL editor.
 
-## Deploying to Vercel (free)
+This project expects a `user` table matching the schema in `src/db/schema.ts`.
+
+Example SQL:
+
+```sql
+create table public.user (
+  id text primary key,
+  username text not null unique,
+  name text,
+  email text unique,
+  "emailVerified" timestamptz,
+  image text,
+  "passwordHash" text,
+  "createdAt" timestamptz not null default now()
+);
+
+create table public.progress (
+  id text primary key,
+  "userId" text not null references public.user(id) on delete cascade,
+  "setSlug" text not null,
+  "problemSlug" text not null,
+  solved boolean not null default true,
+  "solvedAt" timestamptz not null default now(),
+  unique ("userId", "setSlug", "problemSlug")
+);
+```
+
+If you want to use the current Drizzle schema exactly, the project expects these table names and columns to exist.
+
+## Vercel deployment
 
 1. Push this repo to GitHub.
-2. Import the repo at [vercel.com/new](https://vercel.com/new).
-3. In Vercel, add:
-   - `DATABASE_URL` = your Neon Postgres URL
-   - `AUTH_SECRET` = a generated secret
-4. Deploy. Once the app is live, run:
+2. Import it into Vercel.
+3. Add these environment variables in Vercel:
+   - `DATABASE_URL`
+   - `AUTH_SECRET`
+4. Deploy the app.
+5. Run the migration once against production:
 
    ```bash
-   DATABASE_URL="<your-neon-url>" npm run db:migrate
+   DATABASE_URL="<your-supabase-connection-string>" npm run db:migrate
    ```
 
-   to apply the schema in production.
+## GitHub Action keepalive
 
-## Neon setup
+There is a scheduled workflow in `.github/workflows/supabase-keepalive.yml`.
 
-1. Create a free project at [neon.tech](https://neon.tech).
-2. Create a database and copy the connection string.
-3. Use the connection string as `DATABASE_URL` in your Vercel environment variables.
-4. Generate a new `AUTH_SECRET` with:
+It runs once a day and pings the Supabase database to prevent idle shutdown.
 
-   ```bash
-   npx auth secret
-   ```
+To enable it:
 
-5. Deploy the app and run the migration once against Neon:
+1. Go to GitHub repo → Settings → Secrets and variables → Actions
+2. Add a secret named `SUPABASE_DB_URL`
+3. Set it to your Supabase Postgres connection string
 
-   ```bash
-   DATABASE_URL="<your-neon-url>" npm run db:migrate
-   ```
+## Notes
 
-> **Note:** if building locally, make sure `NODE_ENV` isn't already exported
-> in your shell (`env -u NODE_ENV npm run build`) — some Next.js versions crash
-> during `next build` if a stray `NODE_ENV=development` is present. Vercel's
-> build environment doesn't have this issue.
+- `.env.local` should never be committed.
+- `.env.example` is the template for local setup.
+- Docker is optional and only useful for a local Postgres fallback.
+- If you later migrate the frontend to Vite + React, the same Supabase DB and Vercel backend pattern still applies.
 
-## Updating the NeetCode 150 data
+## Useful scripts
 
-The NeetCode 150 problem set is generated from `NC_150.html` (the original
-tracker page it was adapted from) rather than hand-transcribed:
+```bash
+npm install
+./run dev
+npm run db:generate
+npm run db:migrate
+npm run build
+```
+
+## Updating data sets
 
 ```bash
 npm run extract:neetcode150
 ```
 
-This regenerates `src/data/neetcode150.ts`. The **Top Interview Questions**
-set lives in `src/data/topInterview.ts` and is hand-curated — edit it directly
-to add/remove problems.
-
-## Project structure
-
-```
-src/
-  app/            Next.js App Router pages + API routes
-  components/     UI components (navbar, theme toggle, problem list)
-  data/           Problem set data (NeetCode 150 + Top Interview Questions)
-  db/             Drizzle schema + client
-  lib/            Small helpers (GFG search link generator)
-  types/          Shared TypeScript types
-scripts/          One-off data extraction script
-```
+This regenerates the NeetCode 150 data in `src/data/neetcode150.ts`.
