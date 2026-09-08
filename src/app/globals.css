@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f7f6fb;
+  --foreground: #201a2b;
+  --card: #ffffff;
+  --border: #e3defa;
+  --muted: #6b6478;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --accent: #a855f7;
+  --easy: #15803d;
+  --easy-bg: #dcfce7;
+  --medium: #b45309;
+  --medium-bg: #fef3c7;
+  --hard: #b91c1c;
+  --hard-bg: #fee2e2;
+}
+
+.dark {
+  --background: #14101c;
+  --foreground: #ede9f7;
+  --card: #1e1829;
+  --border: #322a44;
+  --muted: #a79cc0;
+  --primary: #a855f7;
+  --primary-foreground: #14101c;
+  --accent: #c084fc;
+  --easy: #4ade80;
+  --easy-bg: #14301f;
+  --medium: #fbbf24;
+  --medium-bg: #332405;
+  --hard: #f87171;
+  --hard-bg: #3a1414;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-easy: var(--easy);
+  --color-easy-bg: var(--easy-bg);
+  --color-medium: var(--medium);
+  --color-medium-bg: var(--medium-bg);
+  --color-hard: var(--hard);
+  --color-hard-bg: var(--hard-bg);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
