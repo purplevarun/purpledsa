@@ -26,6 +26,6 @@ export function verifyPassword(password: string, storedHash: string): boolean {
 
 	return crypto.timingSafeEqual(
 		Buffer.from(candidate, "hex"),
-		Buffer.from(originalHash, "hex")
+		Buffer.from(originalHash, "hex"),
 	);
 }
