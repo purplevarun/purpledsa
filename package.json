@@ -6,7 +6,7 @@
     "dev": "vite --host 0.0.0.0 --port 4000",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 0.0.0.0 --port 4000",
-    "extract:neetcode150": "node scripts/extract-neetcode150.mjs"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
@@ -19,6 +19,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "vite": "^8.2.2"
   }

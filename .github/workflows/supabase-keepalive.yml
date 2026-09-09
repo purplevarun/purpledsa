@@ -1,25 +1,25 @@
 name: Supabase keepalive
 
 on:
-  schedule:
-    - cron: "0 9 * * *"
-  workflow_dispatch:
+    schedule:
+        - cron: "0 9 * * *"
+    workflow_dispatch:
 
 jobs:
-  ping-supabase:
-    runs-on: ubuntu-latest
-    env:
-      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    ping-supabase:
+        runs-on: ubuntu-latest
+        env:
+            SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
-    steps:
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+        steps:
+            - name: Install PostgreSQL client
+              run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Keep the Supabase database warm
-        run: |
-          if [ -z "${SUPABASE_DB_URL:-}" ]; then
-            echo "SUPABASE_DB_URL secret is not set. Skipping keepalive."
-            exit 0
-          fi
+            - name: Keep the Supabase database warm
+              run: |
+                  if [ -z "${SUPABASE_DB_URL:-}" ]; then
+                    echo "SUPABASE_DB_URL secret is not set. Skipping keepalive."
+                    exit 0
+                  fi
 
-          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c "SELECT 1;" -c "SELECT current_timestamp;"
+                  psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c "SELECT 1;" -c "SELECT current_timestamp;"

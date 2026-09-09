@@ -38,25 +38,32 @@ VITE_SUPABASE_URL="https://your-project.supabase.co"
 VITE_SUPABASE_ANON_KEY="your-anon-key"
 ```
 
+Use the exact same values in both places if you want local and production to share one database:
+
+1. Local `.env.local`
+2. Vercel project environment variables
+
+If those values differ, local and production will point to different Supabase projects.
+
 ## Local development
 
 1. Install dependencies:
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
 2. Create `.env.local`:
 
-   ```bash
-   cp .env.example .env.local
-   ```
+    ```bash
+    cp .env.example .env.local
+    ```
 
 3. Start the app:
 
-   ```bash
-   ./run dev
-   ```
+    ```bash
+    ./run dev
+    ```
 
 4. Open the app and sign in.
 
@@ -64,15 +71,15 @@ VITE_SUPABASE_ANON_KEY="your-anon-key"
 
 Create the required tables in the Supabase SQL editor.
 
-Run the SQL in `supabase-schema.sql` in the Supabase SQL Editor. It creates the tables and indexes used by the app.
+Run the SQL in `supabase-schema.sql` in the Supabase SQL Editor. It creates tables, indexes, grants, and RLS policies used by login and leaderboard queries.
 
 ## Vercel deployment
 
 1. Push this repo to GitHub.
 2. Import it into Vercel.
 3. Add these environment variables in Vercel:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
+    - `VITE_SUPABASE_URL`
+    - `VITE_SUPABASE_ANON_KEY`
 4. Deploy the app.
 
 ## Notes
@@ -88,11 +95,3 @@ npm install
 ./run dev
 npm run build
 ```
-
-## Updating data sets
-
-```bash
-npm run extract:neetcode150
-```
-
-This regenerates the NeetCode 150 data in `src/data/neetcode150.ts`.
