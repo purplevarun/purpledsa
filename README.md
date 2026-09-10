@@ -95,3 +95,29 @@ npm install
 ./run dev
 npm run build
 ```
+
+## Problem data
+
+Free DSA Essentials is PurpleDSA's own collection of 100 coding exercises across nine topic groups. The former Striver/A2Z sheet has been removed, including its paid practice and lesson-only links. The collection is available at `/sets/free-dsa-essentials`.
+
+| Platform      | Exercises | Progress       |
+| ------------- | --------: | -------------- |
+| LeetCode      |        42 | Automatic sync |
+| NeetCode      |         5 | Manual         |
+| GeeksforGeeks |        15 | Manual         |
+| SPOJ          |        11 | Manual         |
+| CodeChef      |         7 | Manual         |
+| Codeforces    |        10 | Manual         |
+| CSES          |        10 | Manual         |
+
+Only free submissions belong in the collection; a free account may be required. Premium courses, editorials, hints, and AI features are outside its scope. Settings lists the platform breakdown and links to filtered exercise lists. The master index contains only exercises in active coding sets; the separate design sets remain unchanged.
+
+Access was audited on September 10, 2026 against LeetCode's public `paid_only` metadata, the GFG and Codeforces catalogs, CodeChef's practice API (judge enabled; login is the only reported submission restriction), NeetCode's free practice pages, and CSES task pages. Three unavailable CodeChef candidates were excluded. SPOJ uses its canonical classical problem URLs, but its browser-security challenge prevented automated live-page verification; no actual judge submissions were made during verification.
+
+Keep problem codes stable when correcting names or URLs because saved progress uses those codes. GFG practice links must use the exact `/problems/<slug>/1` URL; never derive slugs from titles or substitute search URLs. Use a verified free equivalent for premium LeetCode questions, not merely `locked: false`. Platform buttons display only supplied practice links for their actual host.
+
+Run the data and link regression checks with Node.js 22.6 or newer:
+
+```bash
+node --experimental-strip-types --test tests/problem-data.test.ts
+```
