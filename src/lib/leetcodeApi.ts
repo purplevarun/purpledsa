@@ -56,10 +56,10 @@ const PUBLIC_SOLVED_COUNT_QUERY = `
 	}
 `;
 
-async function requestLeetCodeGraphQL<T>(
+const requestLeetCodeGraphQL = async <T>(
 	query: string,
 	variables: Record<string, unknown>,
-): Promise<T> {
+): Promise<T> => {
 	const response = await fetch(LEETCODE_GRAPHQL_ENDPOINT, {
 		method: "POST",
 		headers: {
@@ -73,7 +73,7 @@ async function requestLeetCodeGraphQL<T>(
 	if (!response.ok) {
 		throw new Error(
 			payload.errors?.[0]?.message ||
-			`LeetCode request failed with status ${response.status}`,
+				`LeetCode request failed with status ${response.status}`,
 		);
 	}
 	if (payload.errors?.length) {
@@ -86,12 +86,12 @@ async function requestLeetCodeGraphQL<T>(
 	}
 
 	return payload.data;
-}
+};
 
-export async function fetchAcceptedSubmissions(
+export const fetchAcceptedSubmissions = async (
 	username: string,
 	limit = 5000,
-): Promise<FetchAcceptedSubmissionsResult> {
+): Promise<FetchAcceptedSubmissionsResult> => {
 	const publicLimit = Math.min(Math.max(limit, 1), 20);
 
 	const [acResult, allResult, statsResult] = await Promise.allSettled([
@@ -121,8 +121,10 @@ export async function fetchAcceptedSubmissions(
 	const acceptedFromAll =
 		allResult.status === "fulfilled"
 			? (allResult.value.recentSubmissionList ?? []).filter((item) =>
-				(item.statusDisplay || "").toLowerCase().includes("accepted"),
-			)
+					(item.statusDisplay || "")
+						.toLowerCase()
+						.includes("accepted"),
+				)
 			: [];
 
 	if (!acSubmissions.length && !acceptedFromAll.length) {
@@ -144,7 +146,9 @@ export async function fetchAcceptedSubmissions(
 
 	let publicSolvedCount: number | null = null;
 	if (statsResult.status === "fulfilled") {
-		const counts = statsResult.value.matchedUser?.submitStatsGlobal?.acSubmissionNum || [];
+		const counts =
+			statsResult.value.matchedUser?.submitStatsGlobal?.acSubmissionNum ||
+			[];
 		const total = counts.find((item) => item.difficulty === "All")?.count;
 		if (typeof total === "number") {
 			publicSolvedCount = total;
@@ -156,6 +160,6 @@ export async function fetchAcceptedSubmissions(
 		mode: "recent",
 		publicSolvedCount,
 	};
-}
+};
 
 export type { LeetCodeSubmission };

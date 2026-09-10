@@ -6,7 +6,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { ProblemSetPage } from "./pages/ProblemSetPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
-export default function App() {
+const App = () => {
 	return (
 		<AuthProvider>
 			<Routes>
@@ -19,4 +19,6 @@ export default function App() {
 			</Routes>
 		</AuthProvider>
 	);
-}
+};
+
+export default App;

@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 
-export function LoginPage() {
+export const LoginPage = () => {
 	const [step, setStep] = useState<
 		"username" | "password-signin" | "password-signup"
 	>("username");
@@ -17,7 +17,7 @@ export function LoginPage() {
 		return <Navigate to="/" replace />;
 	}
 
-	async function onSubmit(e: FormEvent) {
+	const onSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		try {
 			setLoading(true);
@@ -44,7 +44,7 @@ export function LoginPage() {
 		} finally {
 			setLoading(false);
 		}
-	}
+	};
 
 	const isUsernameStep = step === "username";
 	const isSigninStep = step === "password-signin";
@@ -121,4 +121,4 @@ export function LoginPage() {
 			</div>
 		</div>
 	);
-}
+};

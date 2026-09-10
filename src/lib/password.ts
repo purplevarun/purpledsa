@@ -4,16 +4,19 @@ const ITERATIONS = 100_000;
 const KEY_LENGTH = 64;
 const DIGEST = "sha512";
 
-export function hashPassword(password: string): string {
+export const hashPassword = (password: string): string => {
 	const salt = crypto.randomBytes(16).toString("hex");
 	const derived = crypto
 		.pbkdf2Sync(password, salt, ITERATIONS, KEY_LENGTH, DIGEST)
 		.toString("hex");
 
 	return `${salt}:${derived}`;
-}
+};
 
-export function verifyPassword(password: string, storedHash: string): boolean {
+export const verifyPassword = (
+	password: string,
+	storedHash: string,
+): boolean => {
 	const [salt, originalHash] = storedHash.split(":");
 
 	if (!salt || !originalHash) {
@@ -28,4 +31,4 @@ export function verifyPassword(password: string, storedHash: string): boolean {
 		Buffer.from(candidate, "hex"),
 		Buffer.from(originalHash, "hex"),
 	);
-}
+};
