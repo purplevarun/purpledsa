@@ -27,9 +27,9 @@ export default async function handler(request: Request) {
 	const requestBody =
 		typeof body === "object" && body !== null
 			? (body as {
-				query?: unknown;
-				variables?: unknown;
-			})
+					query?: unknown;
+					variables?: unknown;
+				})
 			: {};
 
 	const payload = {

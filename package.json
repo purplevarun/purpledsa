@@ -1,26 +1,26 @@
 {
-  "name": "purpledsa",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 4000",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 4000",
-    "format": "prettier --write ."
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.116.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "react-router-dom": "^7.18.3"
-  },
-  "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
-    "@vitejs/plugin-react": "^6.1.1",
-    "prettier": "^3.9.6",
-    "typescript": "^5.9.3",
-    "vite": "^8.2.2"
-  }
+	"name": "purpledsa",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "vite --host 0.0.0.0 --port 4000",
+		"build": "tsc --noEmit && vite build",
+		"preview": "vite preview --host 0.0.0.0 --port 4000",
+		"format": "prettier --write ."
+	},
+	"dependencies": {
+		"@supabase/supabase-js": "^2.116.0",
+		"react": "19.2.8",
+		"react-dom": "19.2.8",
+		"react-router-dom": "^7.18.3"
+	},
+	"devDependencies": {
+		"@types/node": "^20",
+		"@types/react": "^19.2.18",
+		"@types/react-dom": "^19.2.7",
+		"@vitejs/plugin-react": "^6.1.1",
+		"prettier": "^3.9.6",
+		"typescript": "^5.9.3",
+		"vite": "^8.2.2"
+	}
 }
