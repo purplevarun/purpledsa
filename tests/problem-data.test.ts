@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
+import type { StudyGuide } from "../src/types/problems.ts";
 
 import {
 	getPracticePlatform,
@@ -22,6 +23,7 @@ type SheetReference = {
 	title: string;
 	access?: string;
 	topics: Array<{ name: string; problemCodes: string[] }>;
+	guides?: Record<string, StudyGuide>;
 };
 
 const problems: ProblemRecord[] = JSON.parse(
@@ -39,10 +41,253 @@ const essentials: SheetReference = JSON.parse(
 		"utf8",
 	),
 );
+const hld: SheetReference = JSON.parse(
+	readFileSync(
+		new URL("../src/data/problem_sets/hld.json", import.meta.url),
+		"utf8",
+	),
+);
+const hldCodes = hld.topics.flatMap((topic) => topic.problemCodes);
 const byCode = new Map(problems.map((problem) => [problem.code, problem]));
 const essentialsCodes = essentials.topics.flatMap(
 	(topic) => topic.problemCodes,
 );
+
+test("HLD entries use direct system-design resources with website labels", () => {
+	const resources: Array<[string, string, string]> = [
+		[
+			"design-url-shortener",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly",
+		],
+		[
+			"design-rate-limiter-at-scale",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-rate-limiter",
+		],
+		[
+			"design-distributed-cache",
+			"GFG",
+			"https://www.geeksforgeeks.org/system-design/design-distributed-cache-system-design/",
+		],
+		[
+			"design-api-gateway",
+			"GFG",
+			"https://www.geeksforgeeks.org/system-design/what-is-api-gateway-system-design/",
+		],
+		[
+			"design-real-time-chat",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/whatsapp",
+		],
+		[
+			"design-notification-system",
+			"GFG",
+			"https://www.geeksforgeeks.org/system-design/design-notification-services-system-design/",
+		],
+		[
+			"design-pub-sub-messaging-platform",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/deep-dives/kafka",
+		],
+		[
+			"design-search-autocomplete",
+			"GFG",
+			"https://www.geeksforgeeks.org/system-design/googles-search-autocomplete-high-level-designhld/",
+		],
+		[
+			"design-news-feed",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-news-feed",
+		],
+		[
+			"design-recommendation-system",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/ml-system-design/problem-breakdowns/video-recommendations",
+		],
+		[
+			"design-analytics-event-pipeline",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/ad-click-aggregator",
+		],
+		[
+			"design-ride-sharing-platform",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber",
+		],
+		[
+			"design-food-delivery-platform",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/gopuff",
+		],
+		[
+			"design-video-streaming-platform",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/youtube",
+		],
+		[
+			"design-payment-system",
+			"Stripe",
+			"https://stripe.dev/blog/payment-api-design",
+		],
+	];
+	assert.equal(hldCodes.length, 15);
+	assert.deepEqual(
+		hldCodes,
+		resources.map(([code]) => code),
+	);
+	const urls = new Set<string>();
+	for (const [code, label, expectedUrl] of resources) {
+		const problem = byCode.get(code);
+		assert.ok(problem, code);
+		assert.equal(problem.url, expectedUrl, code);
+		const url = new URL(problem.url);
+		assert.equal(url.protocol, "https:", code);
+		assert.equal(url.search, "", code);
+		assert.notEqual(url.pathname, "/", code);
+		assert.doesNotMatch(url.pathname, /\/(search|problemset)\/?$/i, code);
+		assert.equal(getPracticePlatform(problem.url), undefined, code);
+		assert.deepEqual(
+			problemPlatformLinks(problem),
+			[{ label, url: expectedUrl }],
+			code,
+		);
+		urls.add(problem.url);
+	}
+	assert.equal(urls.size, hldCodes.length);
+});
+
+test("every HLD topic has a complete illustrated study guide and direct resources", () => {
+	assert.ok(hld.guides, "HLD study guides are missing");
+	assert.deepEqual(Object.keys(hld.guides).sort(), [...hldCodes].sort());
+});
+
+for (const code of hldCodes) {
+	test(`HLD study guide: ${code}`, () => {
+		const guide = hld.guides?.[code];
+		assert.ok(guide, `${code}: guide is missing`);
+		assert.ok(guide.summary.length >= 100, `${code}: summary`);
+		assert.match(guide.reviewedAt, /^\d{4}-\d{2}-\d{2}$/, code);
+		assert.ok(guide.prerequisites.length >= 2, `${code}: prerequisites`);
+		assert.ok(
+			guide.requirements.functional.length >= 3,
+			`${code}: functional requirements`,
+		);
+		assert.ok(
+			guide.requirements.nonFunctional.length >= 3,
+			`${code}: quality requirements`,
+		);
+		assert.ok(guide.requirements.outOfScope.length >= 1, `${code}: scope`);
+		assert.ok(
+			guide.capacity.assumptions.length >= 2,
+			`${code}: sizing assumptions`,
+		);
+		assert.ok(guide.capacity.estimates.length >= 2, `${code}: estimates`);
+		assert.ok(guide.api.length >= 2, `${code}: API`);
+		assert.ok(guide.dataModel.length >= 2, `${code}: data model`);
+		assert.match(
+			guide.architecture.diagram,
+			/^flowchart (TD|LR)\n/,
+			`${code}: diagram`,
+		);
+		assert.doesNotMatch(
+			guide.architecture.diagram,
+			/%%\{|\bclick\b|<script/i,
+			code,
+		);
+		assert.ok(
+			guide.architecture.flows.length >= 2,
+			`${code}: request flows`,
+		);
+		for (const flow of guide.architecture.flows) {
+			assert.ok(
+				flow.name && flow.steps.length >= 3,
+				`${code}: ${flow.name}`,
+			);
+		}
+		assert.ok(guide.decisions.length >= 3, `${code}: trade-offs`);
+		assert.ok(guide.failureModes.length >= 3, `${code}: failure handling`);
+		assert.ok(guide.selfCheck.length >= 3, `${code}: self-check`);
+		for (const check of guide.selfCheck) {
+			assert.ok(
+				check.question && check.answer.length >= 80,
+				`${code}: ${check.question}`,
+			);
+		}
+		assert.ok(
+			guide.resources.filter((resource) => resource.kind === "article")
+				.length >= 2,
+			`${code}: readings`,
+		);
+		assert.ok(
+			guide.resources.some((resource) => resource.kind === "video"),
+			`${code}: video`,
+		);
+		assert.ok(
+			guide.resources.some(
+				(resource) => resource.url === byCode.get(code)?.url,
+			),
+			`${code}: primary reading`,
+		);
+		assert.equal(
+			new Set(guide.resources.map((resource) => resource.url)).size,
+			guide.resources.length,
+			`${code}: duplicate resource`,
+		);
+		for (const resource of guide.resources) {
+			assert.ok(
+				resource.title && resource.author && resource.why,
+				`${code}: resource context`,
+			);
+			const url = new URL(resource.url);
+			assert.equal(url.protocol, "https:", code);
+			assert.notEqual(url.pathname, "/", code);
+			assert.doesNotMatch(url.pathname, /\/(search|results)\/?$/i, code);
+			if (resource.kind === "video") {
+				assert.equal(url.hostname, "www.youtube.com", code);
+				assert.equal(url.pathname, "/watch", code);
+				assert.match(
+					url.searchParams.get("v") ?? "",
+					/^[a-zA-Z0-9_-]{11}$/,
+					code,
+				);
+				assert.equal(url.searchParams.size, 1, code);
+			} else {
+				assert.equal(url.search, "", code);
+			}
+		}
+	});
+}
+
+test("HLD video selections retain their reviewed topic mappings", () => {
+	const videoIds: Record<string, string> = {
+		"design-url-shortener": "iUU4O1sWtJA",
+		"design-rate-limiter-at-scale": "MIJFyUPG4Z4",
+		"design-distributed-cache": "fmT5nlEkl3U",
+		"design-api-gateway": "fyTxwIa-1U0",
+		"design-real-time-chat": "cr6p0n0N-VA",
+		"design-notification-system": "DU8o-OTeoCc",
+		"design-pub-sub-messaging-platform": "DU8o-OTeoCc",
+		"design-search-autocomplete": "PuZvF2EyfBM",
+		"design-news-feed": "Qj4-GruzyDU",
+		"design-recommendation-system": "jz0-satrmrA",
+		"design-analytics-event-pipeline": "Zcv_899yqhI",
+		"design-ride-sharing-platform": "lsKU38RKQSo",
+		"design-food-delivery-platform": "lsKU38RKQSo",
+		"design-video-streaming-platform": "IUrQ5_g3XKs",
+		"design-payment-system": "GAe5oB742dw",
+	};
+	assert.deepEqual(Object.keys(videoIds), hldCodes);
+	for (const [code, videoId] of Object.entries(videoIds)) {
+		assert.deepEqual(
+			hld.guides?.[code].resources
+				.filter((resource) => resource.kind === "video")
+				.map((resource) => resource.url),
+			[`https://www.youtube.com/watch?v=${videoId}`],
+			code,
+		);
+	}
+});
 
 test("Free DSA Essentials has 100 unique exercises across all seven platforms", () => {
 	assert.equal(essentials.slug, "free-dsa-essentials");
@@ -154,7 +399,13 @@ test("active data contains no paid entries or TUF links", () => {
 			assert.equal(url.searchParams.has("s"), false, code);
 			if (url.hostname.endsWith("geeksforgeeks.org")) {
 				assert.equal(url.hostname, "www.geeksforgeeks.org", code);
-				assert.match(url.pathname, /^\/problems\/[^/]+\/\d+\/?$/, code);
+				assert.match(
+					url.pathname,
+					hldCodes.includes(code)
+						? /^\/system-design\/[a-z0-9-]+\/$/
+						: /^\/problems\/[^/]+\/\d+\/?$/,
+					code,
+				);
 			}
 		}
 		if (problem.gfgUrl) {
@@ -285,6 +536,18 @@ test("platform buttons never use searches, invented destinations, or unrelated h
 		"https://codeforces.com/problemset",
 		"https://cses.fi/problemset/",
 		"https://github.com/example/design-problem",
+		"https://github.com/search?q=system-design&type=repositories",
+		"https://www.hellointerview.com/learn/system-design",
+		"https://www.hellointerview.com/learn/system-design/problem-breakdowns/",
+		"https://www.hellointerview.com/premium",
+		"https://www.hellointerview.com.example.org/learn/system-design/problem-breakdowns/bitly",
+		"http://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly",
+		"https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly?search=cache",
+		"https://www.geeksforgeeks.org/system-design/",
+		"https://www.geeksforgeeks.org/system-design/design-distributed-cache-system-design/?s=cache",
+		"https://www.geeksforgeeks.org/courses/system-design-training-program",
+		"https://stripe.dev/blog",
+		"https://stripe.dev.example.org/blog/payment-api-design",
 		"javascript:alert(1)",
 		"not a URL",
 	]) {

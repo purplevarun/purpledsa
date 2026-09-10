@@ -1,4 +1,4 @@
-import type { Problem, ProblemSet } from "@/types/problems";
+import type { Problem, ProblemSet, StudyGuide } from "@/types/problems";
 
 import problemsRaw from "./dsa_problems.json?raw";
 import allDsaRaw from "./problem_sets/all-dsa-questions.json?raw";
@@ -30,6 +30,7 @@ type ProblemSetReference = {
 	slug: string;
 	title: string;
 	description: string;
+	guides?: Record<string, StudyGuide>;
 	topics: Array<{
 		name: string;
 		problemCodes: string[];
@@ -52,7 +53,11 @@ const problemByCode = new Map<string, ProblemRecord>(
 	problemRecords.map((problem) => [problem.code, problem]),
 );
 
-const buildProblem = (problem: ProblemRecord, order: number): Problem => {
+const buildProblem = (
+	problem: ProblemRecord,
+	order: number,
+	studyGuide?: StudyGuide,
+): Problem => {
 	return {
 		id: problem.id,
 		code: problem.code,
@@ -64,6 +69,7 @@ const buildProblem = (problem: ProblemRecord, order: number): Problem => {
 		locked: problem.locked,
 		hints: problem.hints,
 		gfgUrl: problem.gfgUrl,
+		studyGuide,
 	};
 };
 
@@ -79,7 +85,7 @@ export const problemSets: ProblemSet[] = problemSetReferences.map((setRef) => ({
 				if (!match) {
 					return null;
 				}
-				return buildProblem(match, index + 1);
+				return buildProblem(match, index + 1, setRef.guides?.[code]);
 			})
 			.filter((problem): problem is Problem => Boolean(problem)),
 	})),

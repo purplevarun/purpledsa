@@ -79,6 +79,38 @@ export const getPracticePlatform = (value: string) => {
 	}
 };
 
+const systemDesignWebsites = [
+	{
+		label: "Hello Interview",
+		hostname: "hellointerview.com",
+		path: /^\/learn\/(?:system-design|ml-system-design)\/(?:problem-breakdowns|deep-dives)\/[a-z0-9-]+\/?$/,
+	},
+	{
+		label: "GFG",
+		hostname: "geeksforgeeks.org",
+		path: /^\/system-design\/[a-z0-9-]+\/?$/,
+	},
+	{
+		label: "Stripe",
+		hostname: "stripe.dev",
+		path: /^\/blog\/payment-api-design\/?$/,
+	},
+];
+
+const getSystemDesignWebsite = (value: string) => {
+	try {
+		const url = new URL(value);
+		if (url.protocol !== "https:" || url.search) return undefined;
+		const hostname = url.hostname.replace(/^www\./, "");
+		return systemDesignWebsites.find(
+			(website) =>
+				website.hostname === hostname && website.path.test(url.pathname),
+		);
+	} catch {
+		return undefined;
+	}
+};
+
 export const problemPlatformLinks = (problem: {
 	url: string;
 	gfgUrl?: string;
@@ -86,7 +118,9 @@ export const problemPlatformLinks = (problem: {
 	const links: Array<{ label: string; url: string }> = [];
 	for (const value of new Set([problem.gfgUrl, problem.url])) {
 		if (!value) continue;
-		const label = getPracticePlatform(value)?.label;
+		const label =
+			getPracticePlatform(value)?.label ??
+			getSystemDesignWebsite(value)?.label;
 		if (label && !links.some((link) => link.label === label)) {
 			links.push({ label, url: value });
 		}

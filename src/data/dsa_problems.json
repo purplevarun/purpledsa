@@ -1221,7 +1221,7 @@
 		"slug": "design-analytics-event-pipeline",
 		"name": "Design Analytics Event Pipeline",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20Analytics%20Event%20Pipeline%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/ad-click-aggregator",
 		"locked": false,
 		"hints": [
 			"Ingestion, durable queue, stream processing, and warehouse sink.",
@@ -1234,7 +1234,7 @@
 		"slug": "design-api-gateway",
 		"name": "Design API Gateway",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20API%20Gateway%20system%20design&type=repositories",
+		"url": "https://www.geeksforgeeks.org/system-design/what-is-api-gateway-system-design/",
 		"locked": false,
 		"hints": [
 			"Responsibilities: auth, throttling, routing, observability.",
@@ -1247,7 +1247,7 @@
 		"slug": "design-distributed-cache",
 		"name": "Design Distributed Cache",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Distributed%20Cache%20system%20design&type=repositories",
+		"url": "https://www.geeksforgeeks.org/system-design/design-distributed-cache-system-design/",
 		"locked": false,
 		"hints": [
 			"Sharding via consistent hashing with replication.",
@@ -1260,7 +1260,7 @@
 		"slug": "design-food-delivery-platform",
 		"name": "Design Food Delivery Platform",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Food%20Delivery%20Platform%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/gopuff",
 		"locked": false,
 		"hints": [
 			"Order orchestration and dispatch assignment loop.",
@@ -1301,7 +1301,7 @@
 		"slug": "design-news-feed",
 		"name": "Design News Feed",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20News%20Feed%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-news-feed",
 		"locked": false,
 		"hints": [
 			"Fan-out on write vs fan-out on read trade-off.",
@@ -1314,7 +1314,7 @@
 		"slug": "design-notification-system",
 		"name": "Design Notification System",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20Notification%20System%20system%20design&type=repositories",
+		"url": "https://www.geeksforgeeks.org/system-design/design-notification-services-system-design/",
 		"locked": false,
 		"hints": [
 			"Multi-channel delivery (push/email/SMS) with retry queues.",
@@ -1327,7 +1327,7 @@
 		"slug": "design-payment-system",
 		"name": "Design Payment System",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Payment%20System%20system%20design&type=repositories",
+		"url": "https://stripe.dev/blog/payment-api-design",
 		"locked": false,
 		"hints": [
 			"Ledger consistency and idempotent transaction APIs.",
@@ -1340,7 +1340,7 @@
 		"slug": "design-pub-sub-messaging-platform",
 		"name": "Design Pub/Sub Messaging Platform",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Pub%2FSub%20Messaging%20Platform%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/deep-dives/kafka",
 		"locked": false,
 		"hints": [
 			"Partition topics and manage consumer offsets.",
@@ -1353,7 +1353,7 @@
 		"slug": "design-rate-limiter-at-scale",
 		"name": "Design Rate Limiter at Scale",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20Rate%20Limiter%20at%20Scale%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-rate-limiter",
 		"locked": false,
 		"hints": [
 			"Compare token bucket, leaky bucket, and sliding window counters.",
@@ -1366,7 +1366,7 @@
 		"slug": "design-real-time-chat",
 		"name": "Design Real-time Chat",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20Real-time%20Chat%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/whatsapp",
 		"locked": false,
 		"hints": [
 			"Persistent connections (WebSocket), message fan-out, and presence.",
@@ -1379,7 +1379,7 @@
 		"slug": "design-recommendation-system",
 		"name": "Design Recommendation System",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Recommendation%20System%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/ml-system-design/problem-breakdowns/video-recommendations",
 		"locked": false,
 		"hints": [
 			"Blend candidate generation and ranking stages.",
@@ -1392,7 +1392,7 @@
 		"slug": "design-ride-sharing-platform",
 		"name": "Design Ride Sharing Platform",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Ride%20Sharing%20Platform%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber",
 		"locked": false,
 		"hints": [
 			"Location indexing and driver-rider matching strategy.",
@@ -1405,7 +1405,7 @@
 		"slug": "design-search-autocomplete",
 		"name": "Design Search Autocomplete",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Search%20Autocomplete%20system%20design&type=repositories",
+		"url": "https://www.geeksforgeeks.org/system-design/googles-search-autocomplete-high-level-designhld/",
 		"locked": false,
 		"hints": [
 			"Offline indexing pipeline plus low-latency serving tier.",
@@ -1461,7 +1461,7 @@
 		"slug": "design-url-shortener",
 		"name": "Design URL Shortener",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20URL%20Shortener%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly",
 		"locked": false,
 		"hints": [
 			"Define read/write ratio, key generation, and redirect latency goals.",
@@ -1474,7 +1474,7 @@
 		"slug": "design-video-streaming-platform",
 		"name": "Design Video Streaming Platform",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Video%20Streaming%20Platform%20system%20design&type=repositories",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/youtube",
 		"locked": false,
 		"hints": [
 			"Upload/transcoding pipeline and CDN delivery.",

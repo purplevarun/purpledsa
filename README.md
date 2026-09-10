@@ -110,11 +110,39 @@ Free DSA Essentials is PurpleDSA's own collection of 100 coding exercises across
 | Codeforces    |        10 | Manual         |
 | CSES          |        10 | Manual         |
 
-Only free submissions belong in the collection; a free account may be required. Premium courses, editorials, hints, and AI features are outside its scope. Settings lists the platform breakdown and links to filtered exercise lists. The master index contains only exercises in active coding sets; the separate design sets remain unchanged.
+Only free submissions belong in the collection; a free account may be required. Premium courses, editorials, hints, and AI features are outside its scope. Settings lists the platform breakdown and links to filtered exercise lists. The master index contains only exercises in active coding sets; design sets are separate.
 
 Access was audited on September 10, 2026 against LeetCode's public `paid_only` metadata, the GFG and Codeforces catalogs, CodeChef's practice API (judge enabled; login is the only reported submission restriction), NeetCode's free practice pages, and CSES task pages. Three unavailable CodeChef candidates were excluded. SPOJ uses its canonical classical problem URLs, but its browser-security challenge prevented automated live-page verification; no actual judge submissions were made during verification.
 
-Keep problem codes stable when correcting names or URLs because saved progress uses those codes. GFG practice links must use the exact `/problems/<slug>/1` URL; never derive slugs from titles or substitute search URLs. Use a verified free equivalent for premium LeetCode questions, not merely `locked: false`. Platform buttons display only supplied practice links for their actual host.
+Keep problem codes stable when correcting names or URLs because saved progress uses those codes. GFG practice links must use the exact `/problems/<slug>/1` URL; never derive slugs from titles or substitute search URLs. Use a verified free equivalent for premium LeetCode questions, not merely `locked: false`. Platform buttons display supplied practice links or supported HLD articles with their actual website labels.
+
+### HLD Study Guides
+
+The HLD sheet at `/sets/hld` contains 15 original study guides and architecture diagrams, 45 self-check questions with answers, 32 reading selections, and 15 video selections (13 distinct videos). The guides cover requirements, explicit sizing assumptions and worked estimates, API contracts, data models, request flows, trade-offs, failure recovery, and operational metrics. These are interview study scenarios, not claims about a company's actual traffic or a single universally correct architecture. Explanations and diagrams are original; external articles and videos are linked and attributed, not copied.
+
+The reader supports topic search, mobile topic selection, keyboard-accessible section tabs, expandable answers, and zoomable/downloadable diagrams. Link directly to a topic with `/sets/hld?guide=design-payment-system&section=guide`; sections are `guide`, `architecture`, `review`, and `resources`. Diagrams use Mermaid in strict mode with native SVG text and are loaded on demand with the study view. The "studied" checkbox is self-reported and reuses existing progress IDs; it does not claim an assessment or code submission. Coding sheets and LLD are unchanged.
+
+Readings include Hello Interview, GeeksforGeeks, ByteByteGo, Stripe Engineering, and official PostgreSQL, Redis, Confluent, Elastic, Flink, H3, Apple, Google, and TensorFlow documentation, plus Chris Richardson's architectural patterns. Broader topics use concrete examples: Kafka for pub/sub, video recommendations, ad-click aggregation, and local delivery. The food-delivery guide explicitly distinguishes a restaurant marketplace from Gopuff's warehouse model.
+
+Resources were reviewed on September 10, 2026. Paid Hello Interview cache/payment breakdowns were excluded. Video IDs and titles were verified against creator-published pages, but the local network blocks YouTube, so playback, captions, and regional availability were not tested. Focused companion videos are labeled as such instead of being presented as full topic walkthroughs. External access policies can change. Tests validate guide coverage, direct destinations, and the reviewed topic/video mappings; they are not a live availability monitor.
+
+Video provenance:
+
+| Video                               | Publisher reference                                                                                                               |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Bitly (`iUU4O1sWtJA`)               | [Hello Interview: Bitly](https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly)                             |
+| Rate limiter (`MIJFyUPG4Z4`)        | [Hello Interview: rate limiter](https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-rate-limiter)   |
+| Redis (`fmT5nlEkl3U`)               | [Hello Interview: Redis](https://www.hellointerview.com/learn/system-design/deep-dives/redis)                                     |
+| Session vs JWT (`fyTxwIa-1U0`)      | [ByteByteGo EP122](https://blog.bytebytego.com/p/ep122-api-gateway-101)                                                           |
+| WhatsApp (`cr6p0n0N-VA`)            | [Hello Interview: WhatsApp](https://www.hellointerview.com/learn/system-design/problem-breakdowns/whatsapp)                       |
+| Kafka (`DU8o-OTeoCc`)               | [Hello Interview: Kafka](https://www.hellointerview.com/learn/system-design/deep-dives/kafka)                                     |
+| Elasticsearch (`PuZvF2EyfBM`)       | [Hello Interview: Elasticsearch](https://www.hellointerview.com/learn/system-design/deep-dives/elasticsearch)                     |
+| News feed (`Qj4-GruzyDU`)           | [Hello Interview: news feed](https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-news-feed)                  |
+| Recommendations (`jz0-satrmrA`)     | [TensorFlow Recommenders](https://www.tensorflow.org/recommenders)                                                                |
+| Ad-click aggregator (`Zcv_899yqhI`) | [Hello Interview: ad-click aggregator](https://www.hellointerview.com/learn/system-design/problem-breakdowns/ad-click-aggregator) |
+| Uber (`lsKU38RKQSo`)                | [Hello Interview: Uber](https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber)                               |
+| YouTube (`IUrQ5_g3XKs`)             | [Hello Interview: YouTube](https://www.hellointerview.com/learn/system-design/problem-breakdowns/youtube)                         |
+| ACID (`GAe5oB742dw`)                | [ByteByteGo EP105](https://blog.bytebytego.com/p/ep105-the-12-factor-app)                                                         |
 
 Run the data and link regression checks with Node.js 22.6 or newer:
 

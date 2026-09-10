@@ -1,7 +1,7 @@
 {
 	"slug": "hld",
 	"title": "High-Level Design (HLD)",
-	"description": "Top system design interview problems spanning distributed systems, messaging, feeds, and payments.",
+	"description": "System design study guides: architecture, worked estimates, trade-offs, failure analysis, and curated readings and videos.",
 	"topics": [
 		{
 			"name": "Core Distributed Systems",
@@ -38,5 +38,2490 @@
 				"design-payment-system"
 			]
 		}
-	]
+	],
+	"guides": {
+		"design-url-shortener": {
+			"summary": "Build a read-heavy redirect service that maps a short identifier to a destination URL. Start with a database and a stateless API; add caching and independent read scaling when the workload justifies them. The difficult parts are collision handling, expiration, abuse prevention, and maintaining control of redirects after browsers cache them.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"HTTP redirects and browser caching",
+				"Unique indexes, replication, and cache-aside"
+			],
+			"requirements": {
+				"functional": [
+					"Create a short URL from an absolute HTTP or HTTPS destination.",
+					"Resolve a short code to a redirect, with optional custom aliases.",
+					"Expire or disable a mapping without issuing that code to another destination."
+				],
+				"nonFunctional": [
+					"Illustrative target: p99 redirect latency below 100 ms inside a serving region.",
+					"Prioritize redirect availability; accepted creates must survive the agreed database failure model.",
+					"Guarantee one destination per active short code, with bounded staleness for changes."
+				],
+				"outOfScope": [
+					"A full click-analytics product and crawling destination pages.",
+					"Private links: unguessable identifiers alone are not authorization."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"10 million new mappings and 1 billion redirects per day; plan for a 10x peak.",
+					"Retain mappings for one year at an assumed 500 bytes each before indexes and replicas."
+				],
+				"estimates": [
+					{
+						"label": "Read and write traffic",
+						"calculation": "1,000,000,000 / 86,400 = 11,574 reads/s; 10,000,000 / 86,400 = 116 writes/s.",
+						"implication": "About 116,000 peak reads/s motivates a cache; the write rate alone does not require a sharded database."
+					},
+					{
+						"label": "Storage and key space",
+						"calculation": "10,000,000 x 365 x 500 B = 1.825 TB raw; 62^7 = 3,521,614,606,208 possible 7-character codes.",
+						"implication": "Budget additional space for indexes and replicas. A large namespace reduces random collisions but does not remove the need for a unique constraint and retry."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "POST /urls { destination, customAlias?, expiresAt? }",
+					"purpose": "Validate the URL and atomically reserve the code; return 201, or 409 for a custom-alias conflict. An idempotency key makes client retries safe."
+				},
+				{
+					"signature": "GET /{code}",
+					"purpose": "Return 302 with Location for a valid mapping, 404 for an unknown code, or 410 for an expired one. Choose Cache-Control deliberately."
+				},
+				{
+					"signature": "DELETE /urls/{code}",
+					"purpose": "An authorized owner disables the mapping and triggers invalidation. Keep a tombstone so old bookmarks cannot be redirected to a new owner."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "UrlMapping",
+					"fields": "code PK, destination, ownerId, createdAt, expiresAt, disabledAt",
+					"notes": "The database unique key is the final arbiter of ownership, including races between generated codes and custom aliases."
+				},
+				{
+					"entity": "CreateRequest",
+					"fields": "ownerId, idempotencyKey, requestHash, code",
+					"notes": "Unique on ownerId plus idempotencyKey. Reject reuse with a different request; persist the result with the mapping."
+				},
+				{
+					"entity": "RedirectCache",
+					"fields": "code -> destination, expiresAt, version",
+					"notes": "A disposable read cache, not the source of truth. Its TTL must not extend beyond mapping expiration."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Browser[Browser] -->|create| Writer[Create API]\n Writer -->|unique insert| Store[(Mapping database)]\n Browser -->|GET short code| Reader[Redirect API]\n Reader -->|lookup| Cache[(Regional cache)]\n Reader -->|cache miss| Store\n Store -.->|fill cache| Cache\n Reader -->|302 Location| Destination[Destination website]",
+				"flows": [
+					{
+						"name": "Create a mapping",
+						"steps": [
+							"Validate scheme, size, alias rules, and expiry. Apply abuse checks without fetching arbitrary destinations from the server.",
+							"Generate a random base62 code or allocate from a counter range. Attempt a unique insert; on generated-code conflict, retry with a new value.",
+							"Commit the mapping and idempotency result before returning the short URL. A timeout after commit is resolved by replaying the idempotency key.",
+							"Optionally warm the local read cache. A cache failure must not roll back a successfully stored mapping."
+						]
+					},
+					{
+						"name": "Resolve a redirect",
+						"steps": [
+							"Look up the code in the regional cache and check expiresAt, even on a cache hit.",
+							"On a miss, load the mapping from the database and populate a bounded-TTL entry. Brief negative caching can absorb repeated invalid codes.",
+							"Return the redirect. Use a leader read or read-your-writes routing for immediately resolving a newly created link if replicas lag.",
+							"On edits or takedowns, invalidate caches and define a staleness bound; a permanently cached 301 cannot reliably be recalled from clients."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Random codes or counters",
+					"choice": "Random codes distribute allocation and are less predictable; a unique index plus retries ensures correctness.",
+					"tradeOff": "Counters avoid collisions but need durable range allocation and expose ordering unless transformed. Neither option makes a private URL secure."
+				},
+				{
+					"topic": "302 or 301",
+					"choice": "Prefer a temporary redirect when expiration, takedowns, edits, or per-request analytics matter.",
+					"tradeOff": "Permanent redirects can reduce server traffic, but browser caching limits future control. Both require explicit cache-policy reasoning."
+				},
+				{
+					"topic": "Global deployment",
+					"choice": "Begin with one write region and regional caches; replicate mappings for nearby reads.",
+					"tradeOff": "Asynchronous replication permits stale reads. Global uniqueness and immediate read-after-write need coordination, routing, or disjoint allocation ranges."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A popular link expires simultaneously in every cache.",
+					"handling": "Use TTL jitter, request coalescing, and database admission control. Never extend a cache entry beyond a hard URL expiration."
+				},
+				{
+					"scenario": "A database failover happens after creation was acknowledged.",
+					"handling": "Choose replication and acknowledgment guarantees explicitly. Do not promise zero data loss with asynchronous replication; make retry results durable."
+				},
+				{
+					"scenario": "An attacker creates phishing links or scans random codes.",
+					"handling": "Enforce creation quotas, report/takedown workflows, rate limits, and safe redirect-scheme validation. Monitor cache miss rate, redirect p99, errors, and replication lag."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why is hashing a URL and taking seven characters not a uniqueness guarantee?",
+					"answer": "Truncation maps many possible inputs into a finite space, so distinct URLs can collide. A database uniqueness check with a retry strategy or a collision-free allocation scheme is still required; hashing alone also merges identical URLs that might have different owners or expiry rules."
+				},
+				{
+					"question": "What changes when links must be revocable within five seconds?",
+					"answer": "Bound cache TTL and invalidation delivery to that requirement, check disabled and expiration state, and avoid permanent client redirects. A stale-while-revalidate policy must not serve revoked links beyond the agreed bound."
+				},
+				{
+					"question": "What should happen when a create request times out after committing?",
+					"answer": "The client retries with the same idempotency key. The server returns the previously committed short code rather than creating another mapping, provided the request payload matches the stored request hash."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design Bitly",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/bitly",
+					"why": "Primary walkthrough: requirements, short-code generation, redirects, and progressive scaling."
+				},
+				{
+					"kind": "article",
+					"title": "Unique constraints",
+					"author": "PostgreSQL documentation",
+					"url": "https://www.postgresql.org/docs/current/ddl-constraints.html",
+					"why": "Technical reference for enforcing mapping uniqueness under concurrent writes."
+				},
+				{
+					"kind": "video",
+					"title": "System Design Interview: Design Bitly",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=iUU4O1sWtJA",
+					"why": "Full interview walkthrough; compare the proposed allocation and caching choices with your own."
+				}
+			]
+		},
+		"design-rate-limiter-at-scale": {
+			"summary": "Design admission control for a fleet of API servers. A rate limiter protects a resource by deciding whether a request may proceed under a policy. The central challenge is the precision-versus-availability trade-off: independent regional counters cannot enforce a perfectly strict global limit without coordination or preallocated budgets.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Atomic read-modify-write and distributed counters",
+				"Token buckets, time windows, and HTTP 429"
+			],
+			"requirements": {
+				"functional": [
+					"Apply policies by authenticated tenant, endpoint, and optionally IP address.",
+					"Allow bounded bursts while enforcing a sustained rate.",
+					"Return an allow/deny decision with retry metadata and support versioned policy changes."
+				],
+				"nonFunctional": [
+					"Illustrative target: a decision adds less than 5 ms p99 inside a region.",
+					"Keep the limiter available during node failures with explicitly bounded overshoot.",
+					"Prevent one hot tenant from exhausting shared counter capacity."
+				],
+				"outOfScope": [
+					"Billing-grade usage accounting; a quota limiter is not an auditable ledger.",
+					"Application-level authorization and a complete DDoS defense."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"100,000 peak requests/s across a region; each normally consumes one decision.",
+					"10 million active buckets with an assumed 100-byte raw state, before key and datastore overhead."
+				],
+				"estimates": [
+					{
+						"label": "Counter traffic",
+						"calculation": "100,000 requests/s x 1 atomic operation = 100,000 operations/s.",
+						"implication": "Shard by policy key and benchmark the actual script. A single celebrity tenant remains a hot key even with many shards."
+					},
+					{
+						"label": "Bucket memory",
+						"calculation": "10,000,000 x 100 B = 1 GB raw state; one replica makes at least 2 GB before overhead.",
+						"implication": "Expire inactive buckets and measure object overhead. Do not allocate a permanent key for every possible user-route combination."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "checkAndConsume(subject, policyId, cost) -> allowed, remaining, retryAfter",
+					"purpose": "An internal atomic operation. Enforce positive bounded cost and fetch policy version from trusted configuration, not a client-supplied limit."
+				},
+				{
+					"signature": "PUT /policies/{policyId} { rate, burst, version }",
+					"purpose": "An authenticated control-plane operation with validation, staged rollout, and an auditable previous version."
+				},
+				{
+					"signature": "HTTP 429 + Retry-After",
+					"purpose": "Expose throttling to callers without forwarding rejected work. Make retry metadata advisory under concurrent consumption."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Policy",
+					"fields": "policyId, version, refillRate, capacity, failureMode",
+					"notes": "Store durably in a control plane; push snapshots to gateways so every request avoids a configuration database read."
+				},
+				{
+					"entity": "Bucket",
+					"fields": "subject, policyId, tokens, lastRefillTime",
+					"notes": "The key selects one shard. Refill, comparison, and decrement must be atomic on that shard."
+				},
+				{
+					"entity": "RegionalBudget",
+					"fields": "policyId, region, allocatedTokens, epoch",
+					"notes": "Optional disjoint budgets prevent unrestricted regional double spending. Reallocation needs coordination and fencing."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Client[Client] --> Gateway[API gateway]\n Policy[Policy control plane] -.-> Gateway\n Gateway --> Limiter[Limiter shard router]\n Limiter -->|atomic consume| Buckets[(Token bucket shards)]\n Buckets --> Decision[Allow or deny]\n Decision -->|allow| Service[Application service]\n Decision -->|deny 429| Client",
+				"flows": [
+					{
+						"name": "Consume a token",
+						"steps": [
+							"Authenticate the caller, normalize the route, and derive a bounded-cardinality key from trusted identity.",
+							"Execute refill and consumption together: available = min(capacity, tokens + elapsed x rate). Clamp negative elapsed time; use a consistent server-side time source.",
+							"If available covers cost, decrement and allow; otherwise deny and estimate when enough tokens will refill.",
+							"Set an inactivity expiry long enough to restore a full bucket safely, and emit aggregated allow/deny metrics without adding user IDs as unbounded metric labels."
+						]
+					},
+					{
+						"name": "Handle regions and outages",
+						"steps": [
+							"Choose whether the policy is per region or global before distributing counters.",
+							"For global limits, route a subject to a home region, coordinate a shared decision, or lease disjoint regional budgets with bounded overshoot.",
+							"If the counter store fails, apply the configured policy: fail closed for sensitive actions or use a conservative local fallback for availability-sensitive reads.",
+							"Recover gradually and reconcile budget epochs; never let every recovering gateway assume it owns the full global burst."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Token bucket or sliding window",
+					"choice": "Use a token bucket for a sustained rate plus an explicit burst capacity.",
+					"tradeOff": "A fixed window is cheap but can allow two windows of traffic at a boundary. Exact sliding logs consume more memory; sliding counters trade precision for cost."
+				},
+				{
+					"topic": "Atomic scripts",
+					"choice": "Use a short Redis script or another transactional primitive to update a bucket atomically.",
+					"tradeOff": "Atomicity is per execution and shard, not global durability. Long scripts block other work; asynchronous failover may lose recent consumption."
+				},
+				{
+					"topic": "Local token leases",
+					"choice": "Lease small budgets to gateway instances when a remote operation per request is too expensive.",
+					"tradeOff": "Leases reduce latency but can strand unused capacity and complicate crash recovery. Specify the maximum overshoot rather than calling the result exact."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A hot tenant sends most of the traffic.",
+					"handling": "Use an initial local protection limit, isolate heavy tenants, or allocate sub-budgets. Randomly splitting a key without budgets silently multiplies its limit."
+				},
+				{
+					"scenario": "Clock jumps or concurrent requests corrupt refill calculations.",
+					"handling": "Perform all bucket math atomically, clamp elapsed time, and use integer or fixed-point accounting where rounding matters. Monitor unexpected allowance spikes."
+				},
+				{
+					"scenario": "Retries amplify an upstream outage.",
+					"handling": "Rate-limit retries too, return Retry-After, and add bounded exponential backoff with jitter. Track decision latency, denial ratio, fail-open events, and counter-store saturation."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Can three regions each enforce 100 requests/minute and still promise a global limit of 100?",
+					"answer": "No. Independent counters can permit 300 combined requests. A global bound needs a shared authority, home-region routing, or disjoint budgets whose total is at most 100; each option changes latency, utilization, or outage behavior."
+				},
+				{
+					"question": "Why is GET followed by SET insufficient for consuming a token?",
+					"answer": "Two requests can read the same available balance and both overwrite it after admitting work. Refill, comparison, and decrement must execute as one atomic operation so concurrent requests observe a serialized state transition."
+				},
+				{
+					"question": "Does a Redis replica make rate limiting lossless after failover?",
+					"answer": "Not with asynchronous replication alone. A promoted replica may not contain the latest decrements, temporarily restoring consumed tokens. Account for that overshoot or choose stronger acknowledgment and coordination guarantees at a latency and availability cost."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design a Distributed Rate Limiter",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/distributed-rate-limiter",
+					"why": "Primary walkthrough of algorithms, architecture, and distributed policy enforcement."
+				},
+				{
+					"kind": "article",
+					"title": "Scripting with Lua",
+					"author": "Redis documentation",
+					"url": "https://redis.io/docs/latest/develop/programmability/eval-intro/",
+					"why": "Understand atomic execution, blocking behavior, script parameters, and operational limits."
+				},
+				{
+					"kind": "video",
+					"title": "Design a Distributed Rate Limiter",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=MIJFyUPG4Z4",
+					"why": "Full walkthrough with discussion of the precision and availability trade-offs."
+				}
+			]
+		},
+		"design-distributed-cache": {
+			"summary": "Design a sharded, memory-resident key-value cache in front of durable storage. The cache accelerates reads but can lose or evict entries at any time. State the allowed staleness, ownership of invalidation, and behavior when the entire cache is cold before choosing a partitioning scheme or promising availability.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Consistent hashing or fixed hash-slot routing",
+				"Cache-aside, TTLs, eviction, and replication"
+			],
+			"requirements": {
+				"functional": [
+					"Get, set, and delete values by key with an optional TTL.",
+					"Distribute keys across nodes and rebalance as capacity changes.",
+					"Support cache invalidation and per-tenant memory limits."
+				],
+				"nonFunctional": [
+					"Illustrative target: p99 cache operations below 5 ms within a region.",
+					"Continue serving through one node failure when replicas have capacity.",
+					"Bound stale reads and keep the backing database protected during misses or eviction storms."
+				],
+				"outOfScope": [
+					"Using cache eviction-prone memory as the only durable store.",
+					"Cross-key distributed transactions and a universally strict consistency guarantee."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"100 million cached objects averaging 1 KB of payload; use decimal units.",
+					"1 million reads/s and a target 95% hit rate, which must be measured rather than assumed permanently."
+				],
+				"estimates": [
+					{
+						"label": "Memory budget",
+						"calculation": "100,000,000 x 1,000 B = 100 GB payload; one replica = 200 GB before metadata and headroom.",
+						"implication": "Budget key/object overhead, fragmentation, and rebalancing room. Capacity should not run at the eviction cliff."
+					},
+					{
+						"label": "Miss amplification",
+						"calculation": "1,000,000 x (1 - 0.95) = 50,000 database reads/s; a cold cache can approach 1,000,000.",
+						"implication": "A high steady-state hit ratio does not protect the database during restarts. Coalescing, warmup, and load shedding are architectural requirements."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "GET key -> value, version | miss",
+					"purpose": "Return a miss for expired or evicted values. A miss is normal, not an error in the source data."
+				},
+				{
+					"signature": "SET key value ttl version?",
+					"purpose": "Reject oversized entries and apply tenant limits. An optional conditional version prevents an older fill from overwriting a newer cached value."
+				},
+				{
+					"signature": "DELETE key",
+					"purpose": "Invalidate an entry after a source update. Delete is idempotent, but propagation and races still require a staleness policy."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "CacheEntry",
+					"fields": "tenant, key, value, version, expiresAt, accessMetadata",
+					"notes": "Expiry is a freshness control; eviction is a capacity control. They solve different problems."
+				},
+				{
+					"entity": "ShardMap",
+					"fields": "slotRange, primary, replicas, epoch",
+					"notes": "Clients or proxies cache a versioned routing map. Fence obsolete owners during migration."
+				},
+				{
+					"entity": "SourceRecord",
+					"fields": "recordId, payload, version",
+					"notes": "Lives in the durable database. Source versions help detect stale cache fills and reordered invalidations."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n App[Application] --> Router[Cache client or proxy]\n Map[Versioned shard map] -.-> Router\n Router --> Primary[(Cache primary)]\n Primary -.->|replication| Replica[(Cache replica)]\n App -->|cache miss or write| Database[(Source database)]\n Database --> Changes[Change events]\n Changes -->|invalidate| Router",
+				"flows": [
+					{
+						"name": "Read through cache-aside",
+						"steps": [
+							"Hash the namespaced key and route using a versioned shard map. Read from the required consistency tier.",
+							"On a hit, check expiry and return. On a miss, coalesce identical concurrent loads rather than issuing one database request per caller.",
+							"Load the source value, attach a version, and populate a TTL with jitter. Do not hold a global lock while fetching the source.",
+							"Bound loader concurrency and serve explicitly permitted stale data or reject excess work when the database is saturated."
+						]
+					},
+					{
+						"name": "Write and rebalance",
+						"steps": [
+							"Commit source data first, then invalidate through a durable change stream or outbox. A simple best-effort delete alone can be lost.",
+							"Handle the race where an old read fills the cache after invalidation: use versions or accept a documented TTL-bounded staleness window.",
+							"For rebalancing, copy or warm a bounded subset of slots, publish a new map epoch, and redirect or retry stale routes.",
+							"Drain old owners and cap migration traffic. Adding nodes must not trigger an unbounded database refill storm."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Partitioning",
+					"choice": "Use consistent hashing with virtual nodes or an explicit hash-slot map to limit movement.",
+					"tradeOff": "Key distribution is not load distribution: one hot key still lands on one owner. Hot-key replication or local caching needs separate freshness controls."
+				},
+				{
+					"topic": "Eviction policy",
+					"choice": "Choose approximate LRU or LFU based on measured access patterns and tenant isolation needs.",
+					"tradeOff": "Strict LRU adds metadata churn; LFU adapts less quickly to new hot data. Neither policy guarantees useful hit rates for scans."
+				},
+				{
+					"topic": "Write-through or write-behind",
+					"choice": "Start with a durable source plus cache-aside or synchronous write-through.",
+					"tradeOff": "Write-behind lowers write latency but can lose acknowledged data without a durable queue and recovery protocol. It is not a free cache optimization."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A shard fails or every entry expires at once.",
+					"handling": "Promote a replica where possible, coalesce misses, jitter TTLs, and limit database concurrency. Reserve enough capacity for a node loss."
+				},
+				{
+					"scenario": "Invalidations arrive late or out of order.",
+					"handling": "Carry source versions and monitor propagation lag. State whether stale results are allowed; do not promise linearizability from asynchronous invalidation."
+				},
+				{
+					"scenario": "Large keys or one tenant consume all memory.",
+					"handling": "Limit value size, apply tenant quotas, and track memory, hit ratio, evictions, fill latency, hot keys, and source-load amplification."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why can deleting a cache entry after a database update still serve stale data?",
+					"answer": "A concurrent reader may have fetched the old database value before the update and fill the cache after deletion. Versions, ordered change processing, or a clearly bounded TTL policy are needed to address that race; deletion alone does not establish strict consistency."
+				},
+				{
+					"question": "Does adding more cache shards solve a single hot key?",
+					"answer": "No. The hot key still maps to one shard and can dominate its CPU or bandwidth. Consider a small local cache, read replicas, or controlled replication of that key, with an explicit strategy for freshness and invalidation."
+				},
+				{
+					"question": "What must be tested beyond the steady-state hit ratio?",
+					"answer": "Test cold starts, a lost shard, synchronized expiry, a slow source database, oversized values, and rebalancing. Measure whether miss amplification remains bounded and whether recovery traffic prevents healthy requests from completing."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design Distributed Cache",
+					"author": "GeeksforGeeks",
+					"url": "https://www.geeksforgeeks.org/system-design/design-distributed-cache-system-design/",
+					"why": "Primary design exercise covering interfaces, partitioning, and system components."
+				},
+				{
+					"kind": "article",
+					"title": "Key eviction",
+					"author": "Redis documentation",
+					"url": "https://redis.io/docs/latest/develop/reference/eviction/",
+					"why": "Precise behavior of memory limits and supported eviction policies."
+				},
+				{
+					"kind": "video",
+					"title": "Redis Deep Dive",
+					"author": "Hello Interview / Stefan Mai",
+					"url": "https://www.youtube.com/watch?v=fmT5nlEkl3U",
+					"why": "Companion deep dive into Redis, including the operational choices behind a distributed cache."
+				}
+			]
+		},
+		"design-api-gateway": {
+			"summary": "Design the public entry point for a collection of services. A gateway centralizes routing and cross-cutting controls, not all business logic. Separate its fast data plane from configuration and policy management, and give every downstream call a deadline so one slow service cannot consume the entire gateway fleet.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Reverse proxies, TLS, authentication, and authorization",
+				"Timeouts, connection pools, retries, and circuit breakers"
+			],
+			"requirements": {
+				"functional": [
+					"Route versioned public APIs to healthy services and support controlled traffic splitting.",
+					"Authenticate callers, enforce coarse policy and rate limits, and forward trusted identity.",
+					"Produce access logs and traces, and optionally aggregate a small bounded number of backend calls."
+				],
+				"nonFunctional": [
+					"Illustrative target: less than 10 ms p99 gateway overhead excluding downstream work.",
+					"Roll out configuration without interrupting established requests.",
+					"Limit the failure blast radius of a bad route, hot tenant, or unhealthy backend."
+				],
+				"outOfScope": [
+					"Domain-specific authorization decisions that depend on service-owned data.",
+					"Replacing every internal service-to-service connection with the public gateway."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"50,000 peak requests/s with a mean in-flight duration of 200 ms.",
+					"20 KB average combined request and response traffic before TLS and protocol overhead."
+				],
+				"estimates": [
+					{
+						"label": "Concurrency",
+						"calculation": "50,000 requests/s x 0.2 s = 10,000 concurrent requests.",
+						"implication": "Use Little's Law to size connection pools and buffers. At a 2-second downstream slowdown, concurrency becomes 100,000 without admission control."
+					},
+					{
+						"label": "Network throughput",
+						"calculation": "50,000 x 20,000 B = 1 GB/s, approximately 8 Gbit/s.",
+						"implication": "Load test bandwidth, TLS CPU, body buffering, and fan-out amplification, not just the number of gateway instances."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "ANY /v1/{route} -> configured upstream",
+					"purpose": "Validate route, method, body size, identity, and request deadline before forwarding. Strip untrusted identity headers."
+				},
+				{
+					"signature": "PUT /admin/routes/{routeId} { upstream, timeout, policy, version }",
+					"purpose": "Control-plane-only configuration with RBAC, schema validation, canary rollout, and rollback."
+				},
+				{
+					"signature": "GET /health/ready",
+					"purpose": "Report ability to serve with a valid local configuration; do not make every backend outage mark every gateway unready."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "RouteSnapshot",
+					"fields": "version, path, methods, upstreamPool, timeoutMs, retryPolicy",
+					"notes": "Publish an immutable validated snapshot and swap it atomically in the data plane."
+				},
+				{
+					"entity": "IdentityPolicy",
+					"fields": "issuer, audience, allowedAlgorithms, keySetVersion, scopes",
+					"notes": "Cache trusted signing keys with rotation support. A valid signature alone is not sufficient without issuer, audience, and expiry checks."
+				},
+				{
+					"entity": "BackendPool",
+					"fields": "service, endpoints, health, connectionLimit, circuitState",
+					"notes": "Derived from discovery and active/passive health observations; keep per-backend limits."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Client[Client] --> Edge[Edge load balancer and TLS]\n Edge --> Gateway[Gateway data plane]\n Config[Route and policy control plane] -.-> Gateway\n Gateway --> Identity[Authentication and admission]\n Identity --> Orders[Order service]\n Identity --> Catalog[Catalog service]\n Gateway -.-> Telemetry[Logs metrics and traces]\n Discovery[Service discovery] -.-> Gateway",
+				"flows": [
+					{
+						"name": "Forward a request",
+						"steps": [
+							"Terminate TLS at an approved boundary, enforce header/body limits, and assign a trace ID without logging secrets.",
+							"Validate authentication and rate policy, strip spoofable internal headers, and attach identity over an authenticated downstream connection.",
+							"Choose a healthy upstream from the current snapshot. Propagate a remaining deadline and use a bounded connection pool.",
+							"Stream the response when possible. Record per-route latency and status while ensuring a telemetry outage cannot block the request path."
+						]
+					},
+					{
+						"name": "Roll out a route safely",
+						"steps": [
+							"Validate a proposed snapshot against schema and routing invariants, including overlapping path rules.",
+							"Canary it on a small subset of gateways or traffic and watch error rate, latency, and backend saturation.",
+							"Distribute the versioned snapshot, swap atomically, and keep the previous valid version for rollback.",
+							"If the control plane disappears, continue serving the last known-good configuration and alert on age rather than failing every request."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Gateway or backend-for-frontend",
+					"choice": "Keep the shared gateway focused on cross-cutting controls; use a BFF for client-specific composition.",
+					"tradeOff": "Centralizing composition can reduce client round trips but couples releases and creates fan-out latency. Limit aggregation and preserve service ownership."
+				},
+				{
+					"topic": "Retries",
+					"choice": "Retry only transient failures for operations known to be safe, within a shared deadline and retry budget.",
+					"tradeOff": "A timed-out payment may already have succeeded. Blind retries of non-idempotent operations duplicate side effects and amplify overload."
+				},
+				{
+					"topic": "Identity verification",
+					"choice": "Validate tokens locally using cached, rotated keys where the identity model permits.",
+					"tradeOff": "Local verification reduces latency but revocation may lag until expiry. Sensitive operations may require a different revocation or introspection policy."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "One backend is slow and consumes every worker or connection.",
+					"handling": "Use per-backend pools, deadlines, concurrency limits, circuit breakers, and load shedding. A circuit breaker does not replace timeouts."
+				},
+				{
+					"scenario": "Bad configuration is pushed globally.",
+					"handling": "Validate, version, canary, and roll back snapshots. Keep the control plane off the critical request path and restrict administrative access."
+				},
+				{
+					"scenario": "A large upload or decompression bomb exhausts memory.",
+					"handling": "Bound decoded body size, stream large payloads or use direct object-store uploads, and monitor active connections, buffer memory, retry volume, and upstream p99."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why should a gateway not retry every 500 or timeout?",
+					"answer": "The upstream may have committed a side effect before the response was lost. Retrying is safe only with idempotent semantics or a durable idempotency key, and even safe retries need a deadline and budget to avoid multiplying traffic during an outage."
+				},
+				{
+					"question": "What happens if the configuration service is unavailable for ten minutes?",
+					"answer": "The data plane should normally keep serving a validated last-known-good snapshot. Alert on stale configuration and define exceptions for security-critical revocations; requiring a configuration fetch for each request makes control-plane downtime a full service outage."
+				},
+				{
+					"question": "Is a JWT with a valid signature always acceptable?",
+					"answer": "No. Validate the expected issuer, audience, algorithm, expiry, and relevant claims, using trusted keys. The backend must still enforce resource-level authorization; otherwise a token valid for another service or tenant could gain unintended access."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "API Gateway",
+					"author": "GeeksforGeeks",
+					"url": "https://www.geeksforgeeks.org/system-design/what-is-api-gateway-system-design/",
+					"why": "Primary overview of responsibilities, deployment, and gateway design concerns."
+				},
+				{
+					"kind": "article",
+					"title": "API Gateway / Backends for Frontends",
+					"author": "Chris Richardson / Microservices.io",
+					"url": "https://microservices.io/patterns/apigateway.html",
+					"why": "Pattern reference for choosing gateway boundaries and understanding aggregation trade-offs."
+				},
+				{
+					"kind": "video",
+					"title": "Session vs JWT: The Differences You May Not Know",
+					"author": "ByteByteGo",
+					"url": "https://www.youtube.com/watch?v=fyTxwIa-1U0",
+					"why": "Focused companion on the gateway's authentication design, not a full gateway interview walkthrough. Published in ByteByteGo EP122."
+				}
+			]
+		},
+		"design-real-time-chat": {
+			"summary": "Design durable one-to-one and small-group messaging with low-latency delivery. WebSockets solve the live connection, not persistence or offline recovery. Treat accepted, delivered, and read as different states, and define ordering within a conversation rather than imposing an unnecessary global sequence across all users.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"WebSockets, heartbeats, and reconnect behavior",
+				"Append-only storage, idempotency, and ordered partitions"
+			],
+			"requirements": {
+				"functional": [
+					"Send text messages to a conversation and retrieve paginated history.",
+					"Deliver to online devices and synchronize missed messages after reconnect.",
+					"Support group membership, delivery receipts, and optional read receipts."
+				],
+				"nonFunctional": [
+					"Illustrative target: online delivery below 300 ms p99 within a region.",
+					"Do not acknowledge durable acceptance before the agreed replicated persistence point.",
+					"Preserve per-conversation ordering and tolerate duplicate network delivery."
+				],
+				"outOfScope": [
+					"Large public broadcast channels, calls, and a full media-upload pipeline.",
+					"End-to-end encryption is a separate explicit requirement; this baseline does not claim encrypted-content confidentiality from the server."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"10 million daily active users send 50 messages each per day; size each stored record at 1 KB.",
+					"1 million concurrent connections, with a hypothetical 20,000-connection benchmark per gateway before headroom."
+				],
+				"estimates": [
+					{
+						"label": "Message throughput and storage",
+						"calculation": "10,000,000 x 50 = 500 million messages/day = 5,787/s average; at 5x peak, about 29,000/s. Storage is 500 GB/day raw.",
+						"implication": "Retention and attachment policy dominate cost. Replication, indexes, receipts, and group fan-out add to these baseline numbers."
+					},
+					{
+						"label": "Connection fleet",
+						"calculation": "1,000,000 / 20,000 = 50 gateways before headroom.",
+						"implication": "The benchmark is an assumption to test with real memory, heartbeat, and egress costs; reserve extra capacity for reconnect storms and one failed zone."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "SEND { conversationId, clientMessageId, body }",
+					"purpose": "An authenticated socket event. Check membership, deduplicate the client ID, and return the server message ID and conversation sequence after persistence."
+				},
+				{
+					"signature": "GET /conversations/{id}/messages?after={sequence}",
+					"purpose": "A cursor-based recovery path for offline devices. Use stable sequence cursors rather than offset pagination."
+				},
+				{
+					"signature": "ACK { conversationId, deliveredThrough, readThrough? }",
+					"purpose": "Persist monotonic per-device or per-user cursors. Delivery means a device acknowledged receipt, not simply that a socket write succeeded."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Message",
+					"fields": "conversationId, sequence, messageId, senderId, clientMessageId, body, createdAt",
+					"notes": "Partition by conversation plus a bounded time bucket where necessary. Uniqueness on sender/clientMessageId prevents duplicate sends."
+				},
+				{
+					"entity": "Membership",
+					"fields": "conversationId, userId, joinedAt, leftAt, role",
+					"notes": "Enforce access on writes and history reads; removing a member must have defined effects on queued delivery."
+				},
+				{
+					"entity": "DeviceCursor",
+					"fields": "userId, deviceId, conversationId, deliveredThrough, readThrough",
+					"notes": "Durable recovery cursors are distinct from a short-lived presence map of user/device to gateway."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Sender[Sender device] -->|WebSocket| Gateway[Connection gateway]\n Gateway --> Writer[Conversation writer]\n Writer -->|commit message and outbox| Store[(Message store)]\n Store --> Relay[Outbox relay]\n Relay --> Delivery[Delivery workers]\n Presence[(Device presence)] --> Delivery\n Delivery --> Receiver[Recipient gateway and device]\n Receiver -->|receipt| Cursors[(Delivery cursors)]\n Receiver -->|reconnect sync| Store",
+				"flows": [
+					{
+						"name": "Send and deliver",
+						"steps": [
+							"Authenticate the sender and check conversation membership; select the conversation's writer or ordered partition.",
+							"Assign a sequence and persist the message plus an outbox event atomically. Deduplicate retries using clientMessageId.",
+							"Acknowledge accepted status to the sender only after the durability requirement is met. Publish the committed event to delivery workers.",
+							"Look up online devices, forward to their gateways, and record acknowledgments. A missing socket triggers later sync, not message loss."
+						]
+					},
+					{
+						"name": "Reconnect and recover",
+						"steps": [
+							"Reconnect with backoff and register a new presence lease with a fencing generation so old connections cannot overwrite it.",
+							"Read the last durable cursor and fetch subsequent conversation messages, paginating in sequence order.",
+							"Merge live and historical delivery by message ID, deduplicate, and buffer or request missing sequence gaps.",
+							"Advance delivered/read cursors monotonically. Multi-device read receipts need a defined aggregation rule, such as the maximum observed read position."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Ordering scope",
+					"choice": "Order within each conversation through a single logical writer or partition.",
+					"tradeOff": "This avoids global coordination, but a huge group becomes a hot partition. Large channels need a separate fan-out and ordering strategy."
+				},
+				{
+					"topic": "Delivery guarantee",
+					"choice": "Use at-least-once delivery with deduplication and durable recovery cursors.",
+					"tradeOff": "An acknowledgment can be lost, so retries may duplicate transport events. Exactly-once display is an application effect, not a WebSocket guarantee."
+				},
+				{
+					"topic": "Presence",
+					"choice": "Keep online presence in an expiring, approximate connection registry.",
+					"tradeOff": "Presence can be stale during failures. It should optimize routing, never decide whether a message deserves durable storage."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A gateway crashes after accepting a socket send.",
+					"handling": "The client retries with the same message ID; persistence deduplicates. Messages acknowledged only in gateway memory were never durably accepted."
+				},
+				{
+					"scenario": "The store commits but event publication fails.",
+					"handling": "Use an outbox or transactional log and replay unpublished events. A separate database write followed by best-effort publish creates a loss window."
+				},
+				{
+					"scenario": "A zone outage causes a million clients to reconnect.",
+					"handling": "Jitter reconnects, rate-limit sync, paginate history, and reserve connection capacity. Monitor delivery lag, unacknowledged age, persistence errors, and sequence gaps."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Is a successful socket write proof that the recipient received a message?",
+					"answer": "No. The bytes may only have reached a local buffer or an intermediary before the connection failed. A recipient acknowledgment establishes device delivery, while a durable message log and recovery cursor ensure eventual recovery after reconnect."
+				},
+				{
+					"question": "How do you prevent a retry from creating a second message?",
+					"answer": "The client retains a stable clientMessageId across retries and the server enforces a uniqueness constraint in the same durable write path. Return the original result for an identical retry instead of assigning a new conversation sequence."
+				},
+				{
+					"question": "Why not use timestamps alone to order messages?",
+					"answer": "Clock skew and equal timestamps make them insufficient for a strict conversation order. A per-conversation sequence or ordered log gives a stable cursor; timestamps can remain useful display metadata without being the authoritative ordering key."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design WhatsApp",
+					"author": "Hello Interview / Stefan Mai",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/whatsapp",
+					"why": "Primary walkthrough of live connections, durable messages, and delivery architecture."
+				},
+				{
+					"kind": "article",
+					"title": "Redis Streams",
+					"author": "Redis documentation",
+					"url": "https://redis.io/docs/latest/develop/data-types/streams/",
+					"why": "Explore ordered append-only streams, consumer groups, pending entries, and recovery. Durability still depends on deployment settings."
+				},
+				{
+					"kind": "video",
+					"title": "System Design Interview: Design WhatsApp",
+					"author": "Hello Interview / Stefan Mai",
+					"url": "https://www.youtube.com/watch?v=cr6p0n0N-VA",
+					"why": "Full interview walkthrough; focus on the distinctions between persistence, routing, and receipt state."
+				}
+			]
+		},
+		"design-notification-system": {
+			"summary": "Design a multi-channel notification service for email, push, and SMS. Accepting a notification is different from a provider accepting it, and neither guarantees a person has read it. The design must combine durable intent, preferences, rate controls, retries, and provider feedback without sending the same campaign repeatedly.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Durable queues, delayed jobs, and exponential backoff",
+				"Idempotency, transactional outbox, and provider callbacks"
+			],
+			"requirements": {
+				"functional": [
+					"Accept transactional and bulk notification requests with a template and recipient list.",
+					"Apply channel preferences, consent, quiet hours, and per-recipient frequency limits.",
+					"Track delivery attempts, provider responses, and terminal failure or suppression states."
+				],
+				"nonFunctional": [
+					"Illustrative target: urgent notifications enter a provider request within five seconds when the provider is healthy.",
+					"Do not lose an acknowledged notification intent under the chosen storage failure model.",
+					"Isolate urgent transactional work from bulk campaigns and slow providers."
+				],
+				"outOfScope": [
+					"Guaranteeing that a recipient opens an email or sees a push notification.",
+					"Building an SMTP server or bypassing provider limits and consent requirements."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"100 million recipient-channel deliveries per day, with a 10x burst factor.",
+					"A provider allows 2,000 sends/s and a campaign targets 1 million recipients on that provider."
+				],
+				"estimates": [
+					{
+						"label": "Worker throughput",
+						"calculation": "100,000,000 / 86,400 = 1,157 sends/s average, approximately 11,574/s peak.",
+						"implication": "Shard workers by provider/channel and enforce provider quotas. Queue age matters more than the number of active workers."
+					},
+					{
+						"label": "Campaign drain time",
+						"calculation": "1,000,000 / 2,000 = 500 seconds minimum, excluding retries and competing traffic.",
+						"implication": "Do not promise instant campaign delivery. Allocate reserved capacity to urgent traffic and provide a realistic completion window."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "POST /notifications { eventId, recipients, templateId, channels, expiresAt }",
+					"purpose": "Use a tenant-scoped idempotency key, validate template variables, persist the intent, and return 202 with a status URL."
+				},
+				{
+					"signature": "GET /notifications/{id}",
+					"purpose": "Report accepted, queued, suppressed, provider-accepted, delivered-if-reported, or failed. Do not label all accepted sends as delivered."
+				},
+				{
+					"signature": "POST /provider-events/{provider}",
+					"purpose": "Authenticate callbacks, deduplicate event IDs, and apply state transitions safely when callbacks arrive out of order."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "NotificationIntent",
+					"fields": "id, tenantId, eventId, templateVersion, priority, expiresAt",
+					"notes": "Persist immutable template/version references and an outbox entry together so retries do not change message content unexpectedly."
+				},
+				{
+					"entity": "Delivery",
+					"fields": "notificationId, recipientId, channel, status, nextAttemptAt, providerMessageId",
+					"notes": "Unique per logical recipient/channel send. Keep attempt history separate from final logical state."
+				},
+				{
+					"entity": "Preference",
+					"fields": "recipientId, channelConsent, quietHours, locale, version",
+					"notes": "Recheck consent at dispatch for queued campaigns; the exact exemption rules for transactional messages depend on policy and applicable law."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Producer[Product service] --> Intake[Notification API]\n Intake --> Store[(Intent and outbox)]\n Store --> Planner[Preference and template workers]\n Planner --> Urgent[Urgent queue]\n Planner --> Bulk[Bulk queue]\n Urgent --> Sender[Quota-limited channel workers]\n Bulk --> Sender\n Sender --> Provider[Email SMS or push provider]\n Provider --> Callbacks[Verified callbacks]\n Callbacks --> Status[(Delivery state)]",
+				"flows": [
+					{
+						"name": "Accept and dispatch",
+						"steps": [
+							"Validate the request and persist an idempotent intent plus outbox entry before returning 202.",
+							"Expand recipients in batches, apply preferences and suppression rules, and create unique recipient/channel delivery records.",
+							"Queue by priority and provider; enforce expiry and recheck consent when work reaches the head of the queue.",
+							"Render a versioned template, consume provider quota, and send with a stable provider idempotency key where supported. Record the provider response."
+						]
+					},
+					{
+						"name": "Retry and reconcile",
+						"steps": [
+							"Classify temporary errors, permanent address/token errors, and ambiguous timeouts rather than retrying all failures.",
+							"Schedule bounded exponential backoff with jitter, respect Retry-After, and stop after expiry or an attempt budget.",
+							"For ambiguous results, query provider status when possible. If the provider offers no deduplication or lookup, acknowledge the duplicate-send risk.",
+							"Deduplicate verified callbacks, prevent state regression, and send exhausted failures to a dead-letter workflow for inspection and controlled replay."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Urgent versus bulk",
+					"choice": "Use separate queues and reserved dispatch capacity for urgent transactional traffic.",
+					"tradeOff": "More queues add operational work, but one giant campaign should not delay security alerts or password resets."
+				},
+				{
+					"topic": "At-least-once dispatch",
+					"choice": "Persist intent and deduplicate at each owned boundary; pass idempotency keys to providers when supported.",
+					"tradeOff": "An external send plus local database commit is not one transaction. Universal exactly-once delivery cannot be promised across arbitrary providers."
+				},
+				{
+					"topic": "Provider failover",
+					"choice": "Fail over only after classifying the prior attempt and checking duplicate risk.",
+					"tradeOff": "Switching providers on an ambiguous timeout may send twice. Faster recovery trades off against duplicate suppression and cost."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A provider returns throttling errors for several minutes.",
+					"handling": "Honor its retry guidance, reduce dispatch concurrency, preserve urgent capacity, and monitor oldest queue age instead of repeatedly hammering the provider."
+				},
+				{
+					"scenario": "A malformed template fails every recipient in a campaign.",
+					"handling": "Validate templates and test recipients before fan-out, stop poison jobs, quarantine the template version, and avoid endless retries."
+				},
+				{
+					"scenario": "A callback arrives before the send response or arrives twice.",
+					"handling": "Use provider IDs and event deduplication, store out-of-order observations, and reconcile monotonic logical state. Track failures, suppression rates, duplicates, and callback lag."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Does HTTP 202 mean the user received a notification?",
+					"answer": "No. It means the service accepted responsibility for the intent under its contract. Provider acceptance, device delivery, and user engagement are separate observations; expose those distinctions rather than collapsing them into one success flag."
+				},
+				{
+					"question": "Why can a retry after a timeout send the same SMS twice?",
+					"answer": "The provider might have accepted the first request before the response was lost. A second request without the same provider-supported idempotency key creates a second send; a local unique row alone cannot roll back an external side effect."
+				},
+				{
+					"question": "Where should quiet hours and consent be checked?",
+					"answer": "Use them during planning, then recheck relevant current preferences at dispatch because campaigns may wait in a queue while consent changes. Preserve a clear policy for urgent transactional messages and store why each delivery was sent or suppressed."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design Notification Services",
+					"author": "GeeksforGeeks",
+					"url": "https://www.geeksforgeeks.org/system-design/design-notification-services-system-design/",
+					"why": "Primary notification-service exercise with channel handlers, prioritization, and bulk delivery."
+				},
+				{
+					"kind": "article",
+					"title": "How a Typical Push Notification System Works",
+					"author": "ByteByteGo",
+					"url": "https://bytebytego.com/guides/how-does-a-typical-push-notification-system-work/",
+					"why": "Visual companion for the push channel and the boundary between your service and a delivery provider."
+				},
+				{
+					"kind": "video",
+					"title": "Kafka Deep Dive",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=DU8o-OTeoCc",
+					"why": "Focused companion on the durable messaging backbone, consumer recovery, and delivery semantics; not a full notification-system walkthrough."
+				}
+			]
+		},
+		"design-pub-sub-messaging-platform": {
+			"summary": "Design a durable partitioned event log with independent consumer groups. Producers append events; consumers advance their own offsets and can replay retained history. Ordering is per partition, and end-to-end correctness depends on how consumer output is committed, not merely on a broker claiming exactly-once support.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Append-only logs, replication, and leader epochs",
+				"Partitions, offsets, consumer groups, and idempotent sinks"
+			],
+			"requirements": {
+				"functional": [
+					"Create topics and append keyed events with acknowledgment options.",
+					"Let independent consumer groups subscribe, checkpoint, and replay within retention.",
+					"Preserve order within a partition and recover from broker or consumer failures."
+				],
+				"nonFunctional": [
+					"Illustrative target: sustain 100,000 1-KB events/s with batching.",
+					"Define durability against a stated number of broker failures before acknowledging writes.",
+					"Scale consumers without losing partition ownership or silently skipping records."
+				],
+				"outOfScope": [
+					"A total order across every partition and topic.",
+					"Exactly-once arbitrary HTTP calls or database side effects without destination cooperation."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"100,000 events/s, 1 KB/event, and seven days of retention.",
+					"Replication factor three; assume no compression for a conservative payload estimate."
+				],
+				"estimates": [
+					{
+						"label": "Ingress",
+						"calculation": "100,000 x 1,000 B = 100 MB/s client ingress; two replica copies add roughly 200 MB/s of payload replication.",
+						"implication": "Budget consumer egress separately, batch writes, and benchmark broker disk and network throughput."
+					},
+					{
+						"label": "Retention",
+						"calculation": "100 MB/s x 86,400 x 7 = 60.48 TB raw; three copies = 181.44 TB before indexes and headroom.",
+						"implication": "Retention and replication multiply cost. Tiered storage and compression can help, but replay performance must still satisfy the recovery objective."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "produce(topic, key, payload, producerId, sequence)",
+					"purpose": "Route a key to a partition, append, and acknowledge at the requested durability level. Producer sequence metadata can deduplicate eligible retries."
+				},
+				{
+					"signature": "fetch(topic, partition, offset, maxBytes)",
+					"purpose": "Pull a bounded batch. Define behavior for an offset older than retention rather than silently inventing missing history."
+				},
+				{
+					"signature": "commit(groupId, partition, nextOffset, generation)",
+					"purpose": "Advance progress only for the current consumer-group generation; fence consumers that lost partition ownership."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "LogRecord",
+					"fields": "topic, partition, offset, key, timestamp, schemaId, payload",
+					"notes": "Offsets are partition-local positions. Event keys choose the ordering and load-distribution boundary."
+				},
+				{
+					"entity": "PartitionMetadata",
+					"fields": "leader, replicas, inSyncReplicas, epoch, retentionPolicy",
+					"notes": "Coordinate leader election and fence obsolete leaders. Durability depends on acknowledgment and minimum-replica configuration."
+				},
+				{
+					"entity": "ConsumerCheckpoint",
+					"fields": "groupId, partition, nextOffset, generation",
+					"notes": "Different groups replay independently. Commit semantics must align with the processing output's durability."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Producer[Producer with retries] --> Leader[Partition leader]\n Leader --> Log[(Segment log)]\n Leader --> Replica[(Follower replicas)]\n Metadata[Metadata quorum] -.-> Leader\n Leader --> GroupA[Consumer group A]\n Leader --> GroupB[Consumer group B]\n GroupA --> SinkA[(Idempotent output store)]\n GroupB --> SinkB[(Independent output store)]\n GroupA --> Offsets[(Group offsets)]",
+				"flows": [
+					{
+						"name": "Append durably",
+						"steps": [
+							"Resolve topic metadata, hash the event key to a partition, and send a batch to its current leader.",
+							"The leader appends records and replicates them. With all-in-sync acknowledgments, require the configured minimum in-sync replicas before success.",
+							"Return assigned offsets. If the response is lost, retry using supported producer identity and sequence numbers.",
+							"On leader change, refresh metadata and respect leader epochs; do not acknowledge writes from an obsolete leader."
+						]
+					},
+					{
+						"name": "Process and replay",
+						"steps": [
+							"A group coordinator assigns partitions to consumers; one group member normally processes a partition at a time.",
+							"Fetch from the committed nextOffset and process a bounded batch, preserving required order within each partition.",
+							"Commit output durably before advancing the offset for at-least-once processing; a crash between those steps causes replay.",
+							"Deduplicate effects in the sink or atomically store output and checkpoint where possible. On rebalance, fence old owners and resume from the last committed position."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Partition key",
+					"choice": "Key events by the entity whose order matters, such as account or conversation.",
+					"tradeOff": "Hot entities concentrate load. Adding partitions can remap keys, so strict ordering across repartitioning needs a migration plan."
+				},
+				{
+					"topic": "Pull consumers",
+					"choice": "Let consumers request batches and control their own pace.",
+					"tradeOff": "Pulling makes backpressure and replay explicit, but consumers must monitor lag and retention before slow processing turns into irreversible data loss."
+				},
+				{
+					"topic": "Exactly-once scope",
+					"choice": "Use supported transactions for compatible read-process-write pipelines and idempotent or transactional sinks elsewhere.",
+					"tradeOff": "Broker transactions do not make an unrelated email provider or HTTP endpoint transactional. The claim must name the boundaries it covers."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A consumer crashes after writing output but before committing its offset.",
+					"handling": "Expect replay and deduplicate by event identity or transactionally bind output and checkpoint. Committing before output instead risks data loss."
+				},
+				{
+					"scenario": "A slow consumer falls behind the retention window.",
+					"handling": "Alert on lag age relative to retention, scale processing or isolate poison events, and recover from an archive if available. Resetting offsets discards data and must be explicit."
+				},
+				{
+					"scenario": "Replication falls below the configured minimum.",
+					"handling": "Reject or pause durable writes rather than silently weakening the contract. Monitor in-sync replica count, under-replicated partitions, disk space, produce latency, and rebalance frequency."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why can adding consumers stop improving throughput?",
+					"answer": "Within one consumer group, useful parallelism is usually bounded by the partition count, and a hot partition still has one ordered processing lane. More idle consumers cannot split a partition's strict ordering requirement without changing the workload design."
+				},
+				{
+					"question": "When should the offset be committed relative to writing output?",
+					"answer": "Committing after durable output gives at-least-once processing because a crash may replay completed work. Commit output and offset atomically where supported, or deduplicate effects. Committing the offset first creates a crash window that loses output."
+				},
+				{
+					"question": "Does producer idempotence make sending a payment request exactly once?",
+					"answer": "No. Producer idempotence addresses eligible duplicate appends to the broker. A consumer can still replay and call a payment API again; the payment operation needs its own durable idempotency contract and reconciliation strategy."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Kafka Deep Dive",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.hellointerview.com/learn/system-design/deep-dives/kafka",
+					"why": "Primary explanation of partitions, consumer groups, replication, and interview trade-offs."
+				},
+				{
+					"kind": "article",
+					"title": "Kafka Message Delivery Guarantees",
+					"author": "Confluent documentation",
+					"url": "https://docs.confluent.io/kafka/design/delivery-semantics.html",
+					"why": "Precise producer, consumer, and exactly-once guarantees, including the role of external destinations."
+				},
+				{
+					"kind": "video",
+					"title": "Kafka Deep Dive",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=DU8o-OTeoCc",
+					"why": "Detailed walkthrough of the same log and delivery model used in this design."
+				}
+			]
+		},
+		"design-search-autocomplete": {
+			"summary": "Design a low-latency prefix-suggestion service with a separate indexing pipeline. Serving every keystroke from raw query logs is too expensive, so prepare top suggestions offline or incrementally and publish versioned indexes. Popularity, language, privacy, and freshness determine what belongs in the index; a trie alone does not solve those product decisions.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Tries, finite-state transducers, and prefix indexes",
+				"Top-k ranking, caching, and atomic index publication"
+			],
+			"requirements": {
+				"functional": [
+					"Return a small ranked list for a normalized prefix and locale.",
+					"Update popularity and freshness from permitted query events.",
+					"Filter unsafe or private suggestions and support removal from published results."
+				],
+				"nonFunctional": [
+					"Illustrative target: p99 suggestion responses below 100 ms including the service boundary.",
+					"Keep the serving path available while a new index is built.",
+					"Set an explicit freshness interval, such as hourly ranking updates with faster emergency suppression."
+				],
+				"outOfScope": [
+					"Full web crawling and ranked document search.",
+					"Personalized private-history suggestions in the shared public cache."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"100 million searches/day, averaging eight autocomplete requests per search before debouncing and caching.",
+					"100 million indexed prefixes with ten 8-byte suggestion IDs per prefix as a simplified upper-level estimate."
+				],
+				"estimates": [
+					{
+						"label": "Request rate",
+						"calculation": "100,000,000 x 8 / 86,400 = 9,259 requests/s average; 5x peak is about 46,300/s.",
+						"implication": "Short prefixes are especially hot. Debounce client requests, cache shared prefix/locale results, and drop stale client responses."
+					},
+					{
+						"label": "Top-k payload",
+						"calculation": "100,000,000 x 10 x 8 B = 8 GB of suggestion IDs alone.",
+						"implication": "Prefix structure, scores, text, locale duplication, and replicas add substantial memory. Avoid claiming the whole index fits in this payload-only estimate."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "GET /suggestions?prefix={text}&locale={locale}&limit=10",
+					"purpose": "Normalize Unicode and case consistently, validate length and locale, and bound limit. Return an index version and ranked text/IDs."
+				},
+				{
+					"signature": "POST /query-events { eventId, query, locale, occurredAt }",
+					"purpose": "Accept eligible anonymized signals with sampling and abuse controls; do not leak raw personal queries into public suggestions."
+				},
+				{
+					"signature": "DELETE /admin/suggestions/{id}",
+					"purpose": "Add a fast suppression rule and trigger index/cache updates. Restrict this endpoint to authorized moderation operations."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Suggestion",
+					"fields": "id, normalizedText, displayText, locale, score, policyState",
+					"notes": "Keep display text distinct from normalization. Limit low-frequency terms to reduce accidental exposure of private queries."
+				},
+				{
+					"entity": "PrefixIndex",
+					"fields": "locale, prefix, topSuggestionIds, indexVersion",
+					"notes": "Materialize bounded top-k results in a trie/FST or a search engine's completion index."
+				},
+				{
+					"entity": "IndexManifest",
+					"fields": "version, shardFiles, checksums, createdAt",
+					"notes": "A manifest becomes current only after all shards are available and validated; retain the previous version for rollback."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Client[Search client] --> API[Suggestion API]\n API --> Cache[(Prefix and locale cache)]\n API --> Index[(Serving trie or FST shards)]\n Events[Eligible query events] --> Aggregate[Aggregate and filter]\n Aggregate --> Builder[Top-k index builder]\n Builder --> Snapshots[(Versioned snapshots)]\n Snapshots -.->|atomic publish| Index\n Moderation[Suppression rules] -.-> API",
+				"flows": [
+					{
+						"name": "Serve a prefix",
+						"steps": [
+							"The client debounces typing and tags each request so a slower response for an older prefix cannot overwrite newer suggestions.",
+							"The API validates input and applies the same locale-aware normalization used by the index builder.",
+							"Look up a shared cache key containing prefix, locale, and index version; otherwise query the appropriate serving shard for bounded top-k candidates.",
+							"Apply current suppression rules and return suggestions. Private personalization, if added, must use a separate user-scoped layer."
+						]
+					},
+					{
+						"name": "Build and publish",
+						"steps": [
+							"Ingest eligible events, deduplicate, aggregate time-decayed popularity, and remove bot traffic and sensitive or prohibited strings.",
+							"Construct new index shards from a consistent input snapshot. Test representative prefixes, language behavior, and memory requirements.",
+							"Load and validate the new shards before atomically changing the serving manifest; never expose half an index.",
+							"Invalidate or version cache keys, monitor relevance and latency, and roll back the manifest if the new ranking or capacity is worse."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Precomputed top-k",
+					"choice": "Precompute a bounded candidate list for popular prefixes.",
+					"tradeOff": "This lowers read latency but consumes memory and makes ranking less fresh. On-demand search allows richer filtering but costs more CPU."
+				},
+				{
+					"topic": "Prefix versus typo tolerance",
+					"choice": "Start with exact prefix completion and add bounded fuzzy matching deliberately.",
+					"tradeOff": "Fuzzy expansion can explode candidate work, especially for short strings. Apply minimum lengths, expansion limits, and separate quality measurements."
+				},
+				{
+					"topic": "Freshness",
+					"choice": "Publish versioned batches with a small online overlay for newly trending or suppressed suggestions.",
+					"tradeOff": "The overlay improves freshness but complicates ranking and cache invalidation. Keep a clear conflict policy between offline scores and online changes."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "An index build fails halfway through.",
+					"handling": "Continue serving the previous complete manifest. Validate checksums and shard availability before publication, and alert on index age."
+				},
+				{
+					"scenario": "A short prefix concentrates most requests.",
+					"handling": "Replicate hot-prefix results in local caches and cap fuzzy work. Prefix-based partitioning alone may produce severe skew."
+				},
+				{
+					"scenario": "A sensitive query appears as a public suggestion.",
+					"handling": "Apply minimum-frequency and privacy filters, immediate suppression, and cache removal. Track stale response drops, empty-result rate, p99 latency, and moderation propagation time."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why can an autocomplete UI display results for the wrong prefix?",
+					"answer": "Network responses may arrive out of order. Tag requests with a generation or compare the returned prefix against current input, and ignore older responses; server latency improvements alone do not prevent this client-side race."
+				},
+				{
+					"question": "Why is sharding simply by first character risky?",
+					"answer": "Traffic and vocabulary are highly uneven across initial characters and languages. Measure shard load, use more flexible partitions, and replicate hot short-prefix results so one shard does not receive most requests."
+				},
+				{
+					"question": "How do you remove a suggestion faster than the next hourly rebuild?",
+					"answer": "Maintain an authenticated suppression layer checked on the serving path, propagate it promptly, and invalidate matching cache entries. Rebuild the durable index afterward so the removal survives a restart or version change."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Search Autocomplete High-Level Design",
+					"author": "GeeksforGeeks",
+					"url": "https://www.geeksforgeeks.org/system-design/googles-search-autocomplete-high-level-designhld/",
+					"why": "Primary exercise for requirements, prefix-serving architecture, and capacity planning."
+				},
+				{
+					"kind": "article",
+					"title": "Completion and context suggesters",
+					"author": "Elastic documentation",
+					"url": "https://www.elastic.co/docs/reference/elasticsearch/rest-apis/search-suggesters",
+					"why": "Concrete implementation reference for completion indexes, fuzzy matching, and context filtering."
+				},
+				{
+					"kind": "video",
+					"title": "Elasticsearch Deep Dive",
+					"author": "Hello Interview / Stefan Mai",
+					"url": "https://www.youtube.com/watch?v=PuZvF2EyfBM",
+					"why": "Companion on search-index architecture and serving trade-offs; use the completion-suggester documentation for autocomplete-specific behavior."
+				}
+			]
+		},
+		"design-news-feed": {
+			"summary": "Design a feed of posts from accounts a user follows. Separate durable post ownership from a disposable materialized timeline of post IDs. A hybrid fan-out strategy handles ordinary authors efficiently while avoiding millions of synchronous writes for celebrity accounts; final reads still enforce visibility and deletion rules.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Fan-out on write versus fan-out on read",
+				"Cursor pagination, event queues, and materialized views"
+			],
+			"requirements": {
+				"functional": [
+					"Publish posts and follow or unfollow authors.",
+					"Read a paginated feed with recent eligible content.",
+					"Honor post deletion, blocks, and audience changes even when timeline entries are stale."
+				],
+				"nonFunctional": [
+					"Illustrative target: p99 feed reads below 300 ms inside a region.",
+					"Allow bounded feed freshness lag after publication; do not relax access checks.",
+					"Keep high-follower authors from overwhelming fan-out workers."
+				],
+				"outOfScope": [
+					"A full ML relevance-ranking system; begin with recency or a simple score.",
+					"Media transcoding and advertisement auctions."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"20 million daily active authors publish two posts/day with 200 average eligible followers.",
+					"Cache the newest 500 timeline references for 20 million users at an assumed 16 bytes per reference."
+				],
+				"estimates": [
+					{
+						"label": "Fan-out work",
+						"calculation": "40,000,000 / 86,400 = 463 posts/s; x 200 followers = 92,593 timeline inserts/s average.",
+						"implication": "A 10x peak approaches 926,000 inserts/s before celebrity skew. Queue and batch work rather than writing every follower timeline in the publish request."
+					},
+					{
+						"label": "Timeline payload",
+						"calculation": "20,000,000 x 500 x 16 B = 160 GB raw timeline references.",
+						"implication": "Cache IDs rather than full post bodies; object overhead, scores, and replicas increase actual memory. Inactive users may be reconstructed on demand."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "POST /posts { clientPostId, body, audience }",
+					"purpose": "Persist a post and outbox event idempotently, then acknowledge without waiting for all follower timelines."
+				},
+				{
+					"signature": "GET /feed?cursor={opaqueCursor}&limit=30",
+					"purpose": "Return hydrated eligible posts and a stable next cursor. Bound page size and deduplicate candidates."
+				},
+				{
+					"signature": "PUT /following/{authorId} | DELETE /following/{authorId}",
+					"purpose": "Change the graph idempotently and trigger bounded backfill or cleanup as needed. Enforce the current relationship during reads."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Post",
+					"fields": "postId, authorId, createdAt, bodyRef, audience, deletedAt",
+					"notes": "The post store is authoritative. A timeline entry never overrides a deletion or audience restriction."
+				},
+				{
+					"entity": "FollowEdge",
+					"fields": "followerId, authorId, createdAt, state",
+					"notes": "Maintain indexes for both an author's followers and a viewer's followed authors; they serve different paths."
+				},
+				{
+					"entity": "TimelineEntry",
+					"fields": "viewerId, sortKey, postId, sourceAuthor",
+					"notes": "A rebuildable materialized view with idempotent insertion. Cursor ordering needs a tie-breaker such as postId."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Author[Author] --> Publish[Post API]\n Publish --> Posts[(Posts and outbox)]\n Posts --> Queue[Fan-out queue]\n Graph[(Follow graph)] --> Workers[Fan-out workers]\n Queue --> Workers\n Workers --> Timeline[(Cached timelines)]\n Viewer[Viewer] --> Feed[Feed service]\n Feed --> Timeline\n Feed -->|merge high-fanout authors| Posts\n Feed -->|visibility checks| Graph",
+				"flows": [
+					{
+						"name": "Publish a post",
+						"steps": [
+							"Persist the post and outbox event in one transaction, then acknowledge the author.",
+							"For ordinary authors, paginate eligible followers and enqueue bounded fan-out batches.",
+							"Workers insert post IDs idempotently into active users' timelines and trim to retention limits.",
+							"For high-fanout authors, retain recent posts in an author stream for read-time merging instead of pushing to every follower."
+						]
+					},
+					{
+						"name": "Assemble a feed",
+						"steps": [
+							"Load the viewer's materialized timeline and recent posts from followed high-fanout authors.",
+							"Merge and deduplicate candidates with a stable sort key or a snapshot ranking context.",
+							"Batch-hydrate posts and enforce current deletion, block, and audience rules. Fetch extra candidates if filtering empties the page.",
+							"Return an opaque cursor tied to the ordering policy. A changing ranking score needs snapshot or session semantics to reduce repeats and skipped items."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Hybrid fan-out",
+					"choice": "Push ordinary authors and pull very high-fanout authors during reads.",
+					"tradeOff": "There is no universal follower-count threshold. Choose it using posting rate, follower activity, read frequency, and measured read/insert costs."
+				},
+				{
+					"topic": "Timeline references",
+					"choice": "Materialize IDs and scores, then batch-hydrate post bodies.",
+					"tradeOff": "This avoids copying large bodies and simplifies edits, but adds a hydration dependency that needs caching and bounded partial-failure behavior."
+				},
+				{
+					"topic": "Eventual freshness",
+					"choice": "Allow asynchronous timeline updates while treating privacy checks as authoritative at read time.",
+					"tradeOff": "A stale feed can omit a recent post, but it must not expose a now-private one. These are different consistency requirements."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A celebrity post produces millions of fan-out tasks.",
+					"handling": "Route high-fanout authors to the pull path, batch work, and apply per-author fairness so ordinary posts continue to propagate."
+				},
+				{
+					"scenario": "Fan-out events are replayed after a worker crash.",
+					"handling": "Use unique viewer/post keys or set-like insertion. Replays must not show duplicate posts or consume all timeline slots."
+				},
+				{
+					"scenario": "A deleted post remains in cached timelines.",
+					"handling": "Filter against authoritative post state and propagate tombstones. Monitor fan-out lag, feed p99, hydration failures, cache misses, and visibility-filter rejects."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why is fan-out on write expensive for a celebrity?",
+					"answer": "Each post creates work proportional to the eligible follower count, including many inactive users who may never read it. A pull or hybrid path shifts that work to actual feed reads, at the cost of more read-time merging and caching."
+				},
+				{
+					"question": "Can a cached timeline be trusted to enforce post privacy?",
+					"answer": "No. Audience changes, blocks, unfollows, and deletion can happen after fan-out. Revalidate visibility during hydration or use a comparably strong access-control mechanism; asynchronous cleanup alone creates a data-exposure window."
+				},
+				{
+					"question": "Why is offset pagination unstable for a changing feed?",
+					"answer": "New inserts and ranking changes shift row positions, causing repeated or skipped posts between pages. Use an opaque cursor with stable tie-breakers and, for changing rankings, a snapshot or session context with explicit freshness behavior."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design Facebook's News Feed",
+					"author": "Hello Interview / Stefan Mai",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-news-feed",
+					"why": "Primary walkthrough of the graph, fan-out choices, feed storage, and read path."
+				},
+				{
+					"kind": "article",
+					"title": "Key eviction",
+					"author": "Redis documentation",
+					"url": "https://redis.io/docs/latest/develop/reference/eviction/",
+					"why": "Understand the memory and eviction behavior of a rebuildable timeline cache."
+				},
+				{
+					"kind": "video",
+					"title": "System Design Interview: Design FB News Feed",
+					"author": "Hello Interview / Stefan Mai",
+					"url": "https://www.youtube.com/watch?v=Qj4-GruzyDU",
+					"why": "Full expert-led feed design, including when to move work from writes to reads."
+				}
+			]
+		},
+		"design-recommendation-system": {
+			"summary": "Design a recommendation pipeline using video discovery as a concrete example. Separate candidate retrieval, ranking, and re-ranking so expensive models see a manageable candidate set. The system must optimize a stated user outcome, prevent training-data leakage, serve within a latency budget, and remain useful when models or features are unavailable.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Candidate retrieval, embeddings, ranking, and offline evaluation",
+				"Feature pipelines, point-in-time joins, and model serving"
+			],
+			"requirements": {
+				"functional": [
+					"Return a ranked set of eligible videos for a user and context.",
+					"Record impressions and subsequent engagement with attribution IDs.",
+					"Train, evaluate, deploy, and roll back versioned recommendation models."
+				],
+				"nonFunctional": [
+					"Illustrative target: p99 recommendation responses below 200 ms for the online service.",
+					"Enforce content eligibility, user controls, and privacy rules independently of model scores.",
+					"Maintain a useful fallback for new users, sparse data, or serving outages."
+				],
+				"outOfScope": [
+					"Choosing a universal optimal neural-network architecture.",
+					"Video upload, transcoding, and playback, which are covered in the streaming guide."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"100 million daily active users request 20 recommendation lists/day.",
+					"Each request ranks 500 retrieved candidates; an item index holds 100 million 256-dimensional float32 embeddings."
+				],
+				"estimates": [
+					{
+						"label": "Online ranking load",
+						"calculation": "2,000,000,000 / 86,400 = 23,148 requests/s; x 500 candidates = 11.57 million candidate scores/s average.",
+						"implication": "Use cheap candidate generation, batching, model optimization, and a staged latency budget. Measure peak load and hardware-specific inference throughput."
+					},
+					{
+						"label": "Embedding payload",
+						"calculation": "100,000,000 x 256 x 4 B = 102.4 GB raw vectors.",
+						"implication": "ANN graph/index overhead and replicas add memory. Quantization and sharding trade accuracy, latency, and operational complexity."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "GET /recommendations?context={surface}&cursor={cursor}",
+					"purpose": "Derive identity from authentication, fetch bounded candidates, and return item IDs plus impression attribution tokens and model version."
+				},
+				{
+					"signature": "POST /events { eventId, impressionId, itemId, action, occurredAt }",
+					"purpose": "Record exposures as well as clicks/watch outcomes, deduplicate retries, and validate event timing and consent."
+				},
+				{
+					"signature": "POST /admin/models/{version}/rollout { allocation }",
+					"purpose": "Gate deployment on offline checks and controlled experiments, with an immediate rollback path."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Interaction",
+					"fields": "eventId, impressionId, userId, itemId, action, eventTime, modelVersion",
+					"notes": "Exposure logging is essential: no click without a recorded impression is not a trustworthy negative training example."
+				},
+				{
+					"entity": "FeatureSnapshot",
+					"fields": "entityId, featureVersion, validAt, values",
+					"notes": "Use point-in-time-correct features for training. A future engagement value must not leak into a past prediction example."
+				},
+				{
+					"entity": "ModelBundle",
+					"fields": "version, featureSchema, retrievalIndexVersion, artifacts, metrics",
+					"notes": "Deploy compatible model, feature, and index versions together; retain artifacts for rollback and reproducibility."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n User[User request] --> Retrieval[Candidate generation]\n Vectors[(Embedding index)] --> Retrieval\n Popular[(Fresh and popular candidates)] --> Retrieval\n Retrieval --> Ranker[Ranking model]\n Features[(Online features)] --> Ranker\n Ranker --> Policy[Eligibility diversity and re-ranking]\n Policy --> User\n User --> Events[Impression and engagement log]\n Events --> Training[Point-in-time training and evaluation]\n Training -.-> Ranker\n Training -.-> Vectors",
+				"flows": [
+					{
+						"name": "Recommend online",
+						"steps": [
+							"Fetch user context and run several bounded retrieval sources, such as embeddings, subscriptions, and fresh/popular items.",
+							"Deduplicate candidates, exclude ineligible items early, and batch-fetch version-compatible features.",
+							"Score candidates within the remaining deadline, then apply safety, diversity, repetition, and business constraints in a separate re-ranking stage.",
+							"Return the selected list with attribution IDs. Fall back to safe cached or popularity-based results if a critical online dependency is unavailable."
+						]
+					},
+					{
+						"name": "Train and improve",
+						"steps": [
+							"Collect impressions and delayed outcomes, respecting consent and deletion rules; distinguish event time from ingestion time.",
+							"Build labels and point-in-time features, split evaluation data chronologically, and check for popularity and position biases.",
+							"Compare against simple baselines using offline ranking metrics and product guardrails, then run a controlled online experiment.",
+							"Deploy versioned bundles gradually. Monitor engagement quality, latency, diversity, feature drift, and feedback loops before expanding traffic."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Objective",
+					"choice": "Choose a measurable user outcome such as satisfying watch time or long-term engagement, with quality and safety guardrails.",
+					"tradeOff": "Maximizing clicks alone can reward clickbait; watch time alone can favor long content. A model metric is not automatically a product objective."
+				},
+				{
+					"topic": "Retrieval and ranking",
+					"choice": "Use cheap retrieval to reduce millions of items to hundreds before expensive ranking.",
+					"tradeOff": "The ranker cannot recover relevant items retrieval omitted. Evaluate retrieval recall separately from ranking quality."
+				},
+				{
+					"topic": "Freshness and cold start",
+					"choice": "Blend batch features with fresh interaction signals and a content/popularity fallback.",
+					"tradeOff": "Fresh signals improve adaptation but increase serving dependencies and feedback-loop risk. New users and items need explicit exploration policies."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "The online feature store is slow or missing values.",
+					"handling": "Use bounded timeouts and trained default/missing-value behavior, then a safe fallback. Randomly substituting values can invalidate model calibration."
+				},
+				{
+					"scenario": "A new model improves offline accuracy but harms users.",
+					"handling": "Use canary experiments, guardrails, and rollback; investigate data leakage, exposure bias, latency, and objective mismatch."
+				},
+				{
+					"scenario": "Training and serving use incompatible feature definitions.",
+					"handling": "Version schemas and transformations, validate bundle compatibility, and monitor missing-feature rate, drift, serving latency, coverage, and diversity."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why log impressions rather than only clicks?",
+					"answer": "Without knowing what a user was shown, the system cannot distinguish ignored items from items never exposed. Impression IDs also connect delayed outcomes to the recommendation and model version that produced them, enabling more defensible evaluation."
+				},
+				{
+					"question": "What is point-in-time leakage?",
+					"answer": "It occurs when a training example uses information that was unavailable at the moment of prediction, such as a later popularity total. Offline performance becomes unrealistically strong; time-aware joins and chronological validation help detect and prevent it."
+				},
+				{
+					"question": "Can a better ranker fix poor candidate retrieval?",
+					"answer": "Only within the candidates it receives. If relevant items never enter the candidate set, no downstream score can select them. Measure retrieval recall, mix complementary sources, and evaluate the entire pipeline rather than one model in isolation."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Video Recommendation System Design",
+					"author": "Hello Interview",
+					"url": "https://www.hellointerview.com/learn/ml-system-design/problem-breakdowns/video-recommendations",
+					"why": "Primary ML-system walkthrough from objective framing through retrieval, ranking, and evaluation."
+				},
+				{
+					"kind": "article",
+					"title": "Recommendation systems overview",
+					"author": "Google Machine Learning",
+					"url": "https://developers.google.com/machine-learning/recommendation/overview/types",
+					"why": "Foundational reference for candidate generation, scoring, and re-ranking."
+				},
+				{
+					"kind": "article",
+					"title": "TensorFlow Recommenders",
+					"author": "TensorFlow / Google",
+					"url": "https://www.tensorflow.org/recommenders",
+					"why": "Official library, tutorials, and introduction video for building and evaluating retrieval and ranking models."
+				},
+				{
+					"kind": "video",
+					"title": "Introduction to TensorFlow Recommenders",
+					"author": "TensorFlow / Google",
+					"url": "https://www.youtube.com/watch?v=jz0-satrmrA",
+					"why": "Official introduction to building recommendation models; connect the retrieval and ranking implementation to the system-level choices in this guide."
+				}
+			]
+		},
+		"design-analytics-event-pipeline": {
+			"summary": "Design an event ingestion and aggregation pipeline using ad-click analytics as the worked example. Keep a durable raw log so aggregates can be rebuilt. Define event-time windows, late-arrival rules, deduplication scope, and sink semantics before promising accurate counts; fast ingestion alone does not make the resulting dashboard correct.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Durable logs, stream processing, and checkpoint recovery",
+				"Event time, processing time, watermarks, and idempotent upserts"
+			],
+			"requirements": {
+				"functional": [
+					"Ingest validated events with stable IDs and schema versions.",
+					"Aggregate counts and dimensions over defined time windows.",
+					"Query recent aggregates and replay raw events for corrections or new computations."
+				],
+				"nonFunctional": [
+					"Illustrative target: ordinary events appear in provisional aggregates within one minute.",
+					"Do not lose acknowledged ingestion within the agreed log durability model.",
+					"Bound duplicate counting and specify how late or malformed events are handled."
+				],
+				"outOfScope": [
+					"Billing-grade final financial settlement from untrusted client click events.",
+					"An arbitrary SQL warehouse and a complete fraud-detection product."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"500,000 events/s at 300 bytes/event before compression.",
+					"Keep one day of event IDs for deduplication only if required; a 16-byte ID is a payload lower bound."
+				],
+				"estimates": [
+					{
+						"label": "Ingestion and retention",
+						"calculation": "500,000 x 300 B = 150 MB/s; x 86,400 = 12.96 TB/day raw.",
+						"implication": "Partition ingestion, compress batches, and archive to object storage with lifecycle rules. Replication multiplies hot-log capacity."
+					},
+					{
+						"label": "Deduplication state",
+						"calculation": "500,000 x 86,400 x 16 B = 691.2 GB of IDs for one day, excluding state-store overhead.",
+						"implication": "Deduplication is not free. Choose a justified retention horizon, partition state, and define what happens to duplicates outside that horizon."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "POST /events:batch { schemaVersion, events[] }",
+					"purpose": "Validate sizes, identity, event IDs, and timestamp bounds; acknowledge only after durable append and return per-event validation results where needed."
+				},
+				{
+					"signature": "GET /metrics?key={id}&from={time}&to={time}&window=1m",
+					"purpose": "Read bounded aggregate ranges and expose freshness/finalization metadata, not just a count with no time semantics."
+				},
+				{
+					"signature": "POST /admin/replays { sourceRange, pipelineVersion, outputVersion }",
+					"purpose": "Run a controlled backfill into a separate output version before replacing live aggregates."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Event",
+					"fields": "eventId, entityKey, eventTime, ingestTime, schemaVersion, dimensions",
+					"notes": "Treat client timestamps as untrusted input with validation bounds. Preserve the raw event for audit and reprocessing."
+				},
+				{
+					"entity": "WindowAggregate",
+					"fields": "entityKey, windowStart, metric, count, revision, finalizedAt",
+					"notes": "Use idempotent versioned upserts or transactional sink commits. Replaying increments blindly doubles totals."
+				},
+				{
+					"entity": "Checkpoint",
+					"fields": "pipelineVersion, sourceOffsets, keyedState, checkpointId",
+					"notes": "Offsets and operator state must recover consistently; sink coordination determines the final end-to-end guarantee."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Producers[Event producers] --> Intake[Batch ingestion and validation]\n Intake --> Log[(Partitioned durable log)]\n Log --> Archive[(Raw object archive)]\n Log --> Process[Deduplicate and event-time windows]\n Process --> Results[(Versioned aggregate store)]\n Process --> Late[Late or invalid event stream]\n Results --> Query[Metrics query API]\n Archive --> Replay[Isolated replay pipeline]\n Replay --> Results",
+				"flows": [
+					{
+						"name": "Ingest and aggregate",
+						"steps": [
+							"Validate schema and payload, assign an ingest timestamp, and preserve a caller-stable event ID across retries.",
+							"Append to a replicated log, acknowledge at the configured durability boundary, and archive immutable raw events asynchronously.",
+							"Partition processing by aggregation key, deduplicate within the declared horizon, and assign windows using event time.",
+							"Advance watermarks according to the observed delay policy and write provisional/revised aggregates with replay-safe sink semantics."
+						]
+					},
+					{
+						"name": "Handle late data and backfills",
+						"steps": [
+							"Route events behind the watermark according to allowed lateness: update a revision, send to a correction stream, or reject with an explicit policy.",
+							"Checkpoint source positions and processing state consistently so a restart does not combine new offsets with old counts.",
+							"Replay archived data into a versioned output namespace using the intended schema and pipeline version.",
+							"Compare totals and sample records before atomically switching query consumers to the corrected output; throttle backfills so live traffic remains healthy."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Event time",
+					"choice": "Use event time for business windows and watermarks to bound how long to wait.",
+					"tradeOff": "A watermark is a progress assumption, not proof that no earlier event exists. Faster finalization trades off against late corrections."
+				},
+				{
+					"topic": "Hot aggregation keys",
+					"choice": "Use partial aggregates on salted subkeys and a second-stage merge for associative operations.",
+					"tradeOff": "This reduces skew but complicates deduplication and corrections. Non-associative metrics need a different merge strategy."
+				},
+				{
+					"topic": "Delivery semantics",
+					"choice": "Bind checkpoint recovery to transactional or idempotent output writes.",
+					"tradeOff": "Exactly-once processing inside a stream engine does not automatically make an external increment API exactly once."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A producer retries an entire batch after an ambiguous response.",
+					"handling": "Retain stable event IDs and deduplicate within the supported horizon. Random IDs on every retry defeat deduplication."
+				},
+				{
+					"scenario": "One partition is idle and prevents watermark progress.",
+					"handling": "Use deliberate idle-partition detection and lateness rules, while handling resumed old events as late data. Monitor event-time lag separately from CPU usage."
+				},
+				{
+					"scenario": "A schema change breaks consumers or a replay overwrites live data.",
+					"handling": "Check compatibility, quarantine poison records, version pipeline outputs, and isolate replays. Monitor checkpoint duration, sink lag, duplicate rate, late-event volume, and reconciliation differences."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "What does a watermark actually mean?",
+					"answer": "It expresses a processing system's assumption about how far event time has progressed, based on a lateness policy. It is not a guarantee that all earlier events have arrived; define allowed lateness and how corrections affect already published aggregates."
+				},
+				{
+					"question": "Why can replaying raw events double dashboard counts?",
+					"answer": "If the sink applies another increment for each replayed record, it repeats effects already committed before the failure or backfill. Use transactional checkpoints, idempotent event effects, or replace versioned window aggregates instead of blindly adding again."
+				},
+				{
+					"question": "How do you keep a multi-day backfill from delaying current analytics?",
+					"answer": "Separate replay compute and output versions, cap its source and sink bandwidth, and prioritize live processing. Validate the rebuilt dataset before switching readers; otherwise a backfill can both overload production and expose partially recomputed totals."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design an Ad Click Aggregator",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/ad-click-aggregator",
+					"why": "Primary worked example of ingestion, streaming aggregation, and query serving."
+				},
+				{
+					"kind": "article",
+					"title": "Timely Stream Processing",
+					"author": "Apache Flink documentation",
+					"url": "https://nightlies.apache.org/flink/flink-docs-stable/docs/concepts/time/",
+					"why": "Authoritative explanation of event time, watermarks, late events, and windows."
+				},
+				{
+					"kind": "video",
+					"title": "Design an Ad Click Aggregator",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=Zcv_899yqhI",
+					"why": "Full interview walkthrough of the analytics pipeline and its consistency trade-offs."
+				}
+			]
+		},
+		"design-ride-sharing-platform": {
+			"summary": "Design trip requests, nearby-driver search, and assignment for a ride-sharing service. Location updates are frequent and may be stale; trip ownership must be authoritative. Use the geospatial index to find candidates, then reserve a driver through a concurrency-safe dispatch state machine rather than assuming the nearest indexed driver is still free.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Geospatial cells, distance filtering, and location freshness",
+				"Leases, compare-and-set transitions, and idempotent commands"
+			],
+			"requirements": {
+				"functional": [
+					"Accept rider pickup/destination and return a quote and trip request.",
+					"Track available drivers, find eligible nearby candidates, and offer a trip.",
+					"Manage acceptance, arrival, pickup, completion, cancellation, and live trip location."
+				],
+				"nonFunctional": [
+					"Illustrative target: nearby-driver lookup below 200 ms; assignment completes within a bounded offer window.",
+					"Never assign a driver to conflicting active trips in the authoritative state.",
+					"Tolerate stale GPS, reconnects, and a failed dispatch worker without losing trip ownership."
+				],
+				"outOfScope": [
+					"A full routing engine, surge-pricing model, and payment processor.",
+					"A single globally ordered location log across all cities."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"2 million online drivers report location every four seconds.",
+					"10 million trip requests/day with a 5x peak and at most 200 broad-phase candidates per lookup."
+				],
+				"estimates": [
+					{
+						"label": "Location traffic",
+						"calculation": "2,000,000 / 4 = 500,000 location updates/s.",
+						"implication": "Partition geographically and keep latest positions in a fast expiring index. Persist sampled/history events separately from transaction-heavy trip state."
+					},
+					{
+						"label": "Matching traffic",
+						"calculation": "10,000,000 / 86,400 = 116 requests/s average; at 5x peak, 579/s x 200 = about 116,000 candidate checks/s.",
+						"implication": "GPS ingestion and assignment have very different throughput and consistency needs. Do not send every GPS update through the trip transaction database."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "PUT /drivers/me/location { lat, lon, sequence, observedAt }",
+					"purpose": "Authenticate the driver, reject older updates, validate coordinates, and refresh availability-location TTL."
+				},
+				{
+					"signature": "POST /trips { pickup, destination, quoteId, requestId }",
+					"purpose": "Create an idempotent trip request tied to an expiring quote; return a stable trip ID and initial state."
+				},
+				{
+					"signature": "POST /offers/{id}/accept { leaseVersion }",
+					"purpose": "Atomically verify an unexpired offer and reserve both the trip and driver. Reject stale or conflicting acceptance."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "DriverLocation",
+					"fields": "driverId, cell, lat, lon, sequence, observedAt, expiresAt",
+					"notes": "A best-effort candidate index. Expire stale positions and do not treat index presence as proof of current availability."
+				},
+				{
+					"entity": "Trip",
+					"fields": "tripId, riderId, driverId, state, stateVersion, quoteId",
+					"notes": "Use validated, idempotent transitions with a version check. The trip database owns assignment, not the GPS index."
+				},
+				{
+					"entity": "OfferLease",
+					"fields": "offerId, tripId, driverId, expiresAt, fencingVersion",
+					"notes": "An acceptance must match the current lease. Enforce one active reservation per driver and one assigned driver per trip in the authority."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Driver[Driver app] --> Location[Location ingestion]\n Location --> Geo[(Regional geospatial index)]\n Rider[Rider app] --> Trips[Trip API]\n Trips --> Dispatch[Dispatch workers]\n Geo --> Dispatch\n Dispatch -->|atomic reservation| State[(Trips drivers and leases)]\n Dispatch --> Offers[Offer delivery]\n Offers --> Driver\n Driver -->|accept lease version| Trips\n State --> Events[Trip events and live updates]\n Events --> Rider",
+				"flows": [
+					{
+						"name": "Find and reserve a driver",
+						"steps": [
+							"Create a trip idempotently, select the pickup region, and query nearby cells for candidates with fresh location timestamps.",
+							"Expand neighboring cells as needed, then refine by distance, route ETA, vehicle eligibility, and driver state. A cell match is only a coarse filter.",
+							"Create a bounded offer/reservation through an atomic state transition with an expiry and fencing version.",
+							"Accept only the current offer and transition the trip/driver together. Expired, duplicate, or late acceptances return the authoritative outcome."
+						]
+					},
+					{
+						"name": "Run the trip",
+						"steps": [
+							"Persist validated state transitions such as assigned, arrived, in_progress, and completed with a state version.",
+							"Deliver live location through a transient channel while retaining authoritative trip state independently.",
+							"On reconnect, read current trip state and resume events from a cursor; do not reconstruct ownership from mobile-client memory.",
+							"On completion or cancellation, release the driver in the authority and publish an outbox event for downstream billing and notifications."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Geographic partitioning",
+					"choice": "Partition location and dispatch primarily by city or region, with cell-based candidate lookup.",
+					"tradeOff": "Borders and dense hotspots need overlap queries and load-aware partitioning. A geographic cell ID is not a road-distance measurement."
+				},
+				{
+					"topic": "Offer policy",
+					"choice": "Start with a short sequential offer or tightly controlled reservation window.",
+					"tradeOff": "Broadcast offers reduce matching latency but create more contention and disappointed late acceptances; the authoritative reservation must still be singular."
+				},
+				{
+					"topic": "Consistency split",
+					"choice": "Allow approximate locations while making assignment transitions strongly coordinated within their ownership boundary.",
+					"tradeOff": "Treating every GPS update as strongly consistent is costly; treating assignment as eventually consistent can double-book a driver."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "Two workers select the same driver.",
+					"handling": "Both may see the same index entry, but only one conditional reservation should succeed. Retry matching after an authoritative conflict."
+				},
+				{
+					"scenario": "An old offer is accepted after its lease expired.",
+					"handling": "Check expiry and fencing version in the authoritative transaction, not just on the device. Never revive an obsolete lease."
+				},
+				{
+					"scenario": "A city becomes a location-update hotspot.",
+					"handling": "Split or replicate read indexes, throttle stale updates, and isolate regional queues. Monitor location age, match latency, lease conflicts, offer expiry, and trip-state divergence."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why is a geospatial cache insufficient to prevent double booking?",
+					"answer": "Multiple workers can read the same available-driver snapshot, and GPS/index updates may be delayed. A concurrency-safe reservation in an authoritative store must decide ownership; the spatial index only helps generate candidates."
+				},
+				{
+					"question": "What does a fencing version add beyond an expiry timestamp?",
+					"answer": "It identifies the current ownership generation, so a delayed worker or client cannot act on an old lease after a new one has been issued. The receiving authority must reject older versions for fencing to provide protection."
+				},
+				{
+					"question": "Can the nearest driver by straight-line distance always be the best match?",
+					"answer": "No. Road layout, traffic, bridges, direction, vehicle type, and pickup access can make another driver faster or eligible. Use cells and straight-line distance for candidate generation, then refine using routing and product constraints."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design Uber",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber",
+					"why": "Primary interview walkthrough for location tracking and driver-rider matching."
+				},
+				{
+					"kind": "article",
+					"title": "H3 Geospatial Indexing System",
+					"author": "H3 project",
+					"url": "https://h3geo.org/docs/core-library/overview/",
+					"why": "Technical reference for hierarchical geographic cells and their role in broad-phase lookup."
+				},
+				{
+					"kind": "video",
+					"title": "System Design Interview: Design Uber",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=lsKU38RKQSo",
+					"why": "Full matching and location design walkthrough; challenge the design with concurrent acceptance and stale positions."
+				}
+			]
+		},
+		"design-food-delivery-platform": {
+			"summary": "Design a local food-delivery workflow connecting customers, merchants, couriers, and payment providers. A restaurant marketplace differs from a warehouse-based service such as Gopuff, especially around merchant acceptance and inventory. Model the order as a durable state machine with explicit compensations rather than pretending all participants share one transaction.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Sagas, outbox delivery, and idempotent state transitions",
+				"Geospatial dispatch, payment authorization, and expiring reservations"
+			],
+			"requirements": {
+				"functional": [
+					"Browse nearby merchants and create an order from a price/menu snapshot.",
+					"Coordinate payment authorization, merchant acceptance, courier assignment, and delivery.",
+					"Track order status and handle rejection, cancellation, refund, and support intervention."
+				],
+				"nonFunctional": [
+					"Illustrative target: order submission below one second excluding external confirmation; later steps may be asynchronous.",
+					"Avoid duplicate charges, conflicting courier assignments, and invalid order transitions.",
+					"Keep an auditable recovery path when a merchant, courier, or payment provider is unavailable."
+				],
+				"outOfScope": [
+					"A complete route-optimization engine and dynamic pricing model.",
+					"Assuming compensating actions can reverse physical preparation or a completed delivery."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"1 million orders/day with a 20x meal-time peak.",
+					"200,000 active couriers report location every five seconds."
+				],
+				"estimates": [
+					{
+						"label": "Order commands",
+						"calculation": "1,000,000 / 86,400 = 11.6 orders/s average; 20x peak is about 232/s.",
+						"implication": "Order correctness is more important than extreme write sharding at this scale. Each order creates multiple downstream commands and events."
+					},
+					{
+						"label": "Courier telemetry",
+						"calculation": "200,000 / 5 = 40,000 location updates/s.",
+						"implication": "Isolate location ingestion from transactional order storage. Reuse a geographic candidate index and an authoritative dispatch reservation path."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "POST /orders { cartSnapshot, quoteId, paymentMethodRef, requestId }",
+					"purpose": "Validate quote expiry, persist an idempotent order, and start the workflow. Never trust client-calculated totals."
+				},
+				{
+					"signature": "POST /orders/{id}/merchant-decision { accept, version }",
+					"purpose": "Authenticate the merchant and conditionally accept or reject only the expected order state."
+				},
+				{
+					"signature": "POST /orders/{id}/cancel { requestId, reason }",
+					"purpose": "Apply the cancellation policy for the current stage, schedule compensations, and expose pending refund or manual-review states."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Order",
+					"fields": "orderId, customerId, merchantId, itemPriceSnapshot, totalMinor, currency, state, version",
+					"notes": "Freeze purchased item and price details. Later menu changes must not alter the accepted commercial agreement."
+				},
+				{
+					"entity": "WorkflowStep",
+					"fields": "orderId, stepName, commandId, status, deadline, compensationState",
+					"notes": "Persist step progress and retries so a worker restart resumes rather than repeats untracked side effects."
+				},
+				{
+					"entity": "Reservation",
+					"fields": "orderId, resourceType, resourceId, expiresAt, version",
+					"notes": "Inventory, payment authorization, and courier reservations have different expiry and release rules; do not collapse them into one generic success flag."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Customer[Customer] --> API[Order API]\n API --> Store[(Orders workflow and outbox)]\n Store --> Saga[Order orchestrator]\n Saga --> Payment[Payment authorization]\n Saga --> Merchant[Merchant acceptance]\n Saga --> Dispatch[Courier dispatch]\n Dispatch --> Courier[Courier app]\n Payment --> Events[Idempotent result events]\n Merchant --> Events\n Courier --> Events\n Events --> Saga\n Saga --> Status[Order status and notifications]",
+				"flows": [
+					{
+						"name": "Place and fulfill an order",
+						"steps": [
+							"Validate the server-side quote and persist the immutable order snapshot and workflow start event.",
+							"Authorize payment and request merchant acceptance using idempotent commands with deadlines. The exact ordering depends on commercial policy.",
+							"Reserve a courier near the expected ready time, not necessarily at order creation; keep dispatch retries separate from payment retries.",
+							"Persist pickup and delivery transitions, then capture or finalize payment at the policy-defined stage and notify participants through committed events."
+						]
+					},
+					{
+						"name": "Compensate a failed order",
+						"steps": [
+							"Identify the last committed workflow state after a rejection, timeout, or cancellation request.",
+							"Cancel unneeded courier reservations, release inventory where supported, and void payment authorization or request a refund as appropriate.",
+							"Track compensation commands durably and retry idempotently; a failed refund remains visible as pending, not falsely complete.",
+							"Escalate irreversible or ambiguous cases, such as already prepared food, captured funds, or a disputed delivery, to a defined support workflow."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Orchestration or choreography",
+					"choice": "Use an explicit orchestrator for the multi-party order lifecycle and its deadlines.",
+					"tradeOff": "It centralizes workflow visibility but requires careful versioning and recovery. Pure event choreography reduces a central coordinator but can hide cyclic dependencies and compensation state."
+				},
+				{
+					"topic": "Payment timing",
+					"choice": "Separate authorization from capture when the provider and business flow support it.",
+					"tradeOff": "A hold can expire and capture can fail later. Capturing immediately simplifies one step but increases refunds after merchant rejection."
+				},
+				{
+					"topic": "Dispatch timing",
+					"choice": "Match couriers against a predicted preparation time and update the plan as the order evolves.",
+					"tradeOff": "Early dispatch increases courier waiting; late dispatch increases food waiting. ETA accuracy and uncertainty should influence the offer policy."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "The merchant accepts after the customer cancellation has committed.",
+					"handling": "Check order state/version before accepting the event. Reject stale transitions and apply the policy for any physical preparation already begun."
+				},
+				{
+					"scenario": "Payment authorization succeeds but the workflow worker crashes.",
+					"handling": "Retry the same command ID and reconcile with the provider instead of generating a new authorization. Persist ambiguous results until resolved."
+				},
+				{
+					"scenario": "A courier disappears after pickup.",
+					"handling": "Use telemetry freshness, deadlines, support escalation, and customer communication. Monitor stage age, compensation backlog, authorization expiry, dispatch latency, and failed terminal transitions."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why is a saga not the same as rolling back a database transaction?",
+					"answer": "Each participant may have already committed independent or physical effects. A saga performs new compensating actions, such as refunds or reservation releases, which can themselves fail and may not restore the exact original world."
+				},
+				{
+					"question": "Why store an item and price snapshot on the order?",
+					"answer": "Menus, taxes, availability, and promotions can change while an order is processed. The stored snapshot records the agreement the customer accepted and supports consistent fulfillment, disputes, refunds, and auditing."
+				},
+				{
+					"question": "What should the UI show when cancellation succeeded but the refund is still pending?",
+					"answer": "Expose those as separate states: the order is canceled and the refund is pending or under review. Marking the entire workflow complete would hide an unresolved financial obligation and make recovery or customer support harder."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design a Local Delivery Service Like Gopuff",
+					"author": "Hello Interview",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/gopuff",
+					"why": "Primary local-delivery case study. Adapt its warehouse model carefully for restaurant acceptance and preparation workflows."
+				},
+				{
+					"kind": "article",
+					"title": "Saga pattern",
+					"author": "Chris Richardson / Microservices.io",
+					"url": "https://microservices.io/patterns/data/saga.html",
+					"why": "Foundational reference for multi-service consistency, orchestration, and compensation."
+				},
+				{
+					"kind": "video",
+					"title": "System Design Interview: Design Uber",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=lsKU38RKQSo",
+					"why": "Companion for courier location and dispatch; combine it with the order-saga material rather than treating ride sharing as the whole food-delivery design."
+				}
+			]
+		},
+		"design-video-streaming-platform": {
+			"summary": "Design an on-demand video platform with independent upload, processing, and playback paths. Store media in object storage and deliver immutable segments through a CDN; application servers manage metadata and authorization rather than proxying every video byte. Processing must tolerate retries and only publish manifests that reference complete playable assets.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"Object storage, signed URLs, CDNs, and cache control",
+				"Transcoding, adaptive bitrate streaming, and background jobs"
+			],
+			"requirements": {
+				"functional": [
+					"Upload large videos resumably and track processing status.",
+					"Transcode into several renditions and serve adaptive-bitrate playback.",
+					"Enforce visibility, support deletion, and retain basic metadata and watch progress."
+				],
+				"nonFunctional": [
+					"Illustrative target: playback starts within two seconds under the defined network conditions.",
+					"Keep playback available during isolated processing or metadata-service failures where cached authorization permits.",
+					"Recover partial uploads and processing jobs without publishing broken videos."
+				],
+				"outOfScope": [
+					"Live streaming, real-time chat, and a full recommendation engine.",
+					"Treating signed URLs alone as DRM or a guarantee against copying content."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"10 million daily viewers watch 30 minutes/day at an average 3 Mbit/s.",
+					"100,000 uploads/day, each ten minutes at a 10 Mbit/s source bitrate."
+				],
+				"estimates": [
+					{
+						"label": "Playback bandwidth",
+						"calculation": "10,000,000 x 1,800 s x 3,000,000 bit/s / 8 = 6.75 PB/day, or 625 Gbit/s average.",
+						"implication": "CDN hit ratio and egress dominate the media path. Peak demand and regional distribution matter more than raw API request count."
+					},
+					{
+						"label": "Source uploads",
+						"calculation": "100,000 x 600 s x 10,000,000 bit/s / 8 = 75 TB/day of source video.",
+						"implication": "Multiple renditions, replication, thumbnails, and retention increase storage. Use lifecycle policies and cost-aware encoding tiers."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "POST /videos/uploads { filename, size, contentType, requestId }",
+					"purpose": "Create an authorized upload session with multipart targets, size limits, and expiry; do not proxy the full upload through the metadata API."
+				},
+				{
+					"signature": "POST /videos/{id}/uploads:complete { parts, checksum }",
+					"purpose": "Verify object completion, persist processing state, and enqueue idempotent processing for a specific source version."
+				},
+				{
+					"signature": "GET /videos/{id}/playback",
+					"purpose": "Check visibility and return a current manifest URL or short-lived access token only when assets are playable."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "Video",
+					"fields": "videoId, ownerId, title, visibility, sourceVersion, processingState, manifestVersion",
+					"notes": "Model uploaded, processing, ready, failed, and deleted states. A successful upload is not equivalent to playable media."
+				},
+				{
+					"entity": "Rendition",
+					"fields": "videoId, sourceVersion, codec, resolution, bitrate, objectPrefix, status",
+					"notes": "Use immutable versioned object paths so stale CDN entries cannot mix old and new segments."
+				},
+				{
+					"entity": "ProcessingJob",
+					"fields": "jobId, sourceVersion, rendition, attempt, leaseVersion, checkpoint",
+					"notes": "Stable job identity and fenced ownership prevent duplicate workers from publishing conflicting outputs."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Creator[Creator app] --> API[Upload and metadata API]\n API --> Metadata[(Video metadata)]\n Creator -->|signed multipart upload| Source[(Source object storage)]\n Source --> Queue[Processing jobs]\n Queue --> Workers[Transcode and validate]\n Workers --> Media[(Immutable segments and manifests)]\n Workers -->|publish ready version| Metadata\n Viewer[Viewer] -->|authorize playback| API\n Viewer -->|manifest and segments| CDN[CDN]\n CDN -->|cache miss| Media",
+				"flows": [
+					{
+						"name": "Upload and publish",
+						"steps": [
+							"Issue a bounded resumable upload session and let the client send parts directly to object storage.",
+							"Verify completion and checksum, validate the file, and enqueue source-versioned processing jobs.",
+							"Workers transcode and segment into immutable rendition paths, validate output, and retry failed chunks idempotently.",
+							"Publish a manifest and atomically mark a playable version ready only after its referenced assets exist. Additional renditions can be published as later manifest versions."
+						]
+					},
+					{
+						"name": "Play and adapt",
+						"steps": [
+							"Authorize the viewer against current visibility and return a manifest URL with the appropriate access policy.",
+							"The player fetches the manifest and segments from the CDN, selecting a rendition based on bandwidth and buffer state.",
+							"On cache miss, the CDN fetches immutable segments from origin; origin shielding and prewarming help with sudden popular releases.",
+							"Record quality-of-experience signals and watch progress asynchronously. Deletion requires a defined revocation window across tokens and CDN caches."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Adaptive bitrate",
+					"choice": "Generate a rendition ladder and use HLS or DASH manifests to let the player adapt.",
+					"tradeOff": "More renditions improve fit for devices and networks but cost encoding time and storage. Segment length trades request overhead against startup and switching speed."
+				},
+				{
+					"topic": "Precompute or encode on demand",
+					"choice": "Precompute common renditions and add expensive formats selectively.",
+					"tradeOff": "Encoding everything wastes resources on unwatched uploads; on-demand encoding can hurt first-viewer latency. Use a popularity and device-support policy."
+				},
+				{
+					"topic": "Media authorization",
+					"choice": "Use authenticated playback setup with short-lived signed access and CDN-compatible caching.",
+					"tradeOff": "Tokens can remain valid after access changes until expiry. Strict revocation and DRM requirements need additional mechanisms and may reduce cache efficiency."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "A transcoder crashes halfway through a rendition.",
+					"handling": "Resume or retry an idempotent source-versioned job, keep partial outputs unpublished, and garbage-collect abandoned artifacts."
+				},
+				{
+					"scenario": "A popular video overwhelms the origin on a cold CDN.",
+					"handling": "Use origin shielding, request coalescing, cacheable immutable paths, and selective prewarming; reserve origin capacity for cache misses."
+				},
+				{
+					"scenario": "A manifest references missing or inaccessible segments.",
+					"handling": "Validate assets before publishing and retain a last-known playable version. Monitor startup delay, rebuffer ratio, segment errors, CDN hit rate, and processing backlog."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "Why should application servers avoid proxying all video traffic?",
+					"answer": "Media bandwidth dwarfs metadata API traffic and is well suited to object storage plus CDN caching. Proxying every byte through application servers increases cost, connection pressure, and failure coupling without adding necessary business logic to each segment request."
+				},
+				{
+					"question": "When is a video ready to publish?",
+					"answer": "At least one valid playable rendition and its manifest must be complete, accessible, and consistent with the metadata state. Upload completion alone is insufficient; publishing a manifest before its segments exist produces playback failures."
+				},
+				{
+					"question": "Does deleting the metadata row instantly revoke every copy of a video?",
+					"answer": "No. CDN caches, previously issued tokens, browser buffers, and downloaded copies have separate lifetimes. Define a practical revocation window, purge or version assets as needed, and do not promise control over copies already delivered to a viewer."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Design YouTube",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/youtube",
+					"why": "Primary video-platform design covering uploads, processing, storage, and playback."
+				},
+				{
+					"kind": "article",
+					"title": "HTTP Live Streaming",
+					"author": "Apple Developer",
+					"url": "https://developer.apple.com/streaming/",
+					"why": "Official entry point for HLS specifications, authoring guidance, and validation tools."
+				},
+				{
+					"kind": "video",
+					"title": "System Design Interview: Design YouTube",
+					"author": "Hello Interview / Evan King",
+					"url": "https://www.youtube.com/watch?v=IUrQ5_g3XKs",
+					"why": "Full expert-led walkthrough of the upload and playback architecture."
+				}
+			]
+		},
+		"design-payment-system": {
+			"summary": "Design payment orchestration around an external processor with a durable internal ledger and reconciliation. A network timeout is an unknown outcome, not proof of failure. Separate payment intent, provider attempts, and accounting entries so retries, callbacks, refunds, and settlement reports can be reconciled without inventing money or charging twice.",
+			"reviewedAt": "2026-09-10",
+			"prerequisites": [
+				"ACID transactions, unique constraints, and durable idempotency",
+				"Payment authorization/capture, double-entry accounting, and reconciliation"
+			],
+			"requirements": {
+				"functional": [
+					"Create a payment intent and authorize/capture it using tokenized payment details.",
+					"Handle retries, provider callbacks, cancellations, and partial or full refunds.",
+					"Record balanced accounting entries and reconcile internal state with provider and settlement reports."
+				],
+				"nonFunctional": [
+					"Do not duplicate a logical charge when requests or workers retry.",
+					"Preserve auditable state changes and balanced ledger postings per currency.",
+					"Expose pending and unknown outcomes honestly while recovering from provider or database failures."
+				],
+				"outOfScope": [
+					"Building a card network or storing raw card numbers in application tables.",
+					"Treating this interview design as a complete compliance, fraud, or production accounting specification."
+				]
+			},
+			"capacity": {
+				"assumptions": [
+					"10 million payment attempts/day with a 10x peak.",
+					"Assume at least four 200-byte ledger entry records per completed flow; real fees, refunds, and settlement entries add more."
+				],
+				"estimates": [
+					{
+						"label": "Payment throughput",
+						"calculation": "10,000,000 / 86,400 = 116 attempts/s average; 10x peak is about 1,160/s.",
+						"implication": "Correctness, provider limits, and tail latency dominate before exotic sharding. Isolate slow provider calls from database transaction locks."
+					},
+					{
+						"label": "Ledger payload",
+						"calculation": "10,000,000 x 4 x 200 B = 8 GB/day raw ledger-entry payload.",
+						"implication": "Indexes, immutable audit history, provider responses, replicas, and retention increase storage. Preserve auditability instead of overwriting history to save space."
+					}
+				]
+			},
+			"api": [
+				{
+					"signature": "POST /payment-intents { orderId, amountMinor, currency, methodToken }",
+					"purpose": "Require a merchant-scoped Idempotency-Key and request hash. Persist a stable intent and return the original result for an identical retry."
+				},
+				{
+					"signature": "POST /payment-intents/{id}/capture",
+					"purpose": "Create one logical capture command for the permitted amount. Reuse a stable provider idempotency key and enforce the current intent state."
+				},
+				{
+					"signature": "POST /payments/{id}/refunds { amountMinor, requestId }",
+					"purpose": "Idempotently reserve/refund a bounded amount without exceeding captured funds after prior refunds, using transactional checks."
+				},
+				{
+					"signature": "POST /webhooks/{provider}",
+					"purpose": "Verify signatures and replay protection, deduplicate events, and process state changes asynchronously from durable receipt."
+				}
+			],
+			"dataModel": [
+				{
+					"entity": "PaymentIntent",
+					"fields": "intentId, merchantId, orderId, amountMinor, currency, state, version",
+					"notes": "Use integer minor units and a currency definition, not floating-point money. Authorization, capture, settlement, and refund are separate states."
+				},
+				{
+					"entity": "PaymentAttempt",
+					"fields": "attemptId, intentId, operation, providerKey, providerReference, outcome",
+					"notes": "Keep pending/unknown outcomes and the stable provider idempotency key. Never generate a fresh key merely because an HTTP response timed out."
+				},
+				{
+					"entity": "LedgerTransaction and LedgerEntry",
+					"fields": "transactionId, businessEventId, accountId, currency, signedAmountMinor",
+					"notes": "Post balanced entries atomically: signed amounts sum to zero within each currency. Enforce unique business events; correct mistakes with new reversing entries, not edits."
+				},
+				{
+					"entity": "IdempotencyRecord",
+					"fields": "merchantId, key, requestHash, resourceId, storedResponse",
+					"notes": "Bind the key to the operation and request payload. Retention must cover the promised retry window, and concurrent first requests need uniqueness enforcement."
+				}
+			],
+			"architecture": {
+				"diagram": "flowchart TD\n Merchant[Merchant client] --> API[Idempotent payment API]\n API --> Store[(Intents attempts and outbox)]\n Store --> Worker[Payment worker]\n Worker -->|stable provider key| PSP[Payment processor]\n PSP --> Webhook[Verified callback intake]\n Webhook --> Transition[Idempotent state transition]\n Worker --> Transition\n Transition --> Ledger[(Balanced ledger and event uniqueness)]\n PSP --> Reports[Settlement reports and status lookup]\n Reports --> Reconcile[Reconciliation worker]\n Reconcile --> Transition",
+				"flows": [
+					{
+						"name": "Create and execute a payment",
+						"steps": [
+							"Validate the server-owned amount and currency, reserve the idempotency key, and persist the intent plus an outbox command atomically.",
+							"A worker records a stable provider key and calls the processor outside a long-held database transaction.",
+							"Apply the provider outcome through a versioned, idempotent state transition. Post the relevant ledger transaction and an outbox event atomically inside the owned database boundary.",
+							"Return or expose pending status for unknown outcomes. Provider success followed by an internal database failure is repaired through retry, callback, or reconciliation, not a second charge."
+						]
+					},
+					{
+						"name": "Reconcile and refund",
+						"steps": [
+							"Persist and authenticate callbacks, deduplicate event IDs, and tolerate out-of-order events without regressing a captured payment to merely authorized.",
+							"Query ambiguous attempts by provider reference/key and compare internal records with settlement reports.",
+							"For a refund, transactionally check remaining refundable amount, create a unique refund command, and track its external outcome.",
+							"Post new balanced accounting entries for confirmed refunds or adjustments. Route unresolved differences to an auditable exception queue with ownership and deadlines."
+						]
+					}
+				]
+			},
+			"decisions": [
+				{
+					"topic": "Database transaction boundary",
+					"choice": "Keep owned state, ledger postings, and outbox records atomic where they share a database.",
+					"tradeOff": "The external processor is not part of that transaction. Idempotency plus reconciliation bridges the gap; holding a database lock during the HTTP call does not make it atomic."
+				},
+				{
+					"topic": "Ledger and balances",
+					"choice": "Keep an append-only journal and derive or transactionally maintain balances from committed entries.",
+					"tradeOff": "A balanced ledger prevents certain accounting errors but does not prove the provider moved money correctly. Reconcile external reality separately."
+				},
+				{
+					"topic": "Availability versus uncertainty",
+					"choice": "Prefer pending/unknown states and safe retries over guessing that a timed-out payment failed.",
+					"tradeOff": "Customers may wait longer for a final answer, but retrying with a new identity risks duplicate charges and costly remediation."
+				}
+			],
+			"failureModes": [
+				{
+					"scenario": "The processor captures funds but its response is lost.",
+					"handling": "Reuse the same provider idempotency key, inspect status, and wait for authenticated callbacks or reconciliation. Do not immediately try another processor."
+				},
+				{
+					"scenario": "Two concurrent refund requests exceed the remaining captured amount.",
+					"handling": "Reserve refundable funds under a transaction or conditional update with the required isolation, and deduplicate each refund operation before calling the provider."
+				},
+				{
+					"scenario": "Callbacks are forged, duplicated, or reordered.",
+					"handling": "Verify signatures on the expected raw payload, enforce replay controls, deduplicate IDs, and validate legal state transitions. Monitor unknown-attempt age, ledger imbalance, duplicate suppression, and reconciliation backlog."
+				}
+			],
+			"selfCheck": [
+				{
+					"question": "What should happen after a capture request times out?",
+					"answer": "Treat the result as unknown. Retry using the same provider-supported idempotency key or query the existing attempt, then reconcile with callbacks or reports. A new key or immediate processor failover may charge the customer again."
+				},
+				{
+					"question": "Why does a local unique payment row not guarantee exactly-once charging?",
+					"answer": "The external processor's side effect and your local commit are separate operations. A worker can crash after the charge but before recording success, so retries need provider-side idempotency and a reconciliation path in addition to local uniqueness."
+				},
+				{
+					"question": "Does a balanced double-entry ledger prove a payment settled?",
+					"answer": "No. It proves an internal accounting invariant, not that the provider transferred funds. Provider references, settlement reports, and reconciliation must verify the external outcome; adjustments remain new auditable ledger entries."
+				}
+			],
+			"resources": [
+				{
+					"kind": "article",
+					"title": "Stripe's Payments APIs: The First 10 Years",
+					"author": "Michelle Bu / Stripe Engineering",
+					"url": "https://stripe.dev/blog/payment-api-design",
+					"why": "Primary engineering case study explaining payment intents, asynchronous outcomes, and the evolution of payment abstractions."
+				},
+				{
+					"kind": "article",
+					"title": "Idempotent requests",
+					"author": "Stripe API documentation",
+					"url": "https://docs.stripe.com/api/idempotent_requests",
+					"why": "Concrete provider idempotency semantics and important limits on key reuse and retry behavior."
+				},
+				{
+					"kind": "article",
+					"title": "Payment System",
+					"author": "ByteByteGo",
+					"url": "https://bytebytego.com/guides/payment-system/",
+					"why": "Visual overview of payment-system components to compare with the orchestration and ledger design."
+				},
+				{
+					"kind": "video",
+					"title": "ACID Properties in Databases With Examples",
+					"author": "ByteByteGo",
+					"url": "https://www.youtube.com/watch?v=GAe5oB742dw",
+					"why": "Focused companion for the database guarantees the payment ledger relies on, not a complete payments interview. Published in ByteByteGo EP105."
+				}
+			]
+		}
+	}
 }

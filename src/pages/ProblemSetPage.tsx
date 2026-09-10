@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import Header from "../app/Header";
 import { useAuth } from "../auth/AuthProvider";
@@ -9,6 +9,8 @@ import {
 	problemPlatformLinks,
 } from "../lib/links";
 import { supabase, supabaseConfigError } from "../lib/supabase";
+
+const HldStudyView = lazy(() => import("./HldStudyView"));
 
 type ProgressRow = {
 	problemSlug: string;
@@ -129,6 +131,29 @@ export const ProblemSetPage = () => {
 				<Header />
 				<h1>Problem set not found</h1>
 				<Link to="/">Browse problem sets</Link>
+			</div>
+		);
+	}
+
+	if (set.slug === "hld") {
+		return (
+			<div className="app-shell hld-shell">
+				<Header />
+				{error && (
+					<p role="alert" className="study-error">
+						{error}
+					</p>
+				)}
+				<Suspense
+					fallback={<p role="status">Loading study guides...</p>}
+				>
+					<HldStudyView
+						set={set}
+						solvedCodes={solvedCodes}
+						savingCodes={savingCodes}
+						onToggle={toggleSolved}
+					/>
+				</Suspense>
 			</div>
 		);
 	}
