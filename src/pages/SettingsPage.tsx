@@ -1,33 +1,24 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import { AppHeader } from "../app/AppHeader";
+import { Link, Navigate } from "react-router-dom";
+import Header from "../app/Header";
 import { useAuth } from "../auth/AuthProvider";
-import { problemSets } from "../data/problemSets";
-import { fetchAcceptedSubmissions } from "../lib/leetcodeApi";
-import { supabase, supabaseConfigError } from "../lib/supabase";
+import { FREE_PRACTICE_SET_SLUG, getProblemSet } from "../data/problemSets";
+import { getPracticePlatform, practicePlatforms } from "../lib/links";
 
-function normalizeText(value: string) {
-	return value
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, " ")
-		.trim();
-}
+const freePracticeSet = getProblemSet(FREE_PRACTICE_SET_SLUG);
+const freeProblems =
+	freePracticeSet?.topics.flatMap((topic) => topic.problems) ?? [];
+const platformCounts = practicePlatforms.map((platform) => ({
+	...platform,
+	count: freeProblems.filter(
+		(problem) => getPracticePlatform(problem.url)?.id === platform.id,
+	).length,
+}));
 
-function extractLeetCodeSlug(url: string) {
-	try {
-		const parsed = new URL(url);
-		const match = parsed.pathname.match(/\/problems\/([^/]+)/);
-		return match?.[1] || null;
-	} catch {
-		return null;
-	}
-}
-
-export function SettingsPage() {
+export const SettingsPage = () => {
 	const { user, loading, updateLeetCodeUsername, signOut } = useAuth();
 	const [leetcodeUsername, setLeetcodeUsername] = useState("");
 	const [saving, setSaving] = useState(false);
-	const [syncing, setSyncing] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
 
@@ -40,7 +31,7 @@ export function SettingsPage() {
 		return <Navigate to="/login" replace />;
 	}
 
-	async function onSubmit(e: FormEvent) {
+	const onSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		try {
 			setSaving(true);
@@ -49,177 +40,107 @@ export function SettingsPage() {
 			await updateLeetCodeUsername(leetcodeUsername);
 			setSuccess("Settings saved.");
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Could not save settings");
+			setError(
+				err instanceof Error ? err.message : "Could not save settings",
+			);
 		} finally {
 			setSaving(false);
 		}
-	}
-
-	async function onSync() {
-		if (!user) return;
-
-		try {
-			setSyncing(true);
-			setError("");
-			setSuccess("");
-
-			const cleanLeetCodeUsername = leetcodeUsername.trim();
-			if (!cleanLeetCodeUsername) {
-				throw new Error("LeetCode username is required");
-			}
-
-			if (!supabase) {
-				throw new Error(
-					`Supabase is not configured. ${supabaseConfigError}`,
-				);
-			}
-
-			if (
-				cleanLeetCodeUsername !==
-				(user.leetcodeUsername || user.username)
-			) {
-				await updateLeetCodeUsername(cleanLeetCodeUsername);
-			}
-
-			const { submissions, mode, publicSolvedCount } =
-				await fetchAcceptedSubmissions(
-					cleanLeetCodeUsername,
-					5000,
-				);
-
-			const referencesBySlug = new Map<
-				string,
-				Array<{ setSlug: string; problemSlug: string }>
-			>();
-			const referencesByTitle = new Map<
-				string,
-				Array<{ setSlug: string; problemSlug: string }>
-			>();
-
-			for (const set of problemSets) {
-				for (const topic of set.topics) {
-					for (const problem of topic.problems) {
-						if (!problem.url.includes("leetcode.com/problems/")) continue;
-
-						const reference = {
-							setSlug: set.slug,
-							problemSlug: problem.slug,
-						};
-
-						for (const slugKey of [
-							problem.slug,
-							extractLeetCodeSlug(problem.url),
-						]) {
-							if (!slugKey) continue;
-							if (!referencesBySlug.has(slugKey)) {
-								referencesBySlug.set(slugKey, []);
-							}
-							referencesBySlug.get(slugKey)?.push(reference);
-						}
-
-						const titleKey = normalizeText(problem.name);
-						if (!referencesByTitle.has(titleKey)) {
-							referencesByTitle.set(titleKey, []);
-						}
-						referencesByTitle.get(titleKey)?.push(reference);
-					}
-				}
-			}
-
-			const solvedRows: Array<{
-				id: string;
-				userId: string;
-				setSlug: string;
-				problemSlug: string;
-				solved: boolean;
-				solvedAt: string;
-			}> = [];
-
-			const uniquePairs = new Set<string>();
-			for (const item of submissions) {
-				const refs = [
-					...(item.titleSlug ? referencesBySlug.get(item.titleSlug) || [] : []),
-					...(item.title
-						? referencesByTitle.get(normalizeText(item.title)) || []
-						: []),
-				];
-
-				if (!refs.length) continue;
-
-				for (const ref of refs) {
-					const pairKey = `${ref.setSlug}:${ref.problemSlug}`;
-					if (uniquePairs.has(pairKey)) continue;
-					uniquePairs.add(pairKey);
-					solvedRows.push({
-						id: crypto.randomUUID(),
-						userId: user.id,
-						setSlug: ref.setSlug,
-						problemSlug: ref.problemSlug,
-						solved: true,
-						solvedAt: new Date().toISOString(),
-					});
-				}
-			}
-
-			if (!solvedRows.length) {
-				setSuccess("Sync completed. No matching problems found in your sets.");
-				return;
-			}
-
-			const { error: upsertError } = await supabase
-				.from("progress")
-				.upsert(solvedRows, {
-					onConflict: "userId,setSlug,problemSlug",
-					ignoreDuplicates: true,
-				});
-
-			if (upsertError) {
-				const detail = (upsertError.message || "").toLowerCase();
-				if (
-					detail.includes("permission denied") ||
-					detail.includes("row-level security")
-				) {
-					throw new Error(
-						'Could not sync progress. Supabase permissions/policies are missing for table "progress".',
-					);
-				}
-				throw new Error("Could not sync progress");
-			}
-
-			const solvedCountHint =
-				publicSolvedCount === null
-					? "Public solved count was unavailable."
-					: `Public solved count on LeetCode profile: ${publicSolvedCount}.`;
-
-			setSuccess(
-				`Public sync complete. Matched ${solvedRows.length} problems from ${submissions.length} recent accepted submissions fetched (LeetCode public endpoint max is 20). ${solvedCountHint}`,
-			);
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Could not sync progress");
-		} finally {
-			setSyncing(false);
-		}
-	}
+	};
 
 	return (
 		<div className="app-shell">
-			<AppHeader />
-			<section className="card">
-				<h1 style={{ marginTop: 0 }}>Settings</h1>
-				<p style={{ color: "var(--muted)" }}>
-					Manage account actions and sync preferences.
-				</p>
+			<Header />
+			<main className="settings-content">
+				<div className="settings-heading">
+					<h1>Settings</h1>
+					<p className="selectable">{user?.username}</p>
+				</div>
 
-				<div className="card" style={{ marginTop: 16 }}>
-					<h2 style={{ marginTop: 0, marginBottom: 8 }}>LeetCode Sync</h2>
-					<p style={{ color: "var(--muted)", marginTop: 0 }}>
-						Set your LeetCode username for public progress sync. LeetCode's
-						public endpoint exposes recent accepted submissions only (max 20).
+				<section
+					className="settings-section"
+					aria-labelledby="practice-platforms-heading"
+				>
+					<div className="settings-section-heading">
+						<div>
+							<h2 id="practice-platforms-heading">
+								Free Practice Platforms
+							</h2>
+							<p>
+								{freePracticeSet?.title}: {freeProblems.length}{" "}
+								exercises across{" "}
+								{freePracticeSet?.topics.length} topics.
+							</p>
+						</div>
+						<Link to={`/sets/${FREE_PRACTICE_SET_SLUG}`}>
+							Open collection
+						</Link>
+					</div>
+					<p className="practice-access-note">
+						No paid subscription required. A free platform account
+						may be needed to submit. Paid courses, editorials, and
+						AI tools are not included.
 					</p>
+					<table className="practice-platform-table">
+						<caption className="visually-hidden">
+							Platforms in Free DSA Essentials
+						</caption>
+						<thead>
+							<tr>
+								<th scope="col">Platform</th>
+								<th scope="col">Exercises</th>
+								<th scope="col">Progress</th>
+							</tr>
+						</thead>
+						<tbody>
+							{platformCounts.map((platform) => (
+								<tr key={platform.id}>
+									<th scope="row">
+										<a
+											href={platform.url}
+											target="_blank"
+											rel="noreferrer"
+										>
+											{platform.name}
+										</a>
+										<span className="platform-focus">
+											{platform.focus}
+										</span>
+									</th>
+									<td>
+										<Link
+											to={`/sets/${FREE_PRACTICE_SET_SLUG}?platform=${platform.id}`}
+											aria-label={`${platform.count} ${platform.name} exercises`}
+										>
+											{platform.count}
+										</Link>
+									</td>
+									<td>
+										{platform.id === "leetcode"
+											? "Sync"
+											: "Manual"}
+									</td>
+								</tr>
+							))}
+						</tbody>
+					</table>
+					<p className="practice-access-note">
+						LeetCode supports automatic progress sync. Mark other
+						platforms' exercises as solved manually. SPOJ may
+						require browser verification.
+					</p>
+				</section>
 
-					<form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
-						<div style={{ display: "grid", gap: 6 }}>
-							<label htmlFor="leetcode-username">LeetCode username</label>
+				<section
+					className="settings-section"
+					aria-labelledby="leetcode-sync-heading"
+				>
+					<h2 id="leetcode-sync-heading">LeetCode Sync</h2>
+					<form onSubmit={onSubmit} className="settings-form">
+						<div className="settings-field">
+							<label htmlFor="leetcode-username">
+								LeetCode username
+							</label>
 							<input
 								id="leetcode-username"
 								value={leetcodeUsername}
@@ -233,35 +154,39 @@ export function SettingsPage() {
 							/>
 						</div>
 
-						{error && <div style={{ color: "crimson" }}>{error}</div>}
-						{success && <div style={{ color: "green" }}>{success}</div>}
+						{error && (
+							<div role="alert" style={{ color: "crimson" }}>
+								{error}
+							</div>
+						)}
+						{success && (
+							<div role="status" style={{ color: "green" }}>
+								{success}
+							</div>
+						)}
 
 						<div className="settings-actions">
 							<button
 								type="submit"
 								className="primary"
-								disabled={saving || syncing}
+								disabled={saving}
 							>
-								{saving ? "Saving..." : "Save"}
-							</button>
-							<button
-								type="button"
-								onClick={onSync}
-								disabled={saving || syncing}
-							>
-								{syncing ? "Syncing..." : "Sync now"}
+								{saving ? "Saving..." : "Save username"}
 							</button>
 						</div>
 					</form>
-				</div>
+				</section>
 
-				<div className="card" style={{ marginTop: 16 }}>
-					<h2 style={{ marginTop: 0, marginBottom: 8 }}>Account</h2>
+				<section
+					className="settings-section"
+					aria-labelledby="account-heading"
+				>
+					<h2 id="account-heading">Account</h2>
 					<button type="button" onClick={() => signOut()}>
 						Sign out
 					</button>
-				</div>
-			</section>
+				</section>
+			</main>
 		</div>
 	);
-}
+};

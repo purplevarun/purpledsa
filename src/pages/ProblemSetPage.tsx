@@ -1,8 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-import { AppHeader } from "../app/AppHeader";
+import { useEffect, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
+import Header from "../app/Header";
 import { useAuth } from "../auth/AuthProvider";
-import { problemSets } from "../data/problemSets";
+import { GLOBAL_PROGRESS_SET_SLUG, problemSets } from "../data/problemSets";
+import {
+	getPracticePlatform,
+	practicePlatforms,
+	problemPlatformLinks,
+} from "../lib/links";
 import { supabase, supabaseConfigError } from "../lib/supabase";
 
 type ProgressRow = {
@@ -10,20 +15,19 @@ type ProgressRow = {
 	solved: boolean;
 };
 
-export function ProblemSetPage() {
+export const ProblemSetPage = () => {
 	const { slug } = useParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const { user } = useAuth();
 	const set = problemSets.find((item) => item.slug === slug);
-	const [solvedSlugs, setSolvedSlugs] = useState<Set<string>>(new Set());
-	const [savingSlugs, setSavingSlugs] = useState<Set<string>>(new Set());
+	const [solvedCodes, setSolvedCodes] = useState<Set<string>>(new Set());
+	const [savingCodes, setSavingCodes] = useState<Set<string>>(new Set());
 	const [error, setError] = useState("");
-
-	const setSlug = useMemo(() => set?.slug || null, [set]);
 
 	useEffect(() => {
 		const loadSolved = async () => {
-			if (!setSlug || !user || !supabase) {
-				setSolvedSlugs(new Set());
+			if (!set || !user || !supabase) {
+				setSolvedCodes(new Set());
 				return;
 			}
 
@@ -31,16 +35,16 @@ export function ProblemSetPage() {
 				.from("progress")
 				.select("problemSlug, solved")
 				.eq("userId", user.id)
-				.eq("setSlug", setSlug);
+				.eq("solved", true);
 
 			if (error) {
-				setSolvedSlugs(new Set());
+				setSolvedCodes(new Set());
 				setError("Could not load saved progress");
 				return;
 			}
 
 			setError("");
-			setSolvedSlugs(
+			setSolvedCodes(
 				new Set(
 					((data ?? []) as ProgressRow[])
 						.filter((row) => row.solved)
@@ -50,10 +54,9 @@ export function ProblemSetPage() {
 		};
 
 		loadSolved();
-	}, [setSlug, user]);
+	}, [set, user]);
 
-	async function toggleSolved(problemSlug: string) {
-		if (!setSlug) return;
+	const toggleSolved = async (problemCode: string) => {
 		if (!user) {
 			setError("Sign in to track your progress");
 			return;
@@ -63,14 +66,14 @@ export function ProblemSetPage() {
 			return;
 		}
 
-		const currentlySolved = solvedSlugs.has(problemSlug);
+		const currentlySolved = solvedCodes.has(problemCode);
 		setError("");
-		setSavingSlugs((prev) => new Set(prev).add(problemSlug));
+		setSavingCodes((prev) => new Set(prev).add(problemCode));
 
-		setSolvedSlugs((prev) => {
+		setSolvedCodes((prev) => {
 			const next = new Set(prev);
-			if (currentlySolved) next.delete(problemSlug);
-			else next.add(problemSlug);
+			if (currentlySolved) next.delete(problemCode);
+			else next.add(problemCode);
 			return next;
 		});
 
@@ -80,8 +83,7 @@ export function ProblemSetPage() {
 				.from("progress")
 				.delete()
 				.eq("userId", user.id)
-				.eq("setSlug", setSlug)
-				.eq("problemSlug", problemSlug);
+				.eq("problemSlug", problemCode);
 
 			if (deleteError) requestError = "Could not update progress";
 		} else {
@@ -90,10 +92,10 @@ export function ProblemSetPage() {
 				.upsert(
 					[
 						{
-							id: `${user.id}:${setSlug}:${problemSlug}`,
+							id: `${user.id}:${GLOBAL_PROGRESS_SET_SLUG}:${problemCode}`,
 							userId: user.id,
-							setSlug,
-							problemSlug,
+							setSlug: GLOBAL_PROGRESS_SET_SLUG,
+							problemSlug: problemCode,
 							solved: true,
 							solvedAt: new Date().toISOString(),
 						},
@@ -105,44 +107,109 @@ export function ProblemSetPage() {
 		}
 
 		if (requestError) {
-			setSolvedSlugs((prev) => {
+			setSolvedCodes((prev) => {
 				const next = new Set(prev);
-				if (currentlySolved) next.add(problemSlug);
-				else next.delete(problemSlug);
+				if (currentlySolved) next.add(problemCode);
+				else next.delete(problemCode);
 				return next;
 			});
 			setError(requestError);
 		}
 
-		setSavingSlugs((prev) => {
+		setSavingCodes((prev) => {
 			const next = new Set(prev);
-			next.delete(problemSlug);
+			next.delete(problemCode);
 			return next;
 		});
+	};
+
+	if (!set) {
+		return (
+			<div className="app-shell">
+				<Header />
+				<h1>Problem set not found</h1>
+				<Link to="/">Browse problem sets</Link>
+			</div>
+		);
 	}
 
-	if (!set) return <div className="app-shell">Set not found</div>;
+	const availablePlatforms = practicePlatforms.filter((platform) =>
+		set.topics.some((topic) =>
+			topic.problems.some(
+				(problem) =>
+					getPracticePlatform(problem.url)?.id === platform.id,
+			),
+		),
+	);
+	const requestedPlatform = searchParams.get("platform") ?? "";
+	const selectedPlatform = availablePlatforms.some(
+		(platform) => platform.id === requestedPlatform,
+	)
+		? requestedPlatform
+		: "";
+	const visibleTopics = set.topics
+		.map((topic) => ({
+			...topic,
+			problems: topic.problems.filter(
+				(problem) =>
+					!selectedPlatform ||
+					getPracticePlatform(problem.url)?.id === selectedPlatform,
+			),
+		}))
+		.filter((topic) => topic.problems.length);
+	const visibleCount = visibleTopics.reduce(
+		(total, topic) => total + topic.problems.length,
+		0,
+	);
 
 	return (
 		<div className="app-shell">
-			<AppHeader />
+			<Header />
 			<h1>{set.title}</h1>
 			<p style={{ color: "var(--muted)" }}>{set.description}</p>
 			{error && <p style={{ color: "crimson" }}>{error}</p>}
-			<div className="card" style={{ marginTop: 18 }}>
-				{set.topics.map((topic) => (
+			{availablePlatforms.length > 1 && (
+				<div className="problem-set-toolbar">
+					<label htmlFor="problem-platform">Platform</label>
+					<select
+						id="problem-platform"
+						value={selectedPlatform}
+						onChange={(event) => {
+							const next = new URLSearchParams(searchParams);
+							if (event.target.value)
+								next.set("platform", event.target.value);
+							else next.delete("platform");
+							setSearchParams(next);
+						}}
+					>
+						<option value="">All platforms</option>
+						{availablePlatforms.map((platform) => (
+							<option key={platform.id} value={platform.id}>
+								{platform.name}
+							</option>
+						))}
+					</select>
+					<span role="status">{visibleCount} exercises</span>
+				</div>
+			)}
+			<div className="problem-topics">
+				{visibleTopics.map((topic) => (
 					<div key={topic.name} style={{ marginBottom: 16 }}>
 						<h3>{topic.name}</h3>
 						<div style={{ display: "grid", gap: 8 }}>
 							{topic.problems.map((problem) => (
-								<div key={problem.slug} className="problem-row">
+								<div key={problem.id} className="problem-row">
 									<button
 										type="button"
-										className={`problem-check ${solvedSlugs.has(problem.slug) ? "checked" : ""}`}
+										className={`problem-check ${solvedCodes.has(problem.code) ? "checked" : ""}`}
 										role="checkbox"
-										aria-checked={solvedSlugs.has(problem.slug)}
-										onClick={() => toggleSolved(problem.slug)}
-										disabled={savingSlugs.has(problem.slug)}
+										aria-checked={solvedCodes.has(
+											problem.code,
+										)}
+										onClick={() =>
+											toggleSolved(problem.code)
+										}
+										disabled={savingCodes.has(problem.code)}
 										aria-label={`Mark ${problem.name} as solved`}
 									/>
 									<a
@@ -154,33 +221,18 @@ export function ProblemSetPage() {
 										{problem.name}
 									</a>
 									<div className="platform-links">
-										<a
-											href={`https://www.geeksforgeeks.org/?s=${encodeURIComponent(problem.name)}`}
-											target="_blank"
-											rel="noreferrer"
-										>
-											GFG
-										</a>
-										<a
-											href={problem.url}
-											target="_blank"
-											rel="noreferrer"
-										>
-											LeetCode
-										</a>
-										<a
-											href={
-												problem.url.includes(
-													"neetcode.io",
-												)
-													? problem.url
-													: `https://neetcode.io/problems/${problem.slug}`
-											}
-											target="_blank"
-											rel="noreferrer"
-										>
-											NeetCode
-										</a>
+										{problemPlatformLinks(problem).map(
+											(link) => (
+												<a
+													key={link.label}
+													href={link.url}
+													target="_blank"
+													rel="noreferrer"
+												>
+													{link.label}
+												</a>
+											),
+										)}
 									</div>
 								</div>
 							))}
@@ -190,4 +242,4 @@ export function ProblemSetPage() {
 			</div>
 		</div>
 	);
-}
+};

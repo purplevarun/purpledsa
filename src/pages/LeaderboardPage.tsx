@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AppHeader } from "../app/AppHeader";
+import Header from "../app/Header";
 import { countUniqueSolvedByUser, type ProgressRow } from "../lib/progress";
 import { supabase, supabaseConfigError } from "../lib/supabase";
 
@@ -16,7 +16,7 @@ type LeaderboardEntry = {
 	solvedCount: number;
 };
 
-export function LeaderboardPage() {
+export const LeaderboardPage = () => {
 	const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -81,7 +81,7 @@ export function LeaderboardPage() {
 
 	return (
 		<div className="app-shell">
-			<AppHeader />
+			<Header />
 
 			<section className="card">
 				<h1 style={{ marginTop: 0 }}>Leaderboard</h1>
@@ -123,4 +123,4 @@ export function LeaderboardPage() {
 			</section>
 		</div>
 	);
-}
+};
