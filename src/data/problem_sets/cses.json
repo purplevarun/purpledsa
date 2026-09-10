@@ -1,0 +1,47 @@
+{
+	"slug": "cses",
+	"title": "CSES Problem Set",
+	"description": "Competitive programming essentials from CSES across intro, graphs, searching, and DP.",
+	"topics": [
+		{
+			"name": "Introductory Problems",
+			"problemCodes": [
+				"cses-1068",
+				"cses-1083",
+				"cses-1069",
+				"cses-1094",
+				"cses-1070"
+			]
+		},
+		{
+			"name": "Sorting and Searching",
+			"problemCodes": [
+				"cses-1621",
+				"cses-1084",
+				"cses-1090",
+				"cses-1091",
+				"cses-1619"
+			]
+		},
+		{
+			"name": "Dynamic Programming",
+			"problemCodes": [
+				"cses-1633",
+				"cses-1634",
+				"cses-1635",
+				"cses-1158",
+				"cses-1746"
+			]
+		},
+		{
+			"name": "Graph Algorithms",
+			"problemCodes": [
+				"cses-1192",
+				"cses-1193",
+				"cses-1667",
+				"cses-1668",
+				"cses-1671"
+			]
+		}
+	]
+}

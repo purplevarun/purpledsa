@@ -1,0 +1,54 @@
+{
+	"slug": "lld",
+	"title": "Low-Level Design (LLD)",
+	"description": "Machine-coding / object-oriented design problems — rate limiters, LRU caches, parking lots, and more.",
+	"topics": [
+		{
+			"name": "Caching",
+			"problemCodes": [
+				"design-lru-cache",
+				"design-lfu-cache",
+				"design-a-distributed-cache"
+			]
+		},
+		{
+			"name": "Concurrency Primitives",
+			"problemCodes": [
+				"design-a-rate-limiter",
+				"design-a-bounded-blocking-queue",
+				"design-a-thread-pool",
+				"design-a-circuit-breaker"
+			]
+		},
+		{
+			"name": "Classic Machine Coding Systems",
+			"problemCodes": [
+				"design-a-parking-lot-system",
+				"design-an-elevator-system",
+				"design-a-vending-machine",
+				"design-an-atm-machine",
+				"design-a-logging-framework",
+				"design-an-in-memory-file-system",
+				"design-a-notification-system"
+			]
+		},
+		{
+			"name": "Booking & Marketplace Systems",
+			"problemCodes": [
+				"design-a-movie-ticket-booking-system",
+				"design-a-hotel-booking-system",
+				"design-splitwise-expense-sharing",
+				"design-a-car-rental-system",
+				"design-a-url-shortener"
+			]
+		},
+		{
+			"name": "Games",
+			"problemCodes": [
+				"design-tic-tac-toe",
+				"design-a-snake-and-ladder-game",
+				"design-a-chess-game"
+			]
+		}
+	]
+}

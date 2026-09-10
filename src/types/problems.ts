@@ -1,6 +1,8 @@
 export type Difficulty = "E" | "M" | "H";
 
 export interface Problem {
+	id: string;
+	code: string;
 	order: number;
 	slug: string;
 	name: string;

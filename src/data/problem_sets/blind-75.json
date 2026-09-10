@@ -1,0 +1,55 @@
+{
+	"slug": "blind-75",
+	"title": "Blind 75",
+	"description": "The famous 75-problem interview list focused on high-frequency fundamentals.",
+	"topics": [
+		{
+			"name": "Array",
+			"problemCodes": [
+				"two-sum",
+				"best-time-to-buy-and-sell-stock",
+				"contains-duplicate",
+				"product-of-array-except-self",
+				"maximum-subarray"
+			]
+		},
+		{
+			"name": "Binary",
+			"problemCodes": [
+				"sum-of-two-integers",
+				"number-of-1-bits",
+				"counting-bits",
+				"reverse-bits"
+			]
+		},
+		{
+			"name": "Dynamic Programming",
+			"problemCodes": [
+				"climbing-stairs",
+				"coin-change",
+				"longest-increasing-subsequence",
+				"word-break",
+				"house-robber"
+			]
+		},
+		{
+			"name": "Graphs and Trees",
+			"problemCodes": [
+				"clone-graph",
+				"course-schedule",
+				"number-of-islands",
+				"binary-tree-level-order-traversal",
+				"validate-binary-search-tree"
+			]
+		},
+		{
+			"name": "Intervals and Heap",
+			"problemCodes": [
+				"insert-interval",
+				"merge-intervals",
+				"meeting-rooms-ii-2",
+				"top-k-frequent-elements"
+			]
+		}
+	]
+}

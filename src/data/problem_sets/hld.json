@@ -1,0 +1,42 @@
+{
+	"slug": "hld",
+	"title": "High-Level Design (HLD)",
+	"description": "Top system design interview problems spanning distributed systems, messaging, feeds, and payments.",
+	"topics": [
+		{
+			"name": "Core Distributed Systems",
+			"problemCodes": [
+				"design-url-shortener",
+				"design-rate-limiter-at-scale",
+				"design-distributed-cache",
+				"design-api-gateway"
+			]
+		},
+		{
+			"name": "Realtime and Messaging",
+			"problemCodes": [
+				"design-real-time-chat",
+				"design-notification-system",
+				"design-pub-sub-messaging-platform"
+			]
+		},
+		{
+			"name": "Data Platforms",
+			"problemCodes": [
+				"design-search-autocomplete",
+				"design-news-feed",
+				"design-recommendation-system",
+				"design-analytics-event-pipeline"
+			]
+		},
+		{
+			"name": "Top Asked Interview Systems",
+			"problemCodes": [
+				"design-ride-sharing-platform",
+				"design-food-delivery-platform",
+				"design-video-streaming-platform",
+				"design-payment-system"
+			]
+		}
+	]
+}

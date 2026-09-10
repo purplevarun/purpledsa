@@ -1,0 +1,3974 @@
+[
+	{
+		"id": "dsa-0012",
+		"code": "3sum",
+		"slug": "3sum",
+		"name": "3Sum",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/3sum/",
+		"locked": false,
+		"hints": [
+			"Fix one number, then the rest becomes a Two Sum on a sorted array.",
+			"Sort first, then for each index use two pointers on the remainder to find pairs summing to its negative.",
+			"Skip over duplicate values at every pointer to avoid duplicate triplets."
+		]
+	},
+	{
+		"id": "dsa-0193",
+		"code": "accounts-merge",
+		"slug": "accounts-merge",
+		"name": "Accounts Merge",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/accounts-merge/",
+		"locked": false,
+		"hints": [
+			"Accounts sharing any email should be merged into one — that's a Union-Find grouping problem.",
+			"Union all accounts that share at least one email, using the first-seen account for each email to detect overlaps.",
+			"After unioning, group emails by their root account and sort each group's emails before output."
+		]
+	},
+	{
+		"id": "dsa-0040",
+		"code": "add-two-numbers",
+		"slug": "add-two-numbers",
+		"name": "Add Two Numbers",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/add-two-numbers/",
+		"locked": false,
+		"hints": [
+			"Digits are stored in reverse order, so you can add from the least significant digit directly.",
+			"Track a carry value as you sum corresponding digits from both lists.",
+			"Don't forget a final extra node if a carry remains after both lists are exhausted."
+		]
+	},
+	{
+		"id": "dsa-0097",
+		"code": "alien-dictionary",
+		"slug": "alien-dictionary",
+		"name": "Alien Dictionary",
+		"difficulty": "H",
+		"url": "https://neetcode.io/problems/foreign-dictionary",
+		"locked": false,
+		"hints": [
+			"Word order implies letter order — the first differing character between adjacent words gives you one ordering constraint.",
+			"Build a directed graph of \"this letter comes before that letter,\" then topologically sort it.",
+			"Watch the edge case where a later word is a prefix of an earlier one — that's invalid and has no valid ordering."
+		]
+	},
+	{
+		"id": "dsa-0049",
+		"code": "balanced-binary-tree",
+		"slug": "balanced-binary-tree",
+		"name": "Balanced Binary Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/balanced-binary-tree/",
+		"locked": false,
+		"hints": [
+			"Balanced means every node's two subtrees differ in height by at most 1.",
+			"A naive check recomputes height repeatedly — instead, have height-checking return -1 as an \"unbalanced\" signal.",
+			"Once any subtree reports unbalanced, short-circuit and propagate that -1 straight up without further checking."
+		]
+	},
+	{
+		"id": "dsa-0171",
+		"code": "basic-calculator-ii",
+		"slug": "basic-calculator-ii",
+		"name": "Basic Calculator II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/basic-calculator-ii/",
+		"locked": false,
+		"hints": [
+			"Without parentheses, you just need to respect */ having higher precedence than +-.",
+			"Track a running stack of terms; for + and -, push the (signed) number; for * and /, combine with the top of the stack immediately.",
+			"Summing the stack at the end naturally applies correct operator precedence."
+		]
+	},
+	{
+		"id": "dsa-0015",
+		"code": "best-time-to-buy-and-sell-stock",
+		"slug": "best-time-to-buy-and-sell-stock",
+		"name": "Best Time to Buy and Sell Stock",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+		"locked": false,
+		"hints": [
+			"You only need one pass, tracking the minimum price seen so far.",
+			"At each day, the best possible profit is today's price minus the minimum-so-far.",
+			"Track a running max-profit as you go rather than storing every price."
+		]
+	},
+	{
+		"id": "dsa-0113",
+		"code": "best-time-to-buy-and-sell-stock-with-cooldown",
+		"slug": "best-time-to-buy-and-sell-stock-with-cooldown",
+		"name": "Best Time to Buy and Sell Stock with Cooldown",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/",
+		"locked": false,
+		"hints": [
+			"After selling, you can't buy the very next day — that's the twist versus a plain buy/sell problem.",
+			"Track separate running states for holding a stock, just sold (in cooldown), and free to buy.",
+			"Each day, each state's new value depends only on yesterday's states — no need to store more than the previous day."
+		]
+	},
+	{
+		"id": "dsa-0028",
+		"code": "binary-search",
+		"slug": "binary-search",
+		"name": "Binary Search",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/binary-search/",
+		"locked": false,
+		"hints": [
+			"Compare the middle element to the target and eliminate half the space each time.",
+			"Use left <= right as your loop condition to avoid missing the last element.",
+			"Watch for integer overflow when computing mid — use left + (right-left)/2."
+		]
+	},
+	{
+		"id": "dsa-0176",
+		"code": "binary-search-tree-iterator",
+		"slug": "binary-search-tree-iterator",
+		"name": "Binary Search Tree Iterator",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/binary-search-tree-iterator/",
+		"locked": false,
+		"hints": [
+			"You need next() and hasNext() in average O(1), which rules out a full precomputed in-order list for large trees.",
+			"Maintain a stack, pushing all left-children down to the leftmost node initially.",
+			"On next(), pop a node, and if it has a right child, push that child and all of its left descendants."
+		]
+	},
+	{
+		"id": "dsa-0053",
+		"code": "binary-tree-level-order-traversal",
+		"slug": "binary-tree-level-order-traversal",
+		"name": "Binary Tree Level Order Traversal",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/binary-tree-level-order-traversal/",
+		"locked": false,
+		"hints": [
+			"You need to group nodes by level, so a plain DFS needs extra bookkeeping — BFS is more natural.",
+			"Use a queue, and process it one full level at a time by tracking the queue's size at the start of each level.",
+			"For each of those \"size\" nodes, dequeue it, record its value, and enqueue its children before moving to the next level."
+		]
+	},
+	{
+		"id": "dsa-0059",
+		"code": "binary-tree-maximum-path-sum",
+		"slug": "binary-tree-maximum-path-sum",
+		"name": "Binary Tree Maximum Path Sum",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/binary-tree-maximum-path-sum/",
+		"locked": false,
+		"hints": [
+			"A path can start and end anywhere, and doesn't have to pass through the root.",
+			"At each node, the best path through it is node value plus the best of (left, 0) plus the best of (right, 0), clamping negative contributions to zero.",
+			"What you return upward to the parent is different — only node value plus the better single side, since a path can't branch through a node it's passing through."
+		]
+	},
+	{
+		"id": "dsa-0054",
+		"code": "binary-tree-right-side-view",
+		"slug": "binary-tree-right-side-view",
+		"name": "Binary Tree Right Side View",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/binary-tree-right-side-view/",
+		"locked": false,
+		"hints": [
+			"You want the last node visible at each level, looking from the right.",
+			"A level-order (BFS) traversal naturally lets you grab the last node processed at each level.",
+			"Alternatively, DFS right-before-left and record the first node seen at each new depth."
+		]
+	},
+	{
+		"id": "dsa-0196",
+		"code": "bitwise-and-of-numbers-range",
+		"slug": "bitwise-and-of-numbers-range",
+		"name": "Bitwise AND of Numbers Range",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/bitwise-and-of-numbers-range/",
+		"locked": false,
+		"hints": [
+			"The AND of a whole range only keeps bits that stay constant across every number in it.",
+			"Repeatedly right-shift both m and n together until they're equal — that shared prefix is the common bits.",
+			"Shift the result back left by however many shifts you performed to restore the original bit positions."
+		]
+	},
+	{
+		"id": "striver-book-allocation-problem",
+		"code": "book-allocation-problem",
+		"slug": "book-allocation-problem",
+		"name": "Allocate Minimum Pages",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/allocate-minimum-number-of-pages0937/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/allocate-minimum-number-of-pages0937/1"
+	},
+	{
+		"id": "striver-bottom-view-of-bt",
+		"code": "bottom-view-of-bt",
+		"slug": "bottom-view-of-bt",
+		"name": "Bottom View of Binary Tree",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/bottom-view-of-binary-tree/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/bottom-view-of-binary-tree/1"
+	},
+	{
+		"id": "dsa-0120",
+		"code": "burst-balloons",
+		"slug": "burst-balloons",
+		"name": "Burst Balloons",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/burst-balloons/",
+		"locked": false,
+		"hints": [
+			"Think about which balloon you burst LAST in a given range, not first — that reframes it into clean subproblems.",
+			"dp[i][j] is the best score for bursting all balloons strictly between i and j, given i and j survive as boundaries.",
+			"Try every possible last-balloon-burst k inside (i, j), and combine dp[i][k] + dp[k][j] + the product of the three boundary values."
+		]
+	},
+	{
+		"id": "dsa-0192",
+		"code": "candy",
+		"slug": "candy",
+		"name": "Candy",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/candy/",
+		"locked": false,
+		"hints": [
+			"Every child must get at least one candy, and a child with a higher rating than a neighbor needs more candy than that neighbor.",
+			"Do two passes: left to right, bump a candy count whenever the current rating beats the previous; right to left, do the same in reverse.",
+			"Combine both passes by taking the max of the two computed values at each position."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/candy/1"
+	},
+	{
+		"id": "dsa-0026",
+		"code": "car-fleet",
+		"slug": "car-fleet",
+		"name": "Car Fleet",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/car-fleet/",
+		"locked": false,
+		"hints": [
+			"Sort by starting position — only the car closest to the destination can \"lead\" a fleet.",
+			"Compute each car's arrival time if it never had to slow down.",
+			"Process from closest-to-destination backward; a car merges into the fleet ahead if its time is at most the fleet leader's."
+		]
+	},
+	{
+		"id": "dsa-0098",
+		"code": "cheapest-flights-within-k-stops",
+		"slug": "cheapest-flights-within-k-stops",
+		"name": "Cheapest Flights Within K Stops",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/cheapest-flights-within-k-stops/",
+		"locked": false,
+		"hints": [
+			"Plain Dijkstra doesn't account for the \"at most K stops\" limit directly.",
+			"Bellman-Ford, relaxing edges for at most K+1 rounds, naturally respects the stop limit.",
+			"Use the previous round's costs (not values already updated this round) so you don't chain more than one extra stop per round."
+		]
+	},
+	{
+		"id": "dsa-0099",
+		"code": "climbing-stairs",
+		"slug": "climbing-stairs",
+		"name": "Climbing Stairs",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/climbing-stairs/",
+		"locked": false,
+		"hints": [
+			"To reach step n, you came from either step n-1 or step n-2.",
+			"That means ways(n) = ways(n-1) + ways(n-2) — this is just Fibonacci in disguise.",
+			"You only need the last two values at any point, so you can solve it in O(1) space."
+		]
+	},
+	{
+		"id": "dsa-0081",
+		"code": "clone-graph",
+		"slug": "clone-graph",
+		"name": "Clone Graph",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/clone-graph/",
+		"locked": false,
+		"hints": [
+			"You need to recreate every node and every edge without infinite-looping on cycles.",
+			"A hash map from original node to cloned node lets you detect \"already cloned\" and avoid revisiting.",
+			"Clone a node the first time you see it, then recurse into its neighbors, wiring up clones via the map."
+		]
+	},
+	{
+		"id": "essentials-codechef-cielrcpt",
+		"code": "codechef-cielrcpt",
+		"slug": "codechef-cielrcpt",
+		"hints": [],
+		"name": "Ciel and Receipt",
+		"difficulty": "E",
+		"url": "https://www.codechef.com/problems/CIELRCPT",
+		"locked": false
+	},
+	{
+		"id": "essentials-codechef-fctrl",
+		"code": "codechef-fctrl",
+		"slug": "codechef-fctrl",
+		"hints": [],
+		"name": "Factorial",
+		"difficulty": "E",
+		"url": "https://www.codechef.com/problems/FCTRL",
+		"locked": false
+	},
+	{
+		"id": "essentials-codechef-firesc",
+		"code": "codechef-firesc",
+		"slug": "codechef-firesc",
+		"hints": [],
+		"name": "Fire Escape Routes",
+		"difficulty": "M",
+		"url": "https://www.codechef.com/problems/FIRESC",
+		"locked": false
+	},
+	{
+		"id": "essentials-codechef-intest",
+		"code": "codechef-intest",
+		"slug": "codechef-intest",
+		"hints": [],
+		"name": "Enormous Input Test",
+		"difficulty": "E",
+		"url": "https://www.codechef.com/problems/INTEST",
+		"locked": false
+	},
+	{
+		"id": "essentials-codechef-lapin",
+		"code": "codechef-lapin",
+		"slug": "codechef-lapin",
+		"hints": [],
+		"name": "Lapindromes",
+		"difficulty": "E",
+		"url": "https://www.codechef.com/problems/LAPIN",
+		"locked": false
+	},
+	{
+		"id": "essentials-codechef-prb01",
+		"code": "codechef-prb01",
+		"slug": "codechef-prb01",
+		"hints": [],
+		"name": "Primality Test",
+		"difficulty": "E",
+		"url": "https://www.codechef.com/problems/PRB01",
+		"locked": false
+	},
+	{
+		"id": "essentials-codechef-tsort",
+		"code": "codechef-tsort",
+		"slug": "codechef-tsort",
+		"hints": [],
+		"name": "Simple Sorting",
+		"difficulty": "E",
+		"url": "https://www.codechef.com/problems/TSORT",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-1352-c",
+		"code": "codeforces-1352-c",
+		"slug": "codeforces-1352-c",
+		"hints": [],
+		"name": "K-th Not Divisible by n",
+		"difficulty": "E",
+		"url": "https://codeforces.com/problemset/problem/1352/C",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-230-b",
+		"code": "codeforces-230-b",
+		"slug": "codeforces-230-b",
+		"hints": [],
+		"name": "T-primes",
+		"difficulty": "M",
+		"url": "https://codeforces.com/problemset/problem/230/B",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-279-b",
+		"code": "codeforces-279-b",
+		"slug": "codeforces-279-b",
+		"hints": [],
+		"name": "Books",
+		"difficulty": "M",
+		"url": "https://codeforces.com/problemset/problem/279/B",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-363-b",
+		"code": "codeforces-363-b",
+		"slug": "codeforces-363-b",
+		"hints": [],
+		"name": "Fence",
+		"difficulty": "E",
+		"url": "https://codeforces.com/problemset/problem/363/B",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-371-c",
+		"code": "codeforces-371-c",
+		"slug": "codeforces-371-c",
+		"hints": [],
+		"name": "Hamburgers",
+		"difficulty": "M",
+		"url": "https://codeforces.com/problemset/problem/371/C",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-455-a",
+		"code": "codeforces-455-a",
+		"slug": "codeforces-455-a",
+		"hints": [],
+		"name": "Boredom",
+		"difficulty": "M",
+		"url": "https://codeforces.com/problemset/problem/455/A",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-474-b",
+		"code": "codeforces-474-b",
+		"slug": "codeforces-474-b",
+		"hints": [],
+		"name": "Worms",
+		"difficulty": "E",
+		"url": "https://codeforces.com/problemset/problem/474/B",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-546-a",
+		"code": "codeforces-546-a",
+		"slug": "codeforces-546-a",
+		"hints": [],
+		"name": "Soldier and Bananas",
+		"difficulty": "E",
+		"url": "https://codeforces.com/problemset/problem/546/A",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-580-c",
+		"code": "codeforces-580-c",
+		"slug": "codeforces-580-c",
+		"hints": [],
+		"name": "Kefa and Park",
+		"difficulty": "M",
+		"url": "https://codeforces.com/problemset/problem/580/C",
+		"locked": false
+	},
+	{
+		"id": "essentials-codeforces-706-b",
+		"code": "codeforces-706-b",
+		"slug": "codeforces-706-b",
+		"hints": [],
+		"name": "Interesting drink",
+		"difficulty": "E",
+		"url": "https://codeforces.com/problemset/problem/706/B",
+		"locked": false
+	},
+	{
+		"id": "dsa-0106",
+		"code": "coin-change",
+		"slug": "coin-change",
+		"name": "Coin Change",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/coin-change/",
+		"locked": false,
+		"hints": [
+			"This is bottom-up: figure out the min coins for every amount from 0 up to the target.",
+			"minCoins(amount) = 1 + the minimum over every coin at most amount of minCoins(amount - coin).",
+			"Initialize impossible amounts to infinity, and if the target amount is still infinity at the end, return -1."
+		]
+	},
+	{
+		"id": "dsa-0114",
+		"code": "coin-change-ii",
+		"slug": "coin-change-ii",
+		"name": "Coin Change II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/coin-change-ii/",
+		"locked": false,
+		"hints": [
+			"Unlike Coin Change (min coins), here you're counting the number of distinct combinations that sum to the target.",
+			"Process one coin type at a time, updating reachable-amount counts, so order doesn't create duplicate combinations.",
+			"Iterate amounts upward (not downward) per coin, since reusing the same coin multiple times is allowed here."
+		]
+	},
+	{
+		"id": "dsa-0072",
+		"code": "combination-sum",
+		"slug": "combination-sum",
+		"name": "Combination Sum",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/combination-sum/",
+		"locked": false,
+		"hints": [
+			"The same number can be reused, so your recursion should allow revisiting the current index.",
+			"At each step, either include the current candidate again or move to the next candidate.",
+			"Sort first so you can break early once the remaining target goes negative."
+		]
+	},
+	{
+		"id": "dsa-0075",
+		"code": "combination-sum-ii",
+		"slug": "combination-sum-ii",
+		"name": "Combination Sum II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/combination-sum-ii/",
+		"locked": false,
+		"hints": [
+			"Unlike Combination Sum, each number can only be used once here.",
+			"Sort first, then advance the index by one each recursive call instead of allowing reuse.",
+			"Use the same skip-identical-siblings trick as Subsets II to avoid duplicate combinations."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/combination-sum-ii-1664263832/1"
+	},
+	{
+		"id": "dsa-0190",
+		"code": "combinations",
+		"slug": "combinations",
+		"name": "Combinations",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/combinations/",
+		"locked": false,
+		"hints": [
+			"You're choosing k elements out of n where order doesn't matter.",
+			"Recurse with a start index, only ever moving forward, to avoid generating the same combination twice.",
+			"Prune early once the remaining elements available can't possibly fill out the combination to size k."
+		]
+	},
+	{
+		"id": "dsa-0058",
+		"code": "construct-binary-tree-from-preorder-and-inorder-traversal",
+		"slug": "construct-binary-tree-from-preorder-and-inorder-traversal",
+		"name": "Construct Binary Tree from Preorder and Inorder Traversal",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/",
+		"locked": false,
+		"hints": [
+			"Preorder's first element is always the current subtree's root.",
+			"Find that root's position in the inorder slice — everything left of it is the left subtree, everything right is the right subtree.",
+			"A hash map from value to inorder index turns that lookup into O(1) instead of a scan."
+		]
+	},
+	{
+		"id": "dsa-0013",
+		"code": "container-with-most-water",
+		"slug": "container-with-most-water",
+		"name": "Container With Most Water",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/container-with-most-water/",
+		"locked": false,
+		"hints": [
+			"The brute-force pair check is O(n^2) — two pointers gets you to O(n).",
+			"Start at both ends; area is limited by the shorter line, so move that pointer inward.",
+			"Moving the taller line inward can only ever decrease or keep the width-limited area, never help."
+		]
+	},
+	{
+		"id": "dsa-0001",
+		"code": "contains-duplicate",
+		"slug": "contains-duplicate",
+		"name": "Contains Duplicate",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/contains-duplicate/",
+		"locked": false,
+		"hints": [
+			"Think about what data structure gives O(1) membership checks.",
+			"A set lets you check \"have I seen this before\" in one pass.",
+			"If the set's final size is smaller than the array, a duplicate exists."
+		]
+	},
+	{
+		"id": "dsa-0177",
+		"code": "convert-sorted-array-to-binary-search-tree",
+		"slug": "convert-sorted-array-to-binary-search-tree",
+		"name": "Convert Sorted Array to Binary Search Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/",
+		"locked": false,
+		"hints": [
+			"A height-balanced BST from sorted data naturally picks the middle element as the root.",
+			"Recursively pick the middle of each subarray range as that subtree's root.",
+			"Recurse on the left half for the left subtree and the right half for the right subtree."
+		]
+	},
+	{
+		"id": "dsa-0039",
+		"code": "copy-list-with-random-pointer",
+		"slug": "copy-list-with-random-pointer",
+		"name": "Copy List with Random Pointer",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/copy-list-with-random-pointer/",
+		"locked": false,
+		"hints": [
+			"The tricky part is the random pointer, which can point anywhere, including forward.",
+			"A hash map from original node to cloned node lets you look up any random target instantly.",
+			"Do it in two passes: first create all clone nodes, then wire up next and random using the map."
+		]
+	},
+	{
+		"id": "striver-count-all-digits-of-a-number",
+		"code": "count-all-digits-of-a-number",
+		"slug": "count-all-digits-of-a-number",
+		"name": "Count Digits in a Number",
+		"difficulty": "E",
+		"url": "https://www.geeksforgeeks.org/problems/count-total-digits-in-a-number/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/count-total-digits-in-a-number/1"
+	},
+	{
+		"id": "dsa-0055",
+		"code": "count-good-nodes-in-binary-tree",
+		"slug": "count-good-nodes-in-binary-tree",
+		"name": "Count Good Nodes in Binary Tree",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/count-good-nodes-in-binary-tree/",
+		"locked": false,
+		"hints": [
+			"A node is \"good\" if no ancestor on its path from the root has a greater value.",
+			"Pass the maximum value seen so far down the recursion as you descend.",
+			"At each node, compare it to that running max — if it's at least as big, count it and update the max for its children."
+		]
+	},
+	{
+		"id": "striver-count-subarrays-with-given-sum",
+		"code": "count-subarrays-with-given-sum",
+		"slug": "count-subarrays-with-given-sum",
+		"name": "Subarray Sum Equals K",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/subarray-sum-equals-k/",
+		"locked": false,
+		"hints": []
+	},
+	{
+		"id": "dsa-0146",
+		"code": "counting-bits",
+		"slug": "counting-bits",
+		"name": "Counting Bits",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/counting-bits/",
+		"locked": false,
+		"hints": [
+			"You can reuse previously computed answers instead of recounting bits from scratch for every number.",
+			"The bit count of i equals the bit count of (i with its lowest set bit removed), plus 1.",
+			"i AND (i-1) is that \"lowest set bit removed\" value, and it's always smaller than i, so it's already computed."
+		]
+	},
+	{
+		"id": "dsa-0087",
+		"code": "course-schedule",
+		"slug": "course-schedule",
+		"name": "Course Schedule",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/course-schedule/",
+		"locked": false,
+		"hints": [
+			"This is really \"does this dependency graph contain a cycle?\"",
+			"Track each course's in-degree (prerequisite count) and process courses with zero remaining prerequisites first.",
+			"If you can process every course this way (Kahn's algorithm), there's no cycle; if some remain stuck, a cycle exists."
+		]
+	},
+	{
+		"id": "dsa-0088",
+		"code": "course-schedule-ii",
+		"slug": "course-schedule-ii",
+		"name": "Course Schedule II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/course-schedule-ii/",
+		"locked": false,
+		"hints": [
+			"Same cycle-detection idea as Course Schedule, but now you also need the valid order itself.",
+			"Kahn's algorithm naturally produces a valid order as a side effect of processing zero-in-degree nodes.",
+			"If the resulting order doesn't include every course, a cycle exists — return an empty array."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/course-schedule/1"
+	},
+	{
+		"id": "dsa-0209",
+		"code": "cses-1068",
+		"slug": "cses-1068",
+		"name": "Weird Algorithm",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1068/",
+		"locked": false,
+		"hints": ["Simulate Collatz sequence until 1."]
+	},
+	{
+		"id": "dsa-0211",
+		"code": "cses-1069",
+		"slug": "cses-1069",
+		"name": "Repetitions",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1069/",
+		"locked": false,
+		"hints": ["Track longest contiguous equal characters."]
+	},
+	{
+		"id": "dsa-0213",
+		"code": "cses-1070",
+		"slug": "cses-1070",
+		"name": "Permutation",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1070/",
+		"locked": false,
+		"hints": ["Handle small n separately, then print evens then odds."]
+	},
+	{
+		"id": "dsa-0210",
+		"code": "cses-1083",
+		"slug": "cses-1083",
+		"name": "Missing Number",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1083/",
+		"locked": false,
+		"hints": ["Use sum formula or xor to find missing value."]
+	},
+	{
+		"id": "dsa-0215",
+		"code": "cses-1084",
+		"slug": "cses-1084",
+		"name": "Apartments",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1084/",
+		"locked": false,
+		"hints": ["Two pointers over sorted applicants and apartments."]
+	},
+	{
+		"id": "dsa-0216",
+		"code": "cses-1090",
+		"slug": "cses-1090",
+		"name": "Ferris Wheel",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1090/",
+		"locked": false,
+		"hints": ["Pair lightest with heaviest greedily."]
+	},
+	{
+		"id": "dsa-0217",
+		"code": "cses-1091",
+		"slug": "cses-1091",
+		"name": "Concert Tickets",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1091/",
+		"locked": false,
+		"hints": ["Multiset / tree map predecessor query per customer."]
+	},
+	{
+		"id": "dsa-0212",
+		"code": "cses-1094",
+		"slug": "cses-1094",
+		"name": "Increasing Array",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1094/",
+		"locked": false,
+		"hints": ["Greedily raise each element to previous max."]
+	},
+	{
+		"id": "dsa-0222",
+		"code": "cses-1158",
+		"slug": "cses-1158",
+		"name": "Book Shop",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1158/",
+		"locked": false,
+		"hints": ["0/1 knapsack over price-value pairs."]
+	},
+	{
+		"id": "dsa-0224",
+		"code": "cses-1192",
+		"slug": "cses-1192",
+		"name": "Counting Rooms",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1192/",
+		"locked": false,
+		"hints": ["Count connected components in grid using DFS/BFS."]
+	},
+	{
+		"id": "dsa-0225",
+		"code": "cses-1193",
+		"slug": "cses-1193",
+		"name": "Labyrinth",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1193/",
+		"locked": false,
+		"hints": ["BFS shortest path and parent reconstruction."]
+	},
+	{
+		"id": "dsa-0218",
+		"code": "cses-1619",
+		"slug": "cses-1619",
+		"name": "Restaurant Customers",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1619/",
+		"locked": false,
+		"hints": ["Sweep line with sorted arrivals/departures."]
+	},
+	{
+		"id": "dsa-0214",
+		"code": "cses-1621",
+		"slug": "cses-1621",
+		"name": "Distinct Numbers",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1621/",
+		"locked": false,
+		"hints": ["Count unique using set after reading all values."]
+	},
+	{
+		"id": "dsa-0219",
+		"code": "cses-1633",
+		"slug": "cses-1633",
+		"name": "Dice Combinations",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1633/",
+		"locked": false,
+		"hints": ["dp[x] = sum(dp[x-1..x-6])."]
+	},
+	{
+		"id": "dsa-0220",
+		"code": "cses-1634",
+		"slug": "cses-1634",
+		"name": "Minimizing Coins",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1634/",
+		"locked": false,
+		"hints": ["Classic min-coin unbounded knapsack DP."]
+	},
+	{
+		"id": "dsa-0221",
+		"code": "cses-1635",
+		"slug": "cses-1635",
+		"name": "Coin Combinations I",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1635/",
+		"locked": false,
+		"hints": ["Count ordered ways using DP by sum."]
+	},
+	{
+		"id": "essentials-cses-1646",
+		"code": "cses-1646",
+		"slug": "cses-1646",
+		"hints": [],
+		"name": "Static Range Sum Queries",
+		"difficulty": "E",
+		"url": "https://cses.fi/problemset/task/1646/",
+		"locked": false
+	},
+	{
+		"id": "essentials-cses-1648",
+		"code": "cses-1648",
+		"slug": "cses-1648",
+		"hints": [],
+		"name": "Dynamic Range Sum Queries",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1648/",
+		"locked": false
+	},
+	{
+		"id": "essentials-cses-1649",
+		"code": "cses-1649",
+		"slug": "cses-1649",
+		"hints": [],
+		"name": "Dynamic Range Minimum Queries",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1649/",
+		"locked": false
+	},
+	{
+		"id": "dsa-0226",
+		"code": "cses-1667",
+		"slug": "cses-1667",
+		"name": "Message Route",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1667/",
+		"locked": false,
+		"hints": ["Unweighted shortest path via BFS."]
+	},
+	{
+		"id": "dsa-0227",
+		"code": "cses-1668",
+		"slug": "cses-1668",
+		"name": "Building Teams",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1668/",
+		"locked": false,
+		"hints": ["Check bipartite coloring with BFS/DFS."]
+	},
+	{
+		"id": "dsa-0228",
+		"code": "cses-1671",
+		"slug": "cses-1671",
+		"name": "Shortest Routes I",
+		"difficulty": "H",
+		"url": "https://cses.fi/problemset/task/1671/",
+		"locked": false,
+		"hints": ["Dijkstra from source over adjacency list."]
+	},
+	{
+		"id": "dsa-0223",
+		"code": "cses-1746",
+		"slug": "cses-1746",
+		"name": "Array Description",
+		"difficulty": "M",
+		"url": "https://cses.fi/problemset/task/1746/",
+		"locked": false,
+		"hints": ["DP by index and value with neighbor transitions."]
+	},
+	{
+		"id": "dsa-0025",
+		"code": "daily-temperatures",
+		"slug": "daily-temperatures",
+		"name": "Daily Temperatures",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/daily-temperatures/",
+		"locked": false,
+		"hints": [
+			"For each day you need the next day with a higher temperature — a stack tracks \"waiting\" days.",
+			"Keep a monotonically decreasing stack of indices (temperatures decreasing top to bottom).",
+			"When a warmer day appears, pop and resolve every colder day still on the stack in one pass."
+		]
+	},
+	{
+		"id": "dsa-0105",
+		"code": "decode-ways",
+		"slug": "decode-ways",
+		"name": "Decode Ways",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/decode-ways/",
+		"locked": false,
+		"hints": [
+			"Each position can potentially be decoded alone, or paired with the next digit — but not always.",
+			"ways(i) = ways(i-1) if digit i is valid alone, plus ways(i-2) if digits i-1 and i form a valid 10-26 pair.",
+			"A zero can never stand alone — it's only valid as the second digit of a 10 or 20 pair."
+		]
+	},
+	{
+		"id": "dsa-0233",
+		"code": "design-a-bounded-blocking-queue",
+		"slug": "design-a-bounded-blocking-queue",
+		"name": "Design a Bounded Blocking Queue",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Bounded%20Blocking%20Queue%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Producers block when full, consumers block when empty — classic producer-consumer.",
+			"Use a mutex plus two condition variables (not-full, not-empty), or a language-native construct (e.g. Java's `ReentrantLock` + `Condition`).",
+			"Handle spurious wakeups by re-checking the condition in a while-loop, not an if-check."
+		]
+	},
+	{
+		"id": "dsa-0246",
+		"code": "design-a-car-rental-system",
+		"slug": "design-a-car-rental-system",
+		"name": "Design a Car Rental System",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Car%20Rental%20System%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core entities: Vehicle, Branch (location + inventory), Reservation (date range + vehicle category).",
+			"Availability search should filter by branch, date range, and vehicle category simultaneously.",
+			"Pricing depends on rental duration and vehicle category — model it as a separate pricing strategy, not inline logic."
+		]
+	},
+	{
+		"id": "dsa-0250",
+		"code": "design-a-chess-game",
+		"slug": "design-a-chess-game",
+		"name": "Design a Chess Game",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20a%20Chess%20Game%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core classes: Board, Piece (abstract, with subclasses per piece type implementing move validation), Move, Player.",
+			"Each piece subclass implements its own `isValidMove()` — this is the textbook Strategy/polymorphism example for LLD interviews.",
+			"Check/checkmate detection is the hardest part: after any candidate move, simulate it and verify the player's own king isn't left in check."
+		]
+	},
+	{
+		"id": "dsa-0235",
+		"code": "design-a-circuit-breaker",
+		"slug": "design-a-circuit-breaker",
+		"name": "Design a Circuit Breaker",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Circuit%20Breaker%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Three states: Closed (calls flow normally), Open (calls fail fast), Half-Open (a trial call tests recovery).",
+			"Track a rolling failure count/rate to decide when to trip from Closed to Open.",
+			"After a cooldown period, allow one trial request through (Half-Open) — success closes the circuit, failure reopens it."
+		]
+	},
+	{
+		"id": "dsa-0231",
+		"code": "design-a-distributed-cache",
+		"slug": "design-a-distributed-cache",
+		"name": "Design a Distributed Cache",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20a%20Distributed%20Cache%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Think about consistent hashing to shard keys across nodes without a full rehash on scale-out.",
+			"Core components: Node ring, hash function, replication factor for fault tolerance.",
+			"Consider cache invalidation strategy (TTL vs. write-through vs. write-back) as a first-class design decision."
+		]
+	},
+	{
+		"id": "dsa-0244",
+		"code": "design-a-hotel-booking-system",
+		"slug": "design-a-hotel-booking-system",
+		"name": "Design a Hotel Booking System",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Hotel%20Booking%20System%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core entities: Hotel, RoomType, Room, Reservation — a Reservation spans a date range, not just a single day.",
+			"Availability checking is a range-overlap problem per room — index reservations by room and date range for fast lookups.",
+			"Keep pricing (seasonal/dynamic rates) as a pluggable strategy separate from the reservation/availability logic."
+		]
+	},
+	{
+		"id": "dsa-0240",
+		"code": "design-a-logging-framework",
+		"slug": "design-a-logging-framework",
+		"name": "Design a Logging Framework",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Logging%20Framework%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core interface: `Logger.log(level, message)`, with a chain of LogAppenders (console, file, network) that can be added independently.",
+			"Use the Chain of Responsibility pattern for log level filtering — each handler decides whether to pass a message along.",
+			"Make the log format and destination configurable without changing call sites — that's the whole point of the abstraction."
+		]
+	},
+	{
+		"id": "dsa-0243",
+		"code": "design-a-movie-ticket-booking-system",
+		"slug": "design-a-movie-ticket-booking-system",
+		"name": "Design a Movie Ticket Booking System",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20a%20Movie%20Ticket%20Booking%20System%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core entities: Theater, Screen, Show (a Movie at a Screen at a time), Seat, Booking.",
+			"Concurrent seat selection is the crux of the design — use pessimistic locking (or a short-lived \"hold\" with expiry) to prevent double-booking.",
+			"Separate seat pricing (category-based) from booking/payment flow so pricing rules can evolve independently."
+		]
+	},
+	{
+		"id": "dsa-0242",
+		"code": "design-a-notification-system",
+		"slug": "design-a-notification-system",
+		"name": "Design a Notification System",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Notification%20System%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core interface: `NotificationService.send(user, message, channel)`, with channel as a strategy (email/SMS/push).",
+			"Use the Observer pattern if notifications are triggered by domain events (e.g. \"order shipped\") rather than called directly.",
+			"Consider retry/fallback: if push fails, fall back to email — that's a decorator or chain around the base strategy."
+		]
+	},
+	{
+		"id": "dsa-0236",
+		"code": "design-a-parking-lot-system",
+		"slug": "design-a-parking-lot-system",
+		"name": "Design a Parking Lot System",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Parking%20Lot%20System%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Model spot types (compact/large/handicap) and vehicle types, and match them via a strategy for spot assignment.",
+			"Core classes: ParkingLot, Level, Spot, Vehicle, Ticket — a Ticket ties a Vehicle to a Spot with an entry timestamp.",
+			"Fee calculation is a separate strategy/interface so pricing rules can change without touching the core allocation logic."
+		]
+	},
+	{
+		"id": "dsa-0232",
+		"code": "design-a-rate-limiter",
+		"slug": "design-a-rate-limiter",
+		"name": "Design a Rate Limiter",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Rate%20Limiter%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Multiple algorithms fit: token bucket, leaky bucket, fixed window, sliding window log/counter — pick one and justify it.",
+			"Core interface: `boolean allowRequest(clientId)`, backed by per-client state (tokens remaining, last refill time).",
+			"Token bucket needs a thread-safe refill calculation based on elapsed time, not a background timer, to stay simple and testable."
+		]
+	},
+	{
+		"id": "dsa-0249",
+		"code": "design-a-snake-and-ladder-game",
+		"slug": "design-a-snake-and-ladder-game",
+		"name": "Design a Snake and Ladder Game",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20Snake%20and%20Ladder%20Game%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core classes: Board (cells with snake/ladder jump targets), Player, Dice, Game (turn loop).",
+			"Model snakes and ladders uniformly as a single map of \"jump-from cell → jump-to cell\".",
+			"The turn loop is simple, but handle the exact-landing-on-100 rule (or equivalent) as an explicit edge case if required."
+		]
+	},
+	{
+		"id": "dsa-0234",
+		"code": "design-a-thread-pool",
+		"slug": "design-a-thread-pool",
+		"name": "Design a Thread Pool",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20a%20Thread%20Pool%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core pieces: a task queue, a fixed set of worker threads, and a shutdown mechanism.",
+			"Workers loop: pull a task from the queue (blocking if empty) and execute it, catching exceptions so one bad task doesn't kill a worker.",
+			"Support graceful shutdown (finish queued tasks) vs. immediate shutdown (drop queued tasks) as two distinct modes."
+		]
+	},
+	{
+		"id": "dsa-0247",
+		"code": "design-a-url-shortener",
+		"slug": "design-a-url-shortener",
+		"name": "Design a URL Shortener",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20a%20URL%20Shortener%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core operation: map a long URL to a short code and back — a key-value store is the backbone.",
+			"Short code generation: either a counter encoded in base62, or a hash of the URL truncated and checked for collisions.",
+			"Decide read vs. write ratio assumptions up front — this is a heavy-read system, so caching hot redirects matters."
+		]
+	},
+	{
+		"id": "dsa-0238",
+		"code": "design-a-vending-machine",
+		"slug": "design-a-vending-machine",
+		"name": "Design a Vending Machine",
+		"difficulty": "E",
+		"url": "https://github.com/search?q=Design%20a%20Vending%20Machine%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Model as a state machine: Idle → Has Money → Dispensing → Idle, with clear transitions.",
+			"Core classes: Inventory (item → count/price), Product, PaymentStrategy (cash/card as interchangeable strategies).",
+			"Handle edge cases explicitly: insufficient funds, out-of-stock item, and making change."
+		]
+	},
+	{
+		"id": "dsa-0062",
+		"code": "design-add-and-search-words-data-structure",
+		"slug": "design-add-and-search-words-data-structure",
+		"name": "Design Add and Search Words Data Structure",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/design-add-and-search-words-data-structure/",
+		"locked": false,
+		"hints": [
+			"This is a trie, plus a wildcard character that can match any letter.",
+			"On a normal character, descend into exactly one child; on the wildcard, you must try every child.",
+			"That wildcard case means search needs to be recursive (or use a stack) to explore multiple branches."
+		]
+	},
+	{
+		"id": "dsa-0239",
+		"code": "design-an-atm-machine",
+		"slug": "design-an-atm-machine",
+		"name": "Design an ATM Machine",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20an%20ATM%20Machine%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Model as a state machine similar to a vending machine: Idle → Card Inserted → PIN Entered → Transaction → Dispensing.",
+			"Core classes: Account, Card, CashDispenser (tracks denominations available), Transaction (Withdraw/Deposit/CheckBalance as a strategy/command).",
+			"The cash dispenser's \"minimum number of notes\" calculation is a small greedy sub-problem worth isolating into its own method."
+		]
+	},
+	{
+		"id": "dsa-0237",
+		"code": "design-an-elevator-system",
+		"slug": "design-an-elevator-system",
+		"name": "Design an Elevator System",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20an%20Elevator%20System%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Model elevator state (idle, moving up, moving down, door open) and pending requests (external floor calls + internal floor selections).",
+			"The scheduling algorithm (e.g. SCAN/LOOK — [REDACTED_SQL_PASSWORD_1]ing floors in one direction before reversing) is the core interesting design decision.",
+			"Separate the Elevator (single car) from an ElevatorController (assigns requests to the best car in a multi-elevator building)."
+		]
+	},
+	{
+		"id": "dsa-0241",
+		"code": "design-an-in-memory-file-system",
+		"slug": "design-an-in-memory-file-system",
+		"name": "Design an In-Memory File System",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20an%20In-Memory%20File%20System%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Model directories and files as a tree — a Directory node holds a map of name → (File | Directory).",
+			"Core operations: mkdir, addFile/writeFile, ls, and a path-resolution helper that walks the tree from root.",
+			"Decide whether paths are absolute-only or need to support relative paths and \"..\" — that changes the resolution logic significantly."
+		]
+	},
+	{
+		"id": "dsa-0261",
+		"code": "design-analytics-event-pipeline",
+		"slug": "design-analytics-event-pipeline",
+		"name": "Design Analytics Event Pipeline",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20Analytics%20Event%20Pipeline%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Ingestion, durable queue, stream processing, and warehouse sink.",
+			"Handle backpressure, schema evolution, and replays."
+		]
+	},
+	{
+		"id": "dsa-0254",
+		"code": "design-api-gateway",
+		"slug": "design-api-gateway",
+		"name": "Design API Gateway",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20API%20Gateway%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Responsibilities: auth, throttling, routing, observability.",
+			"Discuss plugin chain and resilience under dependency failures."
+		]
+	},
+	{
+		"id": "dsa-0253",
+		"code": "design-distributed-cache",
+		"slug": "design-distributed-cache",
+		"name": "Design Distributed Cache",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Distributed%20Cache%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Sharding via consistent hashing with replication.",
+			"Cover invalidation, TTL policies, and hot-key mitigation."
+		]
+	},
+	{
+		"id": "dsa-0263",
+		"code": "design-food-delivery-platform",
+		"slug": "design-food-delivery-platform",
+		"name": "Design Food Delivery Platform",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Food%20Delivery%20Platform%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Order orchestration and dispatch assignment loop.",
+			"Estimate ETAs with dynamic traffic-aware updates."
+		]
+	},
+	{
+		"id": "dsa-0230",
+		"code": "design-lfu-cache",
+		"slug": "design-lfu-cache",
+		"name": "Design LFU Cache",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20LFU%20Cache%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Eviction needs least-frequently-used, ties broken by least-recently-used.",
+			"Track per-key frequency, and group keys by frequency using an ordered structure (frequency → doubly linked list of keys).",
+			"Track the current minimum frequency so eviction always checks the right bucket in O(1)."
+		]
+	},
+	{
+		"id": "dsa-0229",
+		"code": "design-lru-cache",
+		"slug": "design-lru-cache",
+		"name": "Design LRU Cache",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20LRU%20Cache%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Needs O(1) get/put — combine a hash map (key → node) with a doubly linked list ordered by recency.",
+			"Core classes: Cache, Node (key, value, prev, next). Move a node to the front on every access.",
+			"Evict from the tail when capacity is exceeded; watch for the head/tail sentinel-node edge cases."
+		]
+	},
+	{
+		"id": "dsa-0259",
+		"code": "design-news-feed",
+		"slug": "design-news-feed",
+		"name": "Design News Feed",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20News%20Feed%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Fan-out on write vs fan-out on read trade-off.",
+			"Use caching and ranking for personalized timelines."
+		]
+	},
+	{
+		"id": "dsa-0256",
+		"code": "design-notification-system",
+		"slug": "design-notification-system",
+		"name": "Design Notification System",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20Notification%20System%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Multi-channel delivery (push/email/SMS) with retry queues.",
+			"Handle idempotency and per-user preferences."
+		]
+	},
+	{
+		"id": "dsa-0265",
+		"code": "design-payment-system",
+		"slug": "design-payment-system",
+		"name": "Design Payment System",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Payment%20System%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Ledger consistency and idempotent transaction APIs.",
+			"Reconciliation, fraud checks, and failure recovery are critical."
+		]
+	},
+	{
+		"id": "dsa-0257",
+		"code": "design-pub-sub-messaging-platform",
+		"slug": "design-pub-sub-messaging-platform",
+		"name": "Design Pub/Sub Messaging Platform",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Pub%2FSub%20Messaging%20Platform%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Partition topics and manage consumer offsets.",
+			"Guarantee trade-offs: at-most-once, at-least-once, exactly-once."
+		]
+	},
+	{
+		"id": "dsa-0252",
+		"code": "design-rate-limiter-at-scale",
+		"slug": "design-rate-limiter-at-scale",
+		"name": "Design Rate Limiter at Scale",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20Rate%20Limiter%20at%20Scale%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Compare token bucket, leaky bucket, and sliding window counters.",
+			"Discuss distributed counters, consistency, and fallback behavior."
+		]
+	},
+	{
+		"id": "dsa-0255",
+		"code": "design-real-time-chat",
+		"slug": "design-real-time-chat",
+		"name": "Design Real-time Chat",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20Real-time%20Chat%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Persistent connections (WebSocket), message fan-out, and presence.",
+			"Storage split: hot recent messages vs archival history."
+		]
+	},
+	{
+		"id": "dsa-0260",
+		"code": "design-recommendation-system",
+		"slug": "design-recommendation-system",
+		"name": "Design Recommendation System",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Recommendation%20System%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Blend candidate generation and ranking stages.",
+			"Discuss feature freshness and model serving constraints."
+		]
+	},
+	{
+		"id": "dsa-0262",
+		"code": "design-ride-sharing-platform",
+		"slug": "design-ride-sharing-platform",
+		"name": "Design Ride Sharing Platform",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Ride%20Sharing%20Platform%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Location indexing and driver-rider matching strategy.",
+			"Handle surge pricing and trip state transitions."
+		]
+	},
+	{
+		"id": "dsa-0258",
+		"code": "design-search-autocomplete",
+		"slug": "design-search-autocomplete",
+		"name": "Design Search Autocomplete",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Search%20Autocomplete%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Offline indexing pipeline plus low-latency serving tier.",
+			"Ranking signals and typo tolerance are key differentiators."
+		]
+	},
+	{
+		"id": "dsa-0245",
+		"code": "design-splitwise-expense-sharing",
+		"slug": "design-splitwise-expense-sharing",
+		"name": "Design Splitwise (Expense Sharing)",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Splitwise%20(Expense%20Sharing)%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core entities: User, Group, Expense (paid-by + split-among with a SplitStrategy: equal/exact/percentage).",
+			"Maintain a balance sheet (who-owes-whom) as a graph, and simplify debts by netting out cycles (minimize total transactions).",
+			"The \"simplify debts\" step is the interesting algorithmic sub-problem — greedy settle-up using max-owed/max-owes pairing."
+		]
+	},
+	{
+		"id": "dsa-0248",
+		"code": "design-tic-tac-toe",
+		"slug": "design-tic-tac-toe",
+		"name": "Design Tic-Tac-Toe",
+		"difficulty": "E",
+		"url": "https://github.com/search?q=Design%20Tic-Tac-Toe%20low%20level%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Core classes: Board (grid + win-check), Player, Game (turn management).",
+			"Win-checking after every move only needs to check the row/column/diagonal through the just-played cell, not the whole board.",
+			"Keep the board size configurable (n×n) so the win-check logic doesn't hardcode 3."
+		]
+	},
+	{
+		"id": "dsa-0069",
+		"code": "design-twitter",
+		"slug": "design-twitter",
+		"name": "Design Twitter",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/design-twitter/",
+		"locked": false,
+		"hints": [
+			"You need the 10 most recent tweets across everyone a user follows, merged and ordered by time.",
+			"Track a global increasing timestamp/counter alongside each tweet.",
+			"Use a heap to merge each followed user's most recent tweets efficiently rather than sorting everything."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/design-twitter/1"
+	},
+	{
+		"id": "dsa-0251",
+		"code": "design-url-shortener",
+		"slug": "design-url-shortener",
+		"name": "Design URL Shortener",
+		"difficulty": "M",
+		"url": "https://github.com/search?q=Design%20URL%20Shortener%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Define read/write ratio, key generation, and redirect latency goals.",
+			"Core pieces: API, key-value store, cache, analytics pipeline."
+		]
+	},
+	{
+		"id": "dsa-0264",
+		"code": "design-video-streaming-platform",
+		"slug": "design-video-streaming-platform",
+		"name": "Design Video Streaming Platform",
+		"difficulty": "H",
+		"url": "https://github.com/search?q=Design%20Video%20Streaming%20Platform%20system%20design&type=repositories",
+		"locked": false,
+		"hints": [
+			"Upload/transcoding pipeline and CDN delivery.",
+			"Store metadata, watch history, and recommendation hooks."
+		]
+	},
+	{
+		"id": "dsa-0143",
+		"code": "detect-squares",
+		"slug": "detect-squares",
+		"name": "Detect Squares",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/detect-squares/",
+		"locked": false,
+		"hints": [
+			"For every added point, you need fast lookups of \"how many points exist at a given coordinate.\"",
+			"A hash map counting occurrences of each (x, y) point gives O(1) existence/count checks.",
+			"For a query point, try every existing point sharing its x-coordinate as one diagonal corner, then check if the other two required corners exist too."
+		]
+	},
+	{
+		"id": "dsa-0164",
+		"code": "diagonal-traverse",
+		"slug": "diagonal-traverse",
+		"name": "Diagonal Traverse",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/diagonal-traverse/",
+		"locked": false,
+		"hints": [
+			"Cells on the same diagonal share the same (row + col) value.",
+			"Group cells by that diagonal index, then alternate the read direction between consecutive diagonals.",
+			"Careful boundary handling at the matrix edges determines the exact start/end of each diagonal."
+		]
+	},
+	{
+		"id": "dsa-0048",
+		"code": "diameter-of-binary-tree",
+		"slug": "diameter-of-binary-tree",
+		"name": "Diameter of Binary Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/diameter-of-binary-tree/",
+		"locked": false,
+		"hints": [
+			"The diameter is a path length, and it doesn't have to pass through the root.",
+			"At every node, the longest path through it is left-depth plus right-depth.",
+			"Track a running max of that sum while a helper function returns depth upward, so you only traverse once."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/diameter-of-binary-tree/1"
+	},
+	{
+		"id": "striver-dijkstras-algorithm",
+		"code": "dijkstras-algorithm",
+		"slug": "dijkstras-algorithm",
+		"name": "Dijkstra Algorithm",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/implementing-dijkstra-set-1-adjacency-matrix/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/implementing-dijkstra-set-1-adjacency-matrix/1"
+	},
+	{
+		"id": "dsa-0118",
+		"code": "distinct-subsequences",
+		"slug": "distinct-subsequences",
+		"name": "Distinct Subsequences",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/distinct-subsequences/",
+		"locked": false,
+		"hints": [
+			"You're counting ways to pick characters from s (keeping order) to spell out t exactly.",
+			"dp[i][j] is the number of ways using the first i characters of s to form the first j characters of t.",
+			"If s[i] matches t[j], you can either use it or skip it — add both possibilities; if it doesn't match, you can only skip it in s."
+		]
+	},
+	{
+		"id": "dsa-0119",
+		"code": "edit-distance",
+		"slug": "edit-distance",
+		"name": "Edit Distance",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/edit-distance/",
+		"locked": false,
+		"hints": [
+			"At each pair of positions, you're choosing the cheapest of insert, delete, or replace.",
+			"If the current characters match, no edit's needed — carry forward the diagonal value unchanged.",
+			"Otherwise take 1 plus the minimum of the three neighboring cells (insert, delete, replace)."
+		]
+	},
+	{
+		"id": "dsa-0008",
+		"code": "encode-and-decode-strings",
+		"slug": "encode-and-decode-strings",
+		"name": "Encode and Decode Strings",
+		"difficulty": "M",
+		"url": "https://neetcode.io/problems/string-encode-and-decode",
+		"locked": false,
+		"hints": [
+			"You can't just join with a delimiter — the delimiter itself might appear in a string.",
+			"Prefix each string with its length so decoding always knows exactly where it ends.",
+			"Use a fixed separator right after the length (e.g. 5#hello) so parsing is unambiguous."
+		]
+	},
+	{
+		"id": "dsa-0183",
+		"code": "evaluate-division",
+		"slug": "evaluate-division",
+		"name": "Evaluate Division",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/evaluate-division/",
+		"locked": false,
+		"hints": [
+			"Each equation a/b = k defines a weighted, directed edge in both directions (b/a = 1/k).",
+			"Build a graph of variables connected by ratio-weighted edges, then DFS/BFS multiplying edge weights along the path.",
+			"A query where either variable never appeared in any equation has no valid path, so the answer is -1.0."
+		]
+	},
+	{
+		"id": "dsa-0023",
+		"code": "evaluate-reverse-polish-notation",
+		"slug": "evaluate-reverse-polish-notation",
+		"name": "Evaluate Reverse Polish Notation",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/evaluate-reverse-polish-notation/",
+		"locked": false,
+		"hints": [
+			"Postfix notation means operators come after their operands — a stack processes this naturally.",
+			"Push numbers; on an operator, pop two, apply it, and push the result back.",
+			"Watch operand order for subtraction and division — the second-popped value comes first."
+		]
+	},
+	{
+		"id": "dsa-0195",
+		"code": "excel-sheet-column-number",
+		"slug": "excel-sheet-column-number",
+		"name": "Excel Sheet Column Number",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/excel-sheet-column-number/",
+		"locked": false,
+		"hints": [
+			"This is base-26 conversion, but with digits 1-26 instead of 0-25.",
+			"Process characters left to right, multiplying the running total by 26 and adding the current letter's value (A=1).",
+			"No special zero-digit handling is needed since there's no \"0\" in this numbering system."
+		]
+	},
+	{
+		"id": "dsa-0181",
+		"code": "find-k-pairs-with-smallest-sums",
+		"slug": "find-k-pairs-with-smallest-sums",
+		"name": "Find K Pairs with Smallest Sums",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/find-k-pairs-with-smallest-sums/",
+		"locked": false,
+		"hints": [
+			"Generating all pairs and sorting is wasteful when both arrays are already sorted.",
+			"Start with pairs (0, j) in a min-heap keyed by sum, one per starting index in the second array (up to k).",
+			"Popping the smallest and pushing its \"next in the first array\" neighbor keeps the heap small while still exploring in sum order."
+		]
+	},
+	{
+		"id": "dsa-0070",
+		"code": "find-median-from-data-stream",
+		"slug": "find-median-from-data-stream",
+		"name": "Find Median from Data Stream",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/find-median-from-data-stream/",
+		"locked": false,
+		"hints": [
+			"Sorting on every insert is too slow — you want the middle without a full sort.",
+			"Keep two heaps: a max-heap for the smaller half of numbers, a min-heap for the larger half.",
+			"Keep the heaps balanced in size (differing by at most 1); the median comes from the top(s) of the heaps."
+		]
+	},
+	{
+		"id": "dsa-0031",
+		"code": "find-minimum-in-rotated-sorted-array",
+		"slug": "find-minimum-in-rotated-sorted-array",
+		"name": "Find Minimum in Rotated Sorted Array",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/",
+		"locked": false,
+		"hints": [
+			"The array is sorted then rotated — one half is always properly ordered.",
+			"Compare the middle to the rightmost element to decide which half contains the rotation point.",
+			"If mid's value is greater than right's value, the minimum is to the right of mid; otherwise it's at or before mid."
+		]
+	},
+	{
+		"id": "dsa-0042",
+		"code": "find-the-duplicate-number",
+		"slug": "find-the-duplicate-number",
+		"name": "Find the Duplicate Number",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/find-the-duplicate-number/",
+		"locked": false,
+		"hints": [
+			"You can't modify the array or use extra space, which rules out sorting or a set.",
+			"Treat each value as a \"next pointer\" (index to arr[index]) — a duplicate creates a cycle.",
+			"Floyd's cycle detection (same idea as Linked List Cycle) finds the duplicate as the cycle's entry point."
+		]
+	},
+	{
+		"id": "dsa-0158",
+		"code": "find-the-index-of-the-first-occurrence-in-a-string",
+		"slug": "find-the-index-of-the-first-occurrence-in-a-string",
+		"name": "Find the Index of the First Occurrence in a String",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string/",
+		"locked": false,
+		"hints": [
+			"This is substring search — brute force checking every start index is O(n*m) and fine for most inputs.",
+			"At each starting index in the haystack, compare the needle character by character.",
+			"For an O(n+m) approach, look into KMP's failure-function preprocessing."
+		]
+	},
+	{
+		"id": "striver-find-the-repeating-and-missing-number",
+		"code": "find-the-repeating-and-missing-number",
+		"slug": "find-the-repeating-and-missing-number",
+		"name": "Missing And Repeating",
+		"difficulty": "E",
+		"url": "https://www.geeksforgeeks.org/problems/find-missing-and-repeating2512/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/find-missing-and-repeating2512/1"
+	},
+	{
+		"id": "dsa-0174",
+		"code": "flatten-binary-tree-to-linked-list",
+		"slug": "flatten-binary-tree-to-linked-list",
+		"name": "Flatten Binary Tree to Linked List",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/flatten-binary-tree-to-linked-list/",
+		"locked": false,
+		"hints": [
+			"The final structure follows preorder traversal order, using only right pointers.",
+			"Process nodes in reverse preorder (right, left, root), keeping a \"previously processed\" pointer.",
+			"Set the current node's right to the previous node and left to null, then update previous to the current node."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/flatten-binary-tree-to-linked-list/1"
+	},
+	{
+		"id": "striver-frog-jump",
+		"code": "frog-jump",
+		"slug": "frog-jump",
+		"name": "Frog Jump",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/geek-jump/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/geek-jump/1"
+	},
+	{
+		"id": "dsa-0163",
+		"code": "game-of-life",
+		"slug": "game-of-life",
+		"name": "Game of Life",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/game-of-life/",
+		"locked": false,
+		"hints": [
+			"Every cell's next state depends on the current state of its 8 neighbors — updating in place risks reading already-updated cells.",
+			"Encode both the old and new state in each cell using extra bits (e.g. 2 = was-dead-now-alive), then decode in a second pass.",
+			"Count live neighbors before deciding a cell's next state, using only the low bit (original state) during counting."
+		]
+	},
+	{
+		"id": "dsa-0125",
+		"code": "gas-station",
+		"slug": "gas-station",
+		"name": "Gas Station",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/gas-station/",
+		"locked": false,
+		"hints": [
+			"If the total gas is less than the total cost, no valid starting station exists at all.",
+			"Track a running tank total; whenever it goes negative, no station before this point could have been a valid start either.",
+			"The station right after the last point the tank went negative is the unique valid starting point (when a solution exists)."
+		]
+	},
+	{
+		"id": "dsa-0024",
+		"code": "generate-parentheses",
+		"slug": "generate-parentheses",
+		"name": "Generate Parentheses",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/generate-parentheses/",
+		"locked": false,
+		"hints": [
+			"This is backtracking, not a formula — build strings and prune invalid branches.",
+			"Track counts of open and close brackets used so far.",
+			"You can add a close bracket only if close count is less than open count, and an open bracket only if open count is less than n."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/generate-all-possible-parentheses/1"
+	},
+	{
+		"id": "dsa-0091",
+		"code": "graph-valid-tree",
+		"slug": "graph-valid-tree",
+		"name": "Graph Valid Tree",
+		"difficulty": "M",
+		"url": "https://neetcode.io/problems/valid-tree",
+		"locked": false,
+		"hints": [
+			"A valid tree needs exactly n-1 edges and full connectivity — check both.",
+			"If the edge count isn't exactly n-1, you can return false immediately without further checks.",
+			"Otherwise, Union-Find (or a single DFS/BFS) confirms whether all nodes end up in one connected group."
+		]
+	},
+	{
+		"id": "dsa-0004",
+		"code": "group-anagrams",
+		"slug": "group-anagrams",
+		"name": "Group Anagrams",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/group-anagrams/",
+		"locked": false,
+		"hints": [
+			"Anagrams share the same letters, just reordered.",
+			"A sorted version of each word makes a great group key.",
+			"Map that sorted-string key to a list of original words in a hash map."
+		]
+	},
+	{
+		"id": "dsa-0126",
+		"code": "hand-of-straights",
+		"slug": "hand-of-straights",
+		"name": "Hand of Straights",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/hand-of-straights/",
+		"locked": false,
+		"hints": [
+			"You need to form consecutive-value groups of a fixed size from the whole hand.",
+			"Count occurrences of each card, then always try to build a group starting from the smallest remaining card.",
+			"If any of the groupSize consecutive cards needed is unavailable, the hand can't be rearranged — return false."
+		]
+	},
+	{
+		"id": "dsa-0139",
+		"code": "happy-number",
+		"slug": "happy-number",
+		"name": "Happy Number",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/happy-number/",
+		"locked": false,
+		"hints": [
+			"Repeatedly summing squared digits either reaches 1, or falls into a repeating cycle that never reaches 1.",
+			"This is a cycle-detection problem — Floyd's slow/fast pointer trick applies directly to the sequence of values.",
+			"Alternatively, a hash set of seen values lets you detect a repeat (and therefore an infinite non-1 cycle) directly."
+		]
+	},
+	{
+		"id": "dsa-0101",
+		"code": "house-robber",
+		"slug": "house-robber",
+		"name": "House Robber",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/house-robber/",
+		"locked": false,
+		"hints": [
+			"You can't rob two adjacent houses — decide, at each house, to include it or skip it.",
+			"best(i) = max(best(i-1), best(i-2) + value[i]) — either skip this house or take it plus the best two houses back.",
+			"Only the previous two computed values are ever needed, so this reduces to O(1) space."
+		]
+	},
+	{
+		"id": "dsa-0102",
+		"code": "house-robber-ii",
+		"slug": "house-robber-ii",
+		"name": "House Robber II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/house-robber-ii/",
+		"locked": false,
+		"hints": [
+			"The houses are in a circle now, so the first and last house can't both be robbed.",
+			"Run the regular House Robber logic twice: once excluding the last house, once excluding the first.",
+			"The answer is the max of those two runs — this sidesteps the circular constraint entirely."
+		]
+	},
+	{
+		"id": "dsa-0169",
+		"code": "implement-queue-using-stacks",
+		"slug": "implement-queue-using-stacks",
+		"name": "Implement Queue using Stacks",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/implement-queue-using-stacks/",
+		"locked": false,
+		"hints": [
+			"A queue is FIFO but a stack is LIFO — you need two stacks to flip the order back.",
+			"Push new elements onto an \"in\" stack; when the \"out\" stack is empty, dump everything from \"in\" into \"out\" to reverse the order.",
+			"Only transfer between stacks when \"out\" is empty, keeping the amortized cost O(1) per operation."
+		]
+	},
+	{
+		"id": "dsa-0061",
+		"code": "implement-trie-prefix-tree",
+		"slug": "implement-trie-prefix-tree",
+		"name": "Implement Trie (Prefix Tree)",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/implement-trie-prefix-tree/",
+		"locked": false,
+		"hints": [
+			"Each node needs children (one per possible character) and a flag marking \"a word ends here.\"",
+			"Insert by walking/creating a child node per character, then marking the last node as end-of-word.",
+			"search() and startsWith() are nearly identical — the only difference is checking that end-of-word flag at the end."
+		]
+	},
+	{
+		"id": "striver-infix-to-postfix-conversion",
+		"code": "infix-to-postfix-conversion",
+		"slug": "infix-to-postfix-conversion",
+		"name": "Infix to Postfix",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/infix-to-postfix-1587115620/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/infix-to-postfix-1587115620/1"
+	},
+	{
+		"id": "dsa-0178",
+		"code": "insert-delete-getrandom-o1",
+		"slug": "insert-delete-getrandom-o1",
+		"name": "Insert Delete GetRandom O(1)",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/insert-delete-getrandom-o1/",
+		"locked": false,
+		"hints": [
+			"Random access in O(1) suggests an array; O(1) delete-by-value suggests a hash map.",
+			"Combine both: a hash map from value to its index in a backing array.",
+			"To delete in O(1), swap the target with the array's last element before popping, updating the map for the swapped element."
+		]
+	},
+	{
+		"id": "dsa-0130",
+		"code": "insert-interval",
+		"slug": "insert-interval",
+		"name": "Insert Interval",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/insert-interval/",
+		"locked": false,
+		"hints": [
+			"The existing intervals are already sorted and non-overlapping, which you can take advantage of.",
+			"Add every interval that ends before the new one starts, untouched.",
+			"Merge all intervals that overlap the new one into a single combined interval, then add every interval that starts after it ends."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/insert-interval-1666733333/1"
+	},
+	{
+		"id": "dsa-0155",
+		"code": "integer-to-roman",
+		"slug": "integer-to-roman",
+		"name": "Integer to Roman",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/integer-to-roman/",
+		"locked": false,
+		"hints": [
+			"Roman numerals are built greedily from the largest values down.",
+			"Keep a sorted list of (value, symbol) pairs including subtractive combinations like (900, \"CM\").",
+			"Repeatedly subtract the largest value that fits and append its symbol, moving to smaller values as needed."
+		]
+	},
+	{
+		"id": "dsa-0116",
+		"code": "interleaving-string",
+		"slug": "interleaving-string",
+		"name": "Interleaving String",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/interleaving-string/",
+		"locked": false,
+		"hints": [
+			"Track how much of each of the two source strings you've consumed to build a prefix of the result.",
+			"dp[i][j] is true if the first i characters of s1 and first j characters of s2 can interleave into the first i+j characters of s3.",
+			"At each cell, check whether the next needed character can come validly from s1's next character, from s2's next character, or neither."
+		]
+	},
+	{
+		"id": "dsa-0168",
+		"code": "intersection-of-two-linked-lists",
+		"slug": "intersection-of-two-linked-lists",
+		"name": "Intersection of Two Linked Lists",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/intersection-of-two-linked-lists/",
+		"locked": false,
+		"hints": [
+			"The two lists might have different lengths before they converge.",
+			"Walk two pointers, one per list; when a pointer reaches its list's end, redirect it to the other list's head.",
+			"Both pointers travel the same total distance this way, so they meet exactly at the intersection (or both hit null together)."
+		]
+	},
+	{
+		"id": "dsa-0046",
+		"code": "invert-binary-tree",
+		"slug": "invert-binary-tree",
+		"name": "Invert Binary Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/invert-binary-tree/",
+		"locked": false,
+		"hints": [
+			"\"Invert\" means swap every node's left and right children.",
+			"A simple recursive swap at every node, then recurse into both (now-swapped) children, solves it.",
+			"This also works iteratively with a queue or stack instead of recursion."
+		]
+	},
+	{
+		"id": "dsa-0182",
+		"code": "is-graph-bipartite",
+		"slug": "is-graph-bipartite",
+		"name": "Is Graph Bipartite?",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/is-graph-bipartite/",
+		"locked": false,
+		"hints": [
+			"A graph is bipartite if you can 2-color it so no edge connects same-colored nodes.",
+			"BFS or DFS from each uncolored component, coloring neighbors the opposite color of the current node.",
+			"If you ever find a neighbor already colored the same as the current node, it's not bipartite."
+		]
+	},
+	{
+		"id": "dsa-0123",
+		"code": "jump-game",
+		"slug": "jump-game",
+		"name": "Jump Game",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/jump-game/",
+		"locked": false,
+		"hints": [
+			"You don't need to know every path — just whether the farthest reachable index ever covers the end.",
+			"Track the farthest index reachable so far as you scan left to right.",
+			"If you ever reach an index beyond your current farthest-reachable point, you're stuck — return false immediately."
+		]
+	},
+	{
+		"id": "dsa-0124",
+		"code": "jump-game-ii",
+		"slug": "jump-game-ii",
+		"name": "Jump Game II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/jump-game-ii/",
+		"locked": false,
+		"hints": [
+			"You want the minimum number of jumps, not just whether reaching the end is possible.",
+			"Track the current jump's reachable boundary and the farthest boundary reachable with one more jump.",
+			"Increment the jump count exactly when you reach the current boundary, then advance both boundaries."
+		]
+	},
+	{
+		"id": "dsa-0066",
+		"code": "k-closest-points-to-origin",
+		"slug": "k-closest-points-to-origin",
+		"name": "K Closest Points to Origin",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/k-closest-points-to-origin/",
+		"locked": false,
+		"hints": [
+			"You don't need to fully sort all points, just find the closest k.",
+			"A max-heap of size k (by distance) lets you discard the farthest point whenever the heap overflows.",
+			"Compare squared distances to avoid unnecessary square-root calls."
+		]
+	},
+	{
+		"id": "dsa-0030",
+		"code": "koko-eating-bananas",
+		"slug": "koko-eating-bananas",
+		"name": "Koko Eating Bananas",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/koko-eating-bananas/",
+		"locked": false,
+		"hints": [
+			"You're not searching the array — you're searching over possible \"eating speeds.\"",
+			"For a given speed, you can compute the total hours needed in one pass.",
+			"Binary search the speed: if hours needed is at most h, try slower; otherwise go faster."
+		]
+	},
+	{
+		"id": "dsa-0064",
+		"code": "kth-largest-element-in-a-stream",
+		"slug": "kth-largest-element-in-a-stream",
+		"name": "Kth Largest Element in a Stream",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/kth-largest-element-in-a-stream/",
+		"locked": false,
+		"hints": [
+			"You need the kth largest after every addition, not just once.",
+			"A min-heap of size k always has the kth largest sitting at its top.",
+			"On each add, push the new value, and if the heap exceeds size k, pop the smallest."
+		]
+	},
+	{
+		"id": "dsa-0067",
+		"code": "kth-largest-element-in-an-array",
+		"slug": "kth-largest-element-in-an-array",
+		"name": "Kth Largest Element in an Array",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/kth-largest-element-in-an-array/",
+		"locked": false,
+		"hints": [
+			"Full sorting is O(n log n) — quickselect averages O(n).",
+			"Quickselect partitions like quicksort, but only recurses into the one side that contains the target index.",
+			"A min-heap of size k is a simpler, if slightly slower, O(n log k) alternative."
+		]
+	},
+	{
+		"id": "dsa-0057",
+		"code": "kth-smallest-element-in-a-bst",
+		"slug": "kth-smallest-element-in-a-bst",
+		"name": "Kth Smallest Element in a BST",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/kth-smallest-element-in-a-bst/",
+		"locked": false,
+		"hints": [
+			"An in-order traversal of a BST visits nodes in sorted order.",
+			"Do an in-order traversal and just count nodes as you go.",
+			"You can stop as soon as you hit the kth node — no need to traverse the whole tree."
+		]
+	},
+	{
+		"id": "striver-largest-element",
+		"code": "largest-element",
+		"slug": "largest-element",
+		"name": "Largest in Array",
+		"difficulty": "E",
+		"url": "https://www.geeksforgeeks.org/problems/largest-element-in-array4009/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/largest-element-in-array4009/1"
+	},
+	{
+		"id": "dsa-0027",
+		"code": "largest-rectangle-in-histogram",
+		"slug": "largest-rectangle-in-histogram",
+		"name": "Largest Rectangle in Histogram",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/largest-rectangle-in-histogram/",
+		"locked": false,
+		"hints": [
+			"For each bar, you want the widest rectangle where it's the shortest bar.",
+			"A monotonic increasing stack of (index, height) tracks candidates efficiently.",
+			"When a shorter bar appears, pop taller bars and compute their max rectangle using the current index as the right boundary."
+		]
+	},
+	{
+		"id": "striver-largest-subarray-with-sum-0",
+		"code": "largest-subarray-with-sum-0",
+		"slug": "largest-subarray-with-sum-0",
+		"name": "Largest subarray with 0 sum",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/largest-subarray-with-0-sum/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/largest-subarray-with-0-sum/1"
+	},
+	{
+		"id": "dsa-0065",
+		"code": "last-stone-weight",
+		"slug": "last-stone-weight",
+		"name": "Last Stone Weight",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/last-stone-weight/",
+		"locked": false,
+		"hints": [
+			"You always need the two current heaviest stones — a max-heap gives you that instantly.",
+			"Pop the top two, and if they differ, push the difference back in.",
+			"A min-heap can simulate a max-heap by pushing negated values."
+		]
+	},
+	{
+		"id": "striver-leaders-in-an-array",
+		"code": "leaders-in-an-array",
+		"slug": "leaders-in-an-array",
+		"name": "Array Leaders",
+		"difficulty": "E",
+		"url": "https://www.geeksforgeeks.org/problems/leaders-in-an-array-1587115620/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/leaders-in-an-array-1587115620/1"
+	},
+	{
+		"id": "dsa-0078",
+		"code": "letter-combinations-of-a-phone-number",
+		"slug": "letter-combinations-of-a-phone-number",
+		"name": "Letter Combinations of a Phone Number",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/",
+		"locked": false,
+		"hints": [
+			"Each digit maps to a fixed set of letters — this is a Cartesian product built one digit at a time.",
+			"Recurse digit by digit, appending one of that digit's letters to the current path each time.",
+			"An empty input should return an empty list, not a list containing an empty string — handle that edge case."
+		]
+	},
+	{
+		"id": "dsa-0179",
+		"code": "lfu-cache",
+		"slug": "lfu-cache",
+		"name": "LFU Cache",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/lfu-cache/",
+		"locked": false,
+		"hints": [
+			"You need O(1) get/put while evicting the least-frequently-used (ties broken by least-recently-used).",
+			"Track each key's frequency, and group keys by frequency using an ordered structure (e.g. per-frequency doubly linked lists).",
+			"Track the current minimum frequency so eviction always checks the right frequency bucket first."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/lfu-cache-1665050355/1"
+	},
+	{
+		"id": "dsa-0041",
+		"code": "linked-list-cycle",
+		"slug": "linked-list-cycle",
+		"name": "Linked List Cycle",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/linked-list-cycle/",
+		"locked": false,
+		"hints": [
+			"You need O(1) space, so a visited-set isn't the intended solution.",
+			"Use two pointers moving at different speeds — one step and two steps at a time.",
+			"If there's a cycle, the faster pointer will eventually lap and equal the slower one."
+		]
+	},
+	{
+		"id": "dsa-0112",
+		"code": "longest-common-subsequence",
+		"slug": "longest-common-subsequence",
+		"name": "Longest Common Subsequence",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/longest-common-subsequence/",
+		"locked": false,
+		"hints": [
+			"Compare characters of both strings position by position, building a 2D table of best-so-far lengths.",
+			"If the current characters match, extend the diagonal value by 1; otherwise take the max of the cell above or to the left.",
+			"Use an extra row and column of zeros as padding so you don't need special-case logic at the string boundaries."
+		]
+	},
+	{
+		"id": "dsa-0009",
+		"code": "longest-consecutive-sequence",
+		"slug": "longest-consecutive-sequence",
+		"name": "Longest Consecutive Sequence",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/longest-consecutive-sequence/",
+		"locked": false,
+		"hints": [
+			"Sorting works but the O(n) approach avoids it entirely — think hash set.",
+			"Put every number in a set, then only start counting a sequence from numbers whose (num-1) isn't in the set.",
+			"That check guarantees each full sequence is only ever counted once, from its start."
+		]
+	},
+	{
+		"id": "dsa-0117",
+		"code": "longest-increasing-path-in-a-matrix",
+		"slug": "longest-increasing-path-in-a-matrix",
+		"name": "Longest Increasing Path in a Matrix",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/longest-increasing-path-in-a-matrix/",
+		"locked": false,
+		"hints": [
+			"From every cell, the longest increasing path is 1 plus the best result from any strictly-greater neighbor.",
+			"Plain DFS recomputes the same cells repeatedly — cache each cell's answer once computed (memoization).",
+			"Because values only increase along a path, there are no cycles to worry about, so memoized DFS is safe."
+		]
+	},
+	{
+		"id": "dsa-0109",
+		"code": "longest-increasing-subsequence",
+		"slug": "longest-increasing-subsequence",
+		"name": "Longest Increasing Subsequence",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/longest-increasing-subsequence/",
+		"locked": false,
+		"hints": [
+			"The O(n^2) version compares every pair — there's an O(n log n) version using binary search.",
+			"Maintain a list representing the smallest possible tail for an increasing subsequence of each length.",
+			"For each new number, binary search that list for where it belongs and replace there (or append if it's the largest so far)."
+		]
+	},
+	{
+		"id": "dsa-0103",
+		"code": "longest-palindromic-substring",
+		"slug": "longest-palindromic-substring",
+		"name": "Longest Palindromic Substring",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/longest-palindromic-substring/",
+		"locked": false,
+		"hints": [
+			"Every palindrome has a center — either a single character or between two characters.",
+			"Try expanding outward from every possible center, growing while both sides still match.",
+			"There are 2n-1 centers total — check them all and track the longest expansion."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/longest-palindrome-in-a-string1956/1"
+	},
+	{
+		"id": "dsa-0017",
+		"code": "longest-repeating-character-replacement",
+		"slug": "longest-repeating-character-replacement",
+		"name": "Longest Repeating Character Replacement",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/longest-repeating-character-replacement/",
+		"locked": false,
+		"hints": [
+			"You're allowed k replacements — think window where (length - count of most frequent char) is at most k.",
+			"Track character counts in the current window and the count of its most frequent character.",
+			"The window never needs to shrink below its best-so-far size — only slide, don't shrink unnecessarily."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/longest-repeating-character-replacement/1"
+	},
+	{
+		"id": "dsa-0016",
+		"code": "longest-substring-without-repeating-characters",
+		"slug": "longest-substring-without-repeating-characters",
+		"name": "Longest Substring Without Repeating Characters",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+		"locked": false,
+		"hints": [
+			"Expand a window to the right; when a repeat shows up, shrink from the left.",
+			"A hash set (or map of char to last index) tells you instantly if the new character is already in the window.",
+			"With a map of last-seen index, you can jump the left pointer directly past the repeat instead of shrinking step by step."
+		]
+	},
+	{
+		"id": "dsa-0052",
+		"code": "lowest-common-ancestor-of-a-binary-search-tree",
+		"slug": "lowest-common-ancestor-of-a-binary-search-tree",
+		"name": "Lowest Common Ancestor of a Binary Search Tree",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/",
+		"locked": false,
+		"hints": [
+			"A BST's ordering tells you which direction to go without checking both subtrees.",
+			"If both target values are less than the current node, go left; if both are greater, go right.",
+			"The moment the two values split (one at or below current, one at or above), that current node is the answer."
+		]
+	},
+	{
+		"id": "dsa-0204",
+		"code": "lowest-common-ancestor-of-a-binary-tree",
+		"slug": "lowest-common-ancestor-of-a-binary-tree",
+		"name": "Lowest Common Ancestor of a Binary Tree",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/",
+		"locked": false,
+		"hints": ["Return node if found in both subtrees."]
+	},
+	{
+		"id": "dsa-0043",
+		"code": "lru-cache",
+		"slug": "lru-cache",
+		"name": "LRU Cache",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/lru-cache/",
+		"locked": false,
+		"hints": [
+			"You need O(1) get and put, so no scanning to find the least-recently-used item.",
+			"Combine a hash map (key to node) with a doubly linked list ordered by recency.",
+			"On every get or put, move that node to the front; evict from the back when over capacity."
+		]
+	},
+	{
+		"id": "dsa-0153",
+		"code": "majority-element",
+		"slug": "majority-element",
+		"name": "Majority Element",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/majority-element/",
+		"locked": false,
+		"hints": [
+			"The majority element appears more than n/2 times — think about a running \"candidate\" and a counter.",
+			"Boyer-Moore voting: increment the counter on a match with the candidate, decrement otherwise, swap candidate when the counter hits 0.",
+			"Because the majority element is guaranteed to exist, no verification pass is required."
+		]
+	},
+	{
+		"id": "dsa-0082",
+		"code": "max-area-of-island",
+		"slug": "max-area-of-island",
+		"name": "Max Area of Island",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/max-area-of-island/",
+		"locked": false,
+		"hints": [
+			"Very similar to Number of Islands, but now you need each island's size, not just the count.",
+			"Have your DFS/BFS return the count of cells visited during that flood-fill.",
+			"Track a running max across every island's returned size."
+		]
+	},
+	{
+		"id": "dsa-0188",
+		"code": "maximal-square",
+		"slug": "maximal-square",
+		"name": "Maximal Square",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/maximal-square/",
+		"locked": false,
+		"hints": [
+			"The largest square ending at a cell depends on three neighboring cells, not just one.",
+			"dp[i][j] (side length of the largest square with bottom-right corner at (i,j)) is 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]), if the cell itself is a 1.",
+			"Track a running max of dp values — the answer is that max, squared."
+		]
+	},
+	{
+		"id": "dsa-0047",
+		"code": "maximum-depth-of-binary-tree",
+		"slug": "maximum-depth-of-binary-tree",
+		"name": "Maximum Depth of Binary Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/maximum-depth-of-binary-tree/",
+		"locked": false,
+		"hints": [
+			"The depth of a tree is 1 plus the deeper of its two subtrees.",
+			"Recurse on left and right, take the max, and add 1 for the current node.",
+			"A null node has depth 0 — that's your base case."
+		]
+	},
+	{
+		"id": "dsa-0107",
+		"code": "maximum-product-subarray",
+		"slug": "maximum-product-subarray",
+		"name": "Maximum Product Subarray",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/maximum-product-subarray/",
+		"locked": false,
+		"hints": [
+			"A single negative number can flip a very small product into the largest one — track both running max and running min.",
+			"At each element, the new max is the largest of (element alone, element times old max, element times old min).",
+			"Update both max and min together each step, since a min can become a max instantly if the next number's negative."
+		]
+	},
+	{
+		"id": "dsa-0122",
+		"code": "maximum-subarray",
+		"slug": "maximum-subarray",
+		"name": "Maximum Subarray",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/maximum-subarray/",
+		"locked": false,
+		"hints": [
+			"If your running sum ever goes negative, it can never help a future subarray — you're better off restarting from zero.",
+			"Keep a running sum, resetting it to 0 whenever it dips below zero, and track the max sum seen.",
+			"This is Kadane's algorithm — a single pass, O(n) time, O(1) space."
+		]
+	},
+	{
+		"id": "dsa-0034",
+		"code": "median-of-two-sorted-arrays",
+		"slug": "median-of-two-sorted-arrays",
+		"name": "Median of Two Sorted Arrays",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
+		"locked": false,
+		"hints": [
+			"Merging both arrays is O(m+n) — the log-time approach binary searches a partition point.",
+			"Binary search a partition in the smaller array; the partition in the other array is then determined.",
+			"A valid partition has every left-side element at most every right-side element across both arrays."
+		]
+	},
+	{
+		"id": "dsa-0133",
+		"code": "meeting-rooms",
+		"slug": "meeting-rooms",
+		"name": "Meeting Rooms",
+		"difficulty": "E",
+		"url": "https://neetcode.io/problems/meeting-schedule",
+		"locked": false,
+		"hints": [
+			"This just asks whether ANY two meetings overlap.",
+			"Sort by start time, then check each meeting's start against the previous meeting's end.",
+			"Any start time earlier than the previous meeting's end time means overlap exists."
+		]
+	},
+	{
+		"id": "dsa-0134",
+		"code": "meeting-rooms-ii",
+		"slug": "meeting-rooms-ii",
+		"name": "Meeting Rooms II",
+		"difficulty": "M",
+		"url": "https://neetcode.io/problems/meeting-schedule-ii",
+		"locked": false,
+		"hints": [
+			"You need the max number of meetings happening simultaneously at any point, not just whether any overlap.",
+			"Separately sort all start times and all end times, then walk through them together.",
+			"Each start increments a room counter, each end (when it comes before or with the next start) decrements it — track the running max."
+		]
+	},
+	{
+		"id": "dsa-0197",
+		"code": "meeting-rooms-ii-2",
+		"slug": "meeting-rooms-ii-2",
+		"name": "Meeting Rooms II",
+		"difficulty": "M",
+		"url": "https://neetcode.io/problems/meeting-schedule-ii",
+		"locked": false,
+		"hints": ["Min-heap of end times for active meetings."]
+	},
+	{
+		"id": "dsa-0131",
+		"code": "merge-intervals",
+		"slug": "merge-intervals",
+		"name": "Merge Intervals",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/merge-intervals/",
+		"locked": false,
+		"hints": [
+			"Sort by start time first — overlaps can only happen between intervals that are now adjacent.",
+			"Walk through sorted intervals, merging into the last added result whenever the current one's start is at or before that result's end.",
+			"When merging, update the result's end to the max of the two ends being merged, not just the new interval's end."
+		]
+	},
+	{
+		"id": "dsa-0044",
+		"code": "merge-k-sorted-lists",
+		"slug": "merge-k-sorted-lists",
+		"name": "Merge k Sorted Lists",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/merge-k-sorted-lists/",
+		"locked": false,
+		"hints": [
+			"Merging two at a time repeatedly works, but a heap gets you a cleaner O(n log k).",
+			"Push the head of every list into a min-heap keyed by value.",
+			"Pop the smallest, append it to the result, then push its next node (if any) back into the heap."
+		]
+	},
+	{
+		"id": "dsa-0151",
+		"code": "merge-sorted-array",
+		"slug": "merge-sorted-array",
+		"name": "Merge Sorted Array",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/merge-sorted-array/",
+		"locked": false,
+		"hints": [
+			"Merging from the front requires shifting elements — merge from the back instead.",
+			"Compare the tail elements of both arrays and place the larger one at the very end of nums1.",
+			"If nums2 still has leftover elements when nums1's original elements are exhausted, copy them over directly."
+		]
+	},
+	{
+		"id": "dsa-0127",
+		"code": "merge-triplets-to-form-target-triplet",
+		"slug": "merge-triplets-to-form-target-triplet",
+		"name": "Merge Triplets to Form Target Triplet",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/merge-triplets-to-form-target-triplet/",
+		"locked": false,
+		"hints": [
+			"A triplet is only useful if none of its values exceed the corresponding target value.",
+			"Filter out any triplet where any coordinate overshoots the target's corresponding coordinate.",
+			"Among the remaining valid triplets, check if each target coordinate is matched by at least one of them."
+		]
+	},
+	{
+		"id": "dsa-0036",
+		"code": "merge-two-sorted-lists",
+		"slug": "merge-two-sorted-lists",
+		"name": "Merge Two Sorted Lists",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/merge-two-sorted-lists/",
+		"locked": false,
+		"hints": [
+			"This is like the merge step of merge sort, but on linked lists.",
+			"Use a dummy head node so you don't need special-case logic for the first node.",
+			"At each step, attach the smaller of the two current nodes and advance only that list."
+		]
+	},
+	{
+		"id": "dsa-0100",
+		"code": "min-cost-climbing-stairs",
+		"slug": "min-cost-climbing-stairs",
+		"name": "Min Cost Climbing Stairs",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/min-cost-climbing-stairs/",
+		"locked": false,
+		"hints": [
+			"Similar recurrence to Climbing Stairs, but now each step choice has an associated cost.",
+			"cost-to-reach(i) = cost[i] + the smaller of cost-to-reach(i-1) and cost-to-reach(i-2).",
+			"You can start from either step 0 or step 1 for free — the answer is the min cost to get past the last step."
+		]
+	},
+	{
+		"id": "dsa-0094",
+		"code": "min-cost-to-connect-all-points",
+		"slug": "min-cost-to-connect-all-points",
+		"name": "Min Cost to Connect All Points",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/min-cost-to-connect-all-points/",
+		"locked": false,
+		"hints": [
+			"You want the cheapest set of edges connecting all points — that's a Minimum Spanning Tree.",
+			"Prim's algorithm grows the tree one cheapest available edge at a time from a min-heap.",
+			"Track visited points so you don't re-add edges to points already included in the tree."
+		]
+	},
+	{
+		"id": "dsa-0022",
+		"code": "min-stack",
+		"slug": "min-stack",
+		"name": "Min Stack",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/min-stack/",
+		"locked": false,
+		"hints": [
+			"You need getMin() in O(1), so don't recompute it by scanning.",
+			"Keep a second stack that tracks the running minimum alongside the main one.",
+			"Push the current min again whenever a new value is less than or equal to the current min, so popping stays in sync."
+		]
+	},
+	{
+		"id": "dsa-0135",
+		"code": "minimum-interval-to-include-each-query",
+		"slug": "minimum-interval-to-include-each-query",
+		"name": "Minimum Interval to Include Each Query",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/minimum-interval-to-include-each-query/",
+		"locked": false,
+		"hints": [
+			"For each query, you want the smallest interval that contains it — process both in a smart order to avoid rechecking everything.",
+			"Sort both intervals and queries by value, and use a min-heap of active intervals keyed by interval size.",
+			"As you sweep through queries in increasing order, add newly-started intervals to the heap and pop expired ones off the top before reading the answer."
+		]
+	},
+	{
+		"id": "striver-minimum-number-of-platforms-required-for-a-railway",
+		"code": "minimum-number-of-platforms-required-for-a-railway",
+		"slug": "minimum-number-of-platforms-required-for-a-railway",
+		"name": "Minimum Platforms",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/minimum-platforms-1587115620/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/minimum-platforms-1587115620/1"
+	},
+	{
+		"id": "dsa-0186",
+		"code": "minimum-path-sum",
+		"slug": "minimum-path-sum",
+		"name": "Minimum Path Sum",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/minimum-path-sum/",
+		"locked": false,
+		"hints": [
+			"Similar shape to Unique Paths, but now summing costs instead of counting paths.",
+			"Each cell's min cost is its own value plus the smaller of the cell above or to the left.",
+			"The first row and first column can only be reached one way each, so they're computed as running sums."
+		]
+	},
+	{
+		"id": "dsa-0161",
+		"code": "minimum-size-subarray-sum",
+		"slug": "minimum-size-subarray-sum",
+		"name": "Minimum Size Subarray Sum",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/minimum-size-subarray-sum/",
+		"locked": false,
+		"hints": [
+			"You want the shortest window whose sum is at least the target — classic shrinking window.",
+			"Expand the window right, and while the sum meets the target, shrink from the left and track the min length.",
+			"Every element is added once and removed at most once, keeping this O(n)."
+		]
+	},
+	{
+		"id": "dsa-0019",
+		"code": "minimum-window-substring",
+		"slug": "minimum-window-substring",
+		"name": "Minimum Window Substring",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/minimum-window-substring/",
+		"locked": false,
+		"hints": [
+			"Expand the window until it contains all required characters, then shrink from the left as much as possible.",
+			"Track how many required unique characters currently have their full count satisfied.",
+			"Only shrink while that satisfied count still equals the number of unique required characters."
+		]
+	},
+	{
+		"id": "dsa-0148",
+		"code": "missing-number",
+		"slug": "missing-number",
+		"name": "Missing Number",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/missing-number/",
+		"locked": false,
+		"hints": [
+			"You know the full expected set (0 to n) — compare it against what's actually present.",
+			"The sum of 0 through n minus the sum of the given array leaves exactly the missing number.",
+			"XOR-ing every index 0 through n with every array value also isolates the missing number, avoiding any overflow concerns with large sums."
+		]
+	},
+	{
+		"id": "dsa-0142",
+		"code": "multiply-strings",
+		"slug": "multiply-strings",
+		"name": "Multiply Strings",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/multiply-strings/",
+		"locked": false,
+		"hints": [
+			"You can't convert to native integers if the numbers can be arbitrarily large.",
+			"Multiply digit by digit like grade-school long multiplication, placing each partial product at the right offset in a result array.",
+			"Digit i of the first number times digit j of the second number always lands at result positions i+j and i+j+1 — accumulate there and handle carries at the end."
+		]
+	},
+	{
+		"id": "dsa-0079",
+		"code": "n-queens",
+		"slug": "n-queens",
+		"name": "N-Queens",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/n-queens/",
+		"locked": false,
+		"hints": [
+			"Place one queen per row, and only need to check that column, diagonal, and anti-diagonal are free.",
+			"Track used columns and both diagonal directions with sets for O(1) conflict checks.",
+			"A cell's two diagonals can be identified by (row - col) and (row + col), which stay constant along each diagonal."
+		]
+	},
+	{
+		"id": "dsa-0095",
+		"code": "network-delay-time",
+		"slug": "network-delay-time",
+		"name": "Network Delay Time",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/network-delay-time/",
+		"locked": false,
+		"hints": [
+			"You want the shortest time for a signal to reach every node — single-source shortest path.",
+			"Dijkstra's algorithm, using a min-heap keyed by current best travel time, fits directly.",
+			"The answer is the max travel time across all nodes — if any node's unreached, return -1."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/network-delay-time/1"
+	},
+	{
+		"id": "striver-ninjas-training",
+		"code": "ninjas-training",
+		"slug": "ninjas-training",
+		"name": "Geek's Training",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/geeks-training/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/geeks-training/1"
+	},
+	{
+		"id": "dsa-0132",
+		"code": "non-overlapping-intervals",
+		"slug": "non-overlapping-intervals",
+		"name": "Non-overlapping Intervals",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/non-overlapping-intervals/",
+		"locked": false,
+		"hints": [
+			"Think in reverse: instead of counting removals, maximize how many intervals you can keep.",
+			"Sort by end time, and greedily keep an interval whenever it starts at or after the last kept interval's end.",
+			"Sorting by end time (not start time) is the key detail — it's what makes the greedy choice provably optimal."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/non-overlapping-intervals/1"
+	},
+	{
+		"id": "dsa-0145",
+		"code": "number-of-1-bits",
+		"slug": "number-of-1-bits",
+		"name": "Number of 1 Bits",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/number-of-1-bits/",
+		"locked": false,
+		"hints": [
+			"You want to count set bits, which you can do by repeatedly isolating the lowest set bit.",
+			"n AND (n-1) clears the lowest set bit of n — count how many times you can do that before n becomes 0.",
+			"This runs in time proportional to the number of set bits, not the total bit width."
+		]
+	},
+	{
+		"id": "dsa-0090",
+		"code": "number-of-connected-components-in-an-undirected-graph",
+		"slug": "number-of-connected-components-in-an-undirected-graph",
+		"name": "Number of Connected Components in an Undirected Graph",
+		"difficulty": "M",
+		"url": "https://neetcode.io/problems/count-connected-components",
+		"locked": false,
+		"hints": [
+			"Each group of mutually reachable nodes counts as one component.",
+			"Union-Find (or repeated DFS from unvisited nodes) groups nodes into components efficiently.",
+			"With Union-Find, the number of distinct roots left after processing every edge is your answer."
+		]
+	},
+	{
+		"id": "dsa-0080",
+		"code": "number-of-islands",
+		"slug": "number-of-islands",
+		"name": "Number of Islands",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/number-of-islands/",
+		"locked": false,
+		"hints": [
+			"Each unvisited land cell you find is the start of a new island.",
+			"DFS or BFS from that cell, marking every connected land cell as visited, \"sinks\" the whole island at once.",
+			"Count how many times you start a fresh DFS/BFS from an unvisited land cell — that count is your answer."
+		]
+	},
+	{
+		"id": "dsa-0083",
+		"code": "pacific-atlantic-water-flow",
+		"slug": "pacific-atlantic-water-flow",
+		"name": "Pacific Atlantic Water Flow",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/pacific-atlantic-water-flow/",
+		"locked": false,
+		"hints": [
+			"Checking every cell's path to both oceans directly is expensive — try working backward from the oceans instead.",
+			"DFS inland from every Pacific-bordering cell, and separately from every Atlantic-bordering cell, moving only to equal-or-higher neighbors.",
+			"A cell that got reached from both searches can flow to both oceans — that's your answer set."
+		]
+	},
+	{
+		"id": "dsa-0167",
+		"code": "palindrome-linked-list",
+		"slug": "palindrome-linked-list",
+		"name": "Palindrome Linked List",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/palindrome-linked-list/",
+		"locked": false,
+		"hints": [
+			"You want O(1) space, so copying to an array isn't the intended solution.",
+			"Find the middle with slow/fast pointers, reverse the second half, then compare both halves.",
+			"Optionally restore the list's original structure afterward by reversing the second half back."
+		]
+	},
+	{
+		"id": "dsa-0077",
+		"code": "palindrome-partitioning",
+		"slug": "palindrome-partitioning",
+		"name": "Palindrome Partitioning",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/palindrome-partitioning/",
+		"locked": false,
+		"hints": [
+			"You want every way to cut the string such that each piece is a palindrome.",
+			"At each position, try every possible next cut, but only recurse into cuts that form a palindrome.",
+			"Precomputing which substrings are palindromes avoids re-checking the same substring repeatedly."
+		]
+	},
+	{
+		"id": "dsa-0104",
+		"code": "palindromic-substrings",
+		"slug": "palindromic-substrings",
+		"name": "Palindromic Substrings",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/palindromic-substrings/",
+		"locked": false,
+		"hints": [
+			"Same expand-around-center idea as Longest Palindromic Substring, but now you count every valid expansion instead of tracking just the longest.",
+			"Every successful expansion step (even a length-1 or length-2 one) counts as one palindrome.",
+			"Total count equals the sum, over all centers, of how far each one successfully expands."
+		]
+	},
+	{
+		"id": "dsa-0110",
+		"code": "partition-equal-subset-sum",
+		"slug": "partition-equal-subset-sum",
+		"name": "Partition Equal Subset Sum",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/partition-equal-subset-sum/",
+		"locked": false,
+		"hints": [
+			"If the total sum is odd, it's immediately impossible to split evenly.",
+			"This reduces to \"can some subset sum to exactly half the total\" — classic 0/1 knapsack.",
+			"Track which sums are reachable using a boolean array, updating it in reverse to avoid reusing an item twice."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/subset-sum-problem2014/1"
+	},
+	{
+		"id": "dsa-0128",
+		"code": "partition-labels",
+		"slug": "partition-labels",
+		"name": "Partition Labels",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/partition-labels/",
+		"locked": false,
+		"hints": [
+			"A letter's partition must extend at least to that letter's last occurrence anywhere in the string.",
+			"Precompute the last index of every character first.",
+			"Extend the current partition's boundary to the max last-occurrence of every character seen so far in it; close the partition when you reach that boundary."
+		]
+	},
+	{
+		"id": "dsa-0173",
+		"code": "path-sum",
+		"slug": "path-sum",
+		"name": "Path Sum",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/path-sum/",
+		"locked": false,
+		"hints": [
+			"You're looking for any single root-to-leaf path summing to the target.",
+			"Recurse down, subtracting the current node's value from the remaining target.",
+			"Only check for a match at leaf nodes (no children) — an internal node with the right sum but children isn't a valid path."
+		]
+	},
+	{
+		"id": "dsa-0187",
+		"code": "perfect-squares",
+		"slug": "perfect-squares",
+		"name": "Perfect Squares",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/perfect-squares/",
+		"locked": false,
+		"hints": [
+			"For every number n, you want the minimum count of perfect squares summing to it.",
+			"minCount(n) = 1 + min over every perfect square s ≤ n of minCount(n - s).",
+			"Build this bottom-up from 0 to n, reusing already-computed smaller answers."
+		]
+	},
+	{
+		"id": "dsa-0018",
+		"code": "permutation-in-string",
+		"slug": "permutation-in-string",
+		"name": "Permutation in String",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/permutation-in-string/",
+		"locked": false,
+		"hints": [
+			"A permutation match means the window's character counts exactly equal the target's.",
+			"Use a fixed-size window (length of s1) and compare frequency counts as it slides.",
+			"Track a single \"matches\" counter instead of comparing full frequency arrays every slide, for O(n)."
+		]
+	},
+	{
+		"id": "dsa-0073",
+		"code": "permutations",
+		"slug": "permutations",
+		"name": "Permutations",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/permutations/",
+		"locked": false,
+		"hints": [
+			"Order matters here, unlike Subsets — every arrangement counts as distinct.",
+			"Track which elements are already used in the current path, and try every unused one at each position.",
+			"Swapping elements in place is a memory-efficient alternative to a separate used-tracking array."
+		]
+	},
+	{
+		"id": "dsa-0140",
+		"code": "plus-one",
+		"slug": "plus-one",
+		"name": "Plus One",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/plus-one/",
+		"locked": false,
+		"hints": [
+			"Adding one only cascades into a carry when a digit is 9.",
+			"Starting from the last digit, if it's less than 9, just increment it and you're done immediately.",
+			"If every digit was a 9 (all become 0), you need one extra leading 1 digit at the front."
+		]
+	},
+	{
+		"id": "dsa-0175",
+		"code": "populating-next-right-pointers-in-each-node",
+		"slug": "populating-next-right-pointers-in-each-node",
+		"name": "Populating Next Right Pointers in Each Node",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/populating-next-right-pointers-in-each-node/",
+		"locked": false,
+		"hints": [
+			"You want O(1) extra space, so a queue-based BFS isn't the intended solution for the perfect-tree version.",
+			"Use the next pointers already set on the current level to traverse it, while linking up the next level below.",
+			"A dummy head per level makes tracking \"where to attach the next node\" cleaner."
+		]
+	},
+	{
+		"id": "dsa-0141",
+		"code": "powx-n",
+		"slug": "powx-n",
+		"name": "Pow(x, n)",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/powx-n/",
+		"locked": false,
+		"hints": [
+			"Multiplying x by itself n times is O(n) — you can do better by repeatedly squaring.",
+			"x^n equals (x^(n/2))^2 when n is even, and x times (x^(n/2))^2 when n is odd (using integer division).",
+			"A negative n just means computing the positive-power result and then taking its reciprocal."
+		]
+	},
+	{
+		"id": "striver-prims-algorithm",
+		"code": "prims-algorithm",
+		"slug": "prims-algorithm",
+		"locked": false,
+		"hints": [],
+		"name": "Minimum Spanning Tree",
+		"url": "https://www.geeksforgeeks.org/problems/minimum-spanning-tree/1",
+		"difficulty": "M",
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/minimum-spanning-tree/1"
+	},
+	{
+		"id": "dsa-0006",
+		"code": "product-of-array-except-self",
+		"slug": "product-of-array-except-self",
+		"name": "Product of Array Except Self",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/product-of-array-except-self/",
+		"locked": false,
+		"hints": [
+			"You can't use division if a zero is present, so think prefix and suffix products.",
+			"Build a prefix-product array from the left, then fold in a suffix product from the right.",
+			"You can do the suffix pass in-place on the output array, using one running variable instead of a second array."
+		]
+	},
+	{
+		"id": "dsa-0093",
+		"code": "reconstruct-itinerary",
+		"slug": "reconstruct-itinerary",
+		"name": "Reconstruct Itinerary",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/reconstruct-itinerary/",
+		"locked": false,
+		"hints": [
+			"You need to use every ticket exactly once, in an order that's lexicographically smallest when multiple valid itineraries exist.",
+			"This is really an Eulerian path — visit neighbors in sorted order, but only finalize a stop after exhausting its options.",
+			"Build the route by appending nodes in a post-order DFS fashion, then reverse the result at the end."
+		]
+	},
+	{
+		"id": "dsa-0089",
+		"code": "redundant-connection",
+		"slug": "redundant-connection",
+		"name": "Redundant Connection",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/redundant-connection/",
+		"locked": false,
+		"hints": [
+			"You're looking for the one edge that turns a tree into a graph with a cycle.",
+			"Union-Find lets you add edges one at a time and detect the instant one connects two already-connected nodes.",
+			"That first edge connecting an already-unified pair is your answer — no need to look further."
+		]
+	},
+	{
+		"id": "dsa-0121",
+		"code": "regular-expression-matching",
+		"slug": "regular-expression-matching",
+		"name": "Regular Expression Matching",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/regular-expression-matching/",
+		"locked": false,
+		"hints": [
+			"A star means zero-or-more of the preceding character, which forces you to consider two branches at once.",
+			"dp[i][j] represents whether the first i characters of s match the first j characters of the pattern.",
+			"On a star, you must handle both \"match zero of the preceding char\" and \"match one more and stay on this pattern position.\""
+		]
+	},
+	{
+		"id": "dsa-0152",
+		"code": "remove-duplicates-from-sorted-array",
+		"slug": "remove-duplicates-from-sorted-array",
+		"name": "Remove Duplicates from Sorted Array",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/remove-duplicates-from-sorted-array/",
+		"locked": false,
+		"hints": [
+			"The array is sorted, so duplicates are always adjacent.",
+			"Use a slow pointer for the next unique-write position and a fast pointer to scan.",
+			"Only advance the slow pointer (and write) when the fast pointer finds a new value."
+		]
+	},
+	{
+		"id": "dsa-0160",
+		"code": "remove-element",
+		"slug": "remove-element",
+		"name": "Remove Element",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/remove-element/",
+		"locked": false,
+		"hints": [
+			"You need to remove all instances of a value in place, order doesn't matter.",
+			"Use a slow pointer marking the next valid write position.",
+			"Only copy and advance the slow pointer when the current element isn't the target value."
+		]
+	},
+	{
+		"id": "dsa-0038",
+		"code": "remove-nth-node-from-end-of-list",
+		"slug": "remove-nth-node-from-end-of-list",
+		"name": "Remove Nth Node From End of List",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/remove-nth-node-from-end-of-list/",
+		"locked": false,
+		"hints": [
+			"You want to avoid two full passes (one to count, one to remove).",
+			"Move one pointer n steps ahead first, then move both pointers together until the lead reaches the end.",
+			"Use a dummy node before the head so removing the actual head node needs no special case."
+		]
+	},
+	{
+		"id": "dsa-0037",
+		"code": "reorder-list",
+		"slug": "reorder-list",
+		"name": "Reorder List",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/reorder-list/",
+		"locked": false,
+		"hints": [
+			"The target order interleaves the first half with the reversed second half.",
+			"Find the middle with slow/fast pointers, reverse the second half, then merge the two halves alternately.",
+			"Be careful to cleanly split the list in two and null-terminate the first half before reversing the second."
+		]
+	},
+	{
+		"id": "dsa-0147",
+		"code": "reverse-bits",
+		"slug": "reverse-bits",
+		"name": "Reverse Bits",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/reverse-bits/",
+		"locked": false,
+		"hints": [
+			"You're reversing the order of all 32 bits, not the value itself.",
+			"Build the result bit by bit: shift the result left, then OR in the current lowest bit of the input.",
+			"Shift the input right by 1 each iteration so its next lowest bit is ready to read, across all 32 iterations."
+		]
+	},
+	{
+		"id": "dsa-0150",
+		"code": "reverse-integer",
+		"slug": "reverse-integer",
+		"name": "Reverse Integer",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/reverse-integer/",
+		"locked": false,
+		"hints": [
+			"You need to catch 32-bit signed integer overflow, which reversing digits can easily cause.",
+			"Pull off the last digit with modulo 10, build the reversed number with result = result*10 + digit, and strip that digit off the original by dividing by 10.",
+			"Check for overflow before each multiply-by-10 step, comparing against the 32-bit int boundaries rather than after the fact."
+		]
+	},
+	{
+		"id": "dsa-0035",
+		"code": "reverse-linked-list",
+		"slug": "reverse-linked-list",
+		"name": "Reverse Linked List",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/reverse-linked-list/",
+		"locked": false,
+		"hints": [
+			"You need to flip every next pointer — track the previous node as you go.",
+			"At each node, save its next before overwriting it, then point back to the previous node.",
+			"Also solvable recursively: reverse the rest of the list first, then fix the current node's links."
+		]
+	},
+	{
+		"id": "dsa-0045",
+		"code": "reverse-nodes-in-k-group",
+		"slug": "reverse-nodes-in-k-group",
+		"name": "Reverse Nodes in k-Group",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/reverse-nodes-in-k-group/",
+		"locked": false,
+		"hints": [
+			"You're reversing the list in fixed-size chunks — check if a full group of k even exists first.",
+			"Reverse each group of k like a standard linked-list reversal, tracking the group's original head and tail.",
+			"Connect the previous group's tail to the new group's head, and leave any remaining shorter group unreversed."
+		]
+	},
+	{
+		"id": "dsa-0154",
+		"code": "roman-to-integer",
+		"slug": "roman-to-integer",
+		"name": "Roman to Integer",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/roman-to-integer/",
+		"locked": false,
+		"hints": [
+			"Most symbols just add their value, but a smaller value before a larger one means subtract.",
+			"Scan left to right, and if the current symbol's value is less than the next symbol's, subtract it instead of adding.",
+			"A single pass with a value lookup map handles every case, including subtractive pairs like IV and IX."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/roman-number-to-integer3201/1"
+	},
+	{
+		"id": "dsa-0159",
+		"code": "rotate-array",
+		"slug": "rotate-array",
+		"name": "Rotate Array",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/rotate-array/",
+		"locked": false,
+		"hints": [
+			"Rotating in place with O(1) extra space is possible via three reversals.",
+			"Reverse the whole array, then reverse the first k elements, then reverse the rest.",
+			"Those three reversals together produce exactly a right-rotation by k."
+		]
+	},
+	{
+		"id": "dsa-0136",
+		"code": "rotate-image",
+		"slug": "rotate-image",
+		"name": "Rotate Image",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/rotate-image/",
+		"locked": false,
+		"hints": [
+			"You must rotate the matrix in place, without allocating a second matrix.",
+			"Transpose the matrix first (swap across the diagonal), then reverse each row.",
+			"Transpose plus reverse-rows together produce exactly a 90-degree clockwise rotation."
+		]
+	},
+	{
+		"id": "dsa-0166",
+		"code": "rotate-list",
+		"slug": "rotate-list",
+		"name": "Rotate List",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/rotate-list/",
+		"locked": false,
+		"hints": [
+			"Rotating by k is easier if you first connect the list into a circle.",
+			"Find the length, connect tail to head, then break the circle at the new correct point.",
+			"Take k modulo length first — rotating by the full length (or a multiple) is a no-op."
+		]
+	},
+	{
+		"id": "dsa-0085",
+		"code": "rotting-oranges",
+		"slug": "rotting-oranges",
+		"name": "Rotting Oranges",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/rotting-oranges/",
+		"locked": false,
+		"hints": [
+			"All oranges rot simultaneously each minute, which points to a multi-source BFS, not one BFS per rotten orange.",
+			"Push every initially-rotten orange into the queue at once, then process level by level, one minute per level.",
+			"If any fresh orange remains unreached after the BFS finishes, the answer is -1."
+		]
+	},
+	{
+		"id": "dsa-0050",
+		"code": "same-tree",
+		"slug": "same-tree",
+		"name": "Same Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/same-tree/",
+		"locked": false,
+		"hints": [
+			"Two trees are the same only if every corresponding node matches, including null positions.",
+			"If both nodes are null, that's a match; if only one is null, that's a mismatch.",
+			"Otherwise compare values, then recursively check the left and right subtrees."
+		]
+	},
+	{
+		"id": "dsa-0029",
+		"code": "search-a-2d-matrix",
+		"slug": "search-a-2d-matrix",
+		"name": "Search a 2D Matrix",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/search-a-2d-matrix/",
+		"locked": false,
+		"hints": [
+			"Rows are sorted and each row's first element is greater than the previous row's last — think of it as one flattened sorted array.",
+			"Convert a single mid index into (row, col) using division and modulo by the row width.",
+			"Binary search that flattened index space directly instead of searching rows then columns separately."
+		]
+	},
+	{
+		"id": "dsa-0032",
+		"code": "search-in-rotated-sorted-array",
+		"slug": "search-in-rotated-sorted-array",
+		"name": "Search in Rotated Sorted Array",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/search-in-rotated-sorted-array/",
+		"locked": false,
+		"hints": [
+			"At every step, at least one half of the current range is normally sorted.",
+			"Figure out which half is sorted first, then check if the target falls in that half's range.",
+			"If the target's in the sorted half's range, search there; otherwise search the other half."
+		]
+	},
+	{
+		"id": "dsa-0060",
+		"code": "serialize-and-deserialize-binary-tree",
+		"slug": "serialize-and-deserialize-binary-tree",
+		"name": "Serialize and Deserialize Binary Tree",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/serialize-and-deserialize-binary-tree/",
+		"locked": false,
+		"hints": [
+			"You need a format that unambiguously marks null children so deserialization isn't guesswork.",
+			"A preorder traversal that explicitly writes a marker (like N) for every null child works well.",
+			"Deserialize by consuming that same preorder stream recursively, exactly mirroring how you wrote it."
+		]
+	},
+	{
+		"id": "dsa-0138",
+		"code": "set-matrix-zeroes",
+		"slug": "set-matrix-zeroes",
+		"name": "Set Matrix Zeroes",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/set-matrix-zeroes/",
+		"locked": false,
+		"hints": [
+			"You need O(1) extra space, so a separate copy of the matrix isn't the intended solution.",
+			"Use the matrix's own first row and first column as markers for which rows/columns need zeroing.",
+			"Handle the first row and first column's own zero-status with one or two separate boolean flags, since they double as your marker space."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/set-matrix-zeroes/1"
+	},
+	{
+		"id": "dsa-0170",
+		"code": "simplify-path",
+		"slug": "simplify-path",
+		"name": "Simplify Path",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/simplify-path/",
+		"locked": false,
+		"hints": [
+			"Split the path on \"/\" and process each segment as a stack operation.",
+			"\".\" means stay, \"..\" means pop (go up a directory), anything else pushes a new directory name.",
+			"Join the remaining stack contents with \"/\" at the end, handling the root-only edge case."
+		]
+	},
+	{
+		"id": "dsa-0144",
+		"code": "single-number",
+		"slug": "single-number",
+		"name": "Single Number",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/single-number/",
+		"locked": false,
+		"hints": [
+			"Every number except one appears exactly twice — think about an operation where duplicates cancel out.",
+			"XOR-ing a number with itself gives 0, and XOR-ing with 0 leaves a number unchanged.",
+			"XOR every element together — every pair of duplicates cancels, leaving only the single number."
+		]
+	},
+	{
+		"id": "dsa-0020",
+		"code": "sliding-window-maximum",
+		"slug": "sliding-window-maximum",
+		"name": "Sliding Window Maximum",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/sliding-window-maximum/",
+		"locked": false,
+		"hints": [
+			"A brute-force max per window is O(n*k) — a monotonic deque gets you O(n).",
+			"Keep indices in a deque where corresponding values are in decreasing order.",
+			"Pop smaller values off the back before pushing, and pop the front once it slides out of the window."
+		]
+	},
+	{
+		"id": "dsa-0184",
+		"code": "snakes-and-ladders",
+		"slug": "snakes-and-ladders",
+		"name": "Snakes and Ladders",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/snakes-and-ladders/",
+		"locked": false,
+		"hints": [
+			"This is shortest-path (BFS) over board squares 1 to n², where snakes/ladders are just extra edges.",
+			"Convert the boustrophedon (back-and-forth) row layout into a straight-line square number to simplify indexing.",
+			"From a square, try every dice roll 1-6, following a snake/ladder immediately if the destination has one."
+		]
+	},
+	{
+		"id": "dsa-0137",
+		"code": "spiral-matrix",
+		"slug": "spiral-matrix",
+		"name": "Spiral Matrix",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/spiral-matrix/",
+		"locked": false,
+		"hints": [
+			"Track four shrinking boundaries — top, bottom, left, right — and walk each edge in turn.",
+			"Traverse right along the top boundary, down the right boundary, left along the bottom, up along the left, then shrink all four boundaries inward.",
+			"After each direction, re-check that top is at or above bottom and left is at or before right before continuing, since a non-square matrix can finish mid-cycle."
+		]
+	},
+	{
+		"id": "essentials-spoj-acode",
+		"code": "spoj-acode",
+		"slug": "spoj-acode",
+		"hints": [],
+		"name": "Alphacode",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/ACODE/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-aggrcow",
+		"code": "spoj-aggrcow",
+		"slug": "spoj-aggrcow",
+		"hints": [],
+		"name": "Aggressive cows",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/AGGRCOW/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-brckts",
+		"code": "spoj-brckts",
+		"slug": "spoj-brckts",
+		"hints": [],
+		"name": "Brackets",
+		"difficulty": "H",
+		"url": "https://www.spoj.com/problems/BRCKTS/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-buglife",
+		"code": "spoj-buglife",
+		"slug": "spoj-buglife",
+		"hints": [],
+		"name": "A Bug's Life",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/BUGLIFE/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-coins",
+		"code": "spoj-coins",
+		"slug": "spoj-coins",
+		"hints": [],
+		"name": "Bytelandian gold coins",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/COINS/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-eko",
+		"code": "spoj-eko",
+		"slug": "spoj-eko",
+		"hints": [],
+		"name": "Eko",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/EKO/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-gss1",
+		"code": "spoj-gss1",
+		"slug": "spoj-gss1",
+		"hints": [],
+		"name": "Can you answer these queries I",
+		"difficulty": "H",
+		"url": "https://www.spoj.com/problems/GSS1/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-invcnt",
+		"code": "spoj-invcnt",
+		"slug": "spoj-invcnt",
+		"hints": [],
+		"name": "Inversion Count",
+		"difficulty": "H",
+		"url": "https://www.spoj.com/problems/INVCNT/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-prime1",
+		"code": "spoj-prime1",
+		"slug": "spoj-prime1",
+		"hints": [],
+		"name": "Prime Generator",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/PRIME1/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-pt07y",
+		"code": "spoj-pt07y",
+		"slug": "spoj-pt07y",
+		"hints": [],
+		"name": "Is it a tree",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/PT07Y/",
+		"locked": false
+	},
+	{
+		"id": "essentials-spoj-stpar",
+		"code": "spoj-stpar",
+		"slug": "spoj-stpar",
+		"hints": [],
+		"name": "Street Parade",
+		"difficulty": "M",
+		"url": "https://www.spoj.com/problems/STPAR/",
+		"locked": false
+	},
+	{
+		"id": "dsa-0194",
+		"code": "sqrtx",
+		"slug": "sqrtx",
+		"name": "Sqrt(x)",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/sqrtx/",
+		"locked": false,
+		"hints": [
+			"You want the floor of the square root without using a library function.",
+			"Binary search over possible answers from 0 to x, checking if mid*mid overshoots x.",
+			"Watch for overflow when squaring mid on very large inputs — use a wider integer type or divide instead of multiply."
+		]
+	},
+	{
+		"id": "dsa-0156",
+		"code": "string-to-integer-atoi",
+		"slug": "string-to-integer-atoi",
+		"name": "String to Integer (atoi)",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/string-to-integer-atoi/",
+		"locked": false,
+		"hints": [
+			"This is mostly about carefully handling edge cases, not a clever algorithm.",
+			"Skip leading whitespace, then an optional sign, then digits — stop at the first non-digit.",
+			"Clamp the final result to the 32-bit signed integer range rather than overflowing."
+		]
+	},
+	{
+		"id": "striver-subset-sum-equals-to-target",
+		"code": "subset-sum-equals-to-target",
+		"slug": "subset-sum-equals-to-target",
+		"name": "Subset Sum Problem",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/subset-sum-problem-1611555638/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/subset-sum-problem-1611555638/1"
+	},
+	{
+		"id": "dsa-0071",
+		"code": "subsets",
+		"slug": "subsets",
+		"name": "Subsets",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/subsets/",
+		"locked": false,
+		"hints": [
+			"Every element has two choices at each step: include it, or don't.",
+			"A recursive function that branches on include vs skip for each index generates all subsets.",
+			"There's no need to check for duplicates here — all elements are distinct, so no extra pruning is required."
+		]
+	},
+	{
+		"id": "dsa-0074",
+		"code": "subsets-ii",
+		"slug": "subsets-ii",
+		"name": "Subsets II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/subsets-ii/",
+		"locked": false,
+		"hints": [
+			"Duplicate values in the input mean naive subset generation will produce duplicate subsets.",
+			"Sort the array first so duplicates sit next to each other.",
+			"At each recursion level, skip a candidate if it equals the previous one and the previous one wasn't included at this same level."
+		]
+	},
+	{
+		"id": "dsa-0162",
+		"code": "substring-with-concatenation-of-all-words",
+		"slug": "substring-with-concatenation-of-all-words",
+		"name": "Substring with Concatenation of All Words",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/substring-with-concatenation-of-all-words/",
+		"locked": false,
+		"hints": [
+			"All words are the same length, so valid substrings align on fixed-size word boundaries.",
+			"Slide a window of total-words-length, breaking it into word-sized chunks and counting them.",
+			"Compare that window's word-count map against the target word-count map for an exact match."
+		]
+	},
+	{
+		"id": "dsa-0051",
+		"code": "subtree-of-another-tree",
+		"slug": "subtree-of-another-tree",
+		"name": "Subtree of Another Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/subtree-of-another-tree/",
+		"locked": false,
+		"hints": [
+			"You can reuse a \"same tree\" check as a helper here.",
+			"Walk every node in the main tree, and at each one check if that same-tree comparison matches the subtree.",
+			"Try the match starting at every node, not just the root — the subtree could start anywhere."
+		]
+	},
+	{
+		"id": "dsa-0191",
+		"code": "sudoku-solver",
+		"slug": "sudoku-solver",
+		"name": "Sudoku Solver",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/sudoku-solver/",
+		"locked": false,
+		"hints": [
+			"This is backtracking over empty cells, trying digits 1-9 and checking row/column/box validity.",
+			"Track used digits per row, column, and 3x3 box (similar to Valid Sudoku) for O(1) conflict checks.",
+			"On placing a digit that leads to a dead end, undo it (backtrack) and try the next digit before giving up on the cell."
+		]
+	},
+	{
+		"id": "dsa-0149",
+		"code": "sum-of-two-integers",
+		"slug": "sum-of-two-integers",
+		"name": "Sum of Two Integers",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/sum-of-two-integers/",
+		"locked": false,
+		"hints": [
+			"You can't use plus or minus directly, so build addition from bitwise operations instead.",
+			"XOR gives you the sum of two bits ignoring carry; AND, shifted left by 1, gives you the carry.",
+			"Repeat that XOR/AND-shift process, feeding the carry back in, until there's no carry left to add."
+		]
+	},
+	{
+		"id": "dsa-0084",
+		"code": "surrounded-regions",
+		"slug": "surrounded-regions",
+		"name": "Surrounded Regions",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/surrounded-regions/",
+		"locked": false,
+		"hints": [
+			"An O region is only safe if it touches the border somewhere.",
+			"Start DFS/BFS from every border O first, and mark everything reachable from those as safe.",
+			"Afterward, flip every remaining unmarked O to X — those never had a path to the border."
+		]
+	},
+	{
+		"id": "dsa-0165",
+		"code": "swap-nodes-in-pairs",
+		"slug": "swap-nodes-in-pairs",
+		"name": "Swap Nodes in Pairs",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/swap-nodes-in-pairs/",
+		"locked": false,
+		"hints": [
+			"You're relinking pointers two nodes at a time, not swapping values.",
+			"Use a dummy node before the head so the first pair swap has no special case.",
+			"At each step, rewire prev/first/second's next pointers in the right order before advancing."
+		]
+	},
+	{
+		"id": "dsa-0096",
+		"code": "swim-in-rising-water",
+		"slug": "swim-in-rising-water",
+		"name": "Swim in Rising Water",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/swim-in-rising-water/",
+		"locked": false,
+		"hints": [
+			"You want the path where the single highest elevation crossed is as small as possible.",
+			"A modified Dijkstra works: instead of summing distances, track the max elevation seen so far on each path.",
+			"A min-heap ordered by that running max, always expanding the currently-lowest-max cell, gets you there efficiently."
+		]
+	},
+	{
+		"id": "dsa-0172",
+		"code": "symmetric-tree",
+		"slug": "symmetric-tree",
+		"name": "Symmetric Tree",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/symmetric-tree/",
+		"locked": false,
+		"hints": [
+			"A tree is symmetric if its left subtree is a mirror image of its right subtree.",
+			"Write a helper comparing two subtrees where you check node1.left against node2.right, and node1.right against node2.left.",
+			"Both null is a match; only one null, or mismatched values, is not."
+		]
+	},
+	{
+		"id": "dsa-0115",
+		"code": "target-sum",
+		"slug": "target-sum",
+		"name": "Target Sum",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/target-sum/",
+		"locked": false,
+		"hints": [
+			"Assigning plus or minus to each number is really choosing a subset to negate.",
+			"If S is the total sum and P is the positive-subset sum, the negative subset sums to S-P, and you need P - (S-P) to equal target.",
+			"That reframes it as: count subsets summing to (target + S) / 2 — a counting variant of the subset-sum knapsack."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/target-sum-1626326450/1"
+	},
+	{
+		"id": "dsa-0068",
+		"code": "task-scheduler",
+		"slug": "task-scheduler",
+		"name": "Task Scheduler",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/task-scheduler/",
+		"locked": false,
+		"hints": [
+			"The most frequent task drives the minimum possible schedule length.",
+			"Picture \"slots\" of size (cooldown + 1), filled first by the most frequent tasks.",
+			"The answer is the max of (total tasks) and the slot-based calculation using the most frequent task's count."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/task-scheduler/1"
+	},
+	{
+		"id": "dsa-0033",
+		"code": "time-based-key-value-store",
+		"slug": "time-based-key-value-store",
+		"name": "Time Based Key-Value Store",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/time-based-key-value-store/",
+		"locked": false,
+		"hints": [
+			"Each key maps to a list of (timestamp, value) pairs, added in increasing timestamp order.",
+			"That means each key's list is already sorted by timestamp — binary search applies.",
+			"Find the largest timestamp in that key's list that is at most the query timestamp."
+		]
+	},
+	{
+		"id": "dsa-0005",
+		"code": "top-k-frequent-elements",
+		"slug": "top-k-frequent-elements",
+		"name": "Top K Frequent Elements",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/top-k-frequent-elements/",
+		"locked": false,
+		"hints": [
+			"First count how often each element appears.",
+			"You don't need to fully sort — bucket sort by frequency runs in O(n).",
+			"Create buckets indexed by frequency (0 to n), then read off the top k from the end."
+		]
+	},
+	{
+		"id": "dsa-0180",
+		"code": "top-k-frequent-words",
+		"slug": "top-k-frequent-words",
+		"name": "Top K Frequent Words",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/top-k-frequent-words/",
+		"locked": false,
+		"hints": [
+			"Ties in frequency break by lexicographic order, which affects both counting and comparison.",
+			"Count word frequencies first, then use a heap ordered by (frequency, word) with a custom comparator.",
+			"A min-heap of size k (popping the worst candidate when it overflows) avoids sorting the entire word list."
+		]
+	},
+	{
+		"id": "striver-top-view-of-bt",
+		"code": "top-view-of-bt",
+		"slug": "top-view-of-bt",
+		"name": "Top View of Binary Tree",
+		"difficulty": "M",
+		"url": "https://www.geeksforgeeks.org/problems/top-view-of-binary-tree/1",
+		"locked": false,
+		"hints": [],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/top-view-of-binary-tree/1"
+	},
+	{
+		"id": "dsa-0014",
+		"code": "trapping-rain-water",
+		"slug": "trapping-rain-water",
+		"name": "Trapping Rain Water",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/trapping-rain-water/",
+		"locked": false,
+		"hints": [
+			"Water trapped at any bar is limited by the shorter of the tallest walls to its left and right.",
+			"Track running max-from-left and max-from-right as two pointers close in.",
+			"At each step, process the side with the smaller current max first — that side's water level is now decided."
+		]
+	},
+	{
+		"id": "dsa-0185",
+		"code": "triangle",
+		"slug": "triangle",
+		"name": "Triangle",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/triangle/",
+		"locked": false,
+		"hints": [
+			"Working top-down means tracking two possible parents per cell — bottom-up is cleaner here.",
+			"Start from the last row of the triangle, treating it as the base case.",
+			"Each row up, update each cell to itself plus the min of the two adjacent cells directly below it."
+		]
+	},
+	{
+		"id": "dsa-0003",
+		"code": "two-sum",
+		"slug": "two-sum",
+		"name": "Two Sum",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/two-sum/",
+		"locked": false,
+		"hints": [
+			"Brute force is O(n^2) — you can do it in one pass.",
+			"For each number, check if its complement (target - num) was already seen.",
+			"Store value to index in a hash map as you go, so the lookup is O(1)."
+		]
+	},
+	{
+		"id": "dsa-0011",
+		"code": "two-sum-ii-input-array-is-sorted",
+		"slug": "two-sum-ii-input-array-is-sorted",
+		"name": "Two Sum II - Input Array Is Sorted",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/",
+		"locked": false,
+		"hints": [
+			"Sorted input means you don't need a hash map this time.",
+			"Start pointers at both ends; the sum tells you which one to move.",
+			"If the sum's too big, move the right pointer left; too small, move the left pointer right."
+		]
+	},
+	{
+		"id": "dsa-0111",
+		"code": "unique-paths",
+		"slug": "unique-paths",
+		"name": "Unique Paths",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/unique-paths/",
+		"locked": false,
+		"hints": [
+			"The number of ways to reach a cell is the sum of ways to reach the cell above it and the cell to its left.",
+			"The entire first row and first column only have exactly one possible path each.",
+			"This can be computed with a single 1D array reused across rows, instead of a full 2D grid."
+		]
+	},
+	{
+		"id": "dsa-0002",
+		"code": "valid-anagram",
+		"slug": "valid-anagram",
+		"name": "Valid Anagram",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/valid-anagram/",
+		"locked": false,
+		"hints": [
+			"Two strings are anagrams if they have identical letter counts.",
+			"Count characters with a fixed-size array or hash map, one string adds, the other subtracts.",
+			"If all counts return to zero, it's a match — also handles differing lengths as an early exit."
+		]
+	},
+	{
+		"id": "dsa-0010",
+		"code": "valid-palindrome",
+		"slug": "valid-palindrome",
+		"name": "Valid Palindrome",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/valid-palindrome/",
+		"locked": false,
+		"hints": [
+			"Skip non-alphanumeric characters as you compare.",
+			"Use two pointers starting from both ends, moving inward.",
+			"Lowercase both characters before comparing to ignore case."
+		]
+	},
+	{
+		"id": "dsa-0021",
+		"code": "valid-parentheses",
+		"slug": "valid-parentheses",
+		"name": "Valid Parentheses",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/valid-parentheses/",
+		"locked": false,
+		"hints": [
+			"Every closing bracket must match the most recently opened one.",
+			"Push opening brackets onto a stack; on a closing bracket, check the top matches.",
+			"An empty stack at the end (and never popping from empty) means it's valid."
+		]
+	},
+	{
+		"id": "dsa-0129",
+		"code": "valid-parenthesis-string",
+		"slug": "valid-parenthesis-string",
+		"name": "Valid Parenthesis String",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/valid-parenthesis-string/",
+		"locked": false,
+		"hints": [
+			"A star can act as an open bracket, a close bracket, or nothing, so tracking one exact count of open brackets isn't enough.",
+			"Track a range (minimum possible open count, maximum possible open count) as you scan.",
+			"If the max ever drops below zero, it's invalid; at the end, the string is valid if the minimum can be brought down to zero."
+		]
+	},
+	{
+		"id": "dsa-0007",
+		"code": "valid-sudoku",
+		"slug": "valid-sudoku",
+		"name": "Valid Sudoku",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/valid-sudoku/",
+		"locked": false,
+		"hints": [
+			"You just need to validate rules, not solve the puzzle.",
+			"Track seen digits per row, per column, and per 3x3 box separately.",
+			"A box's index can be computed from (row/3, col/3) to bucket cells correctly."
+		]
+	},
+	{
+		"id": "dsa-0056",
+		"code": "validate-binary-search-tree",
+		"slug": "validate-binary-search-tree",
+		"name": "Validate Binary Search Tree",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/validate-binary-search-tree/",
+		"locked": false,
+		"hints": [
+			"Checking only \"left child less than node less than right child\" locally isn't enough — bounds must hold for the whole subtree.",
+			"Pass a valid (min, max) range down through the recursion.",
+			"Each node must fall within its inherited range, then tighten that range for its left and right children."
+		]
+	},
+	{
+		"id": "dsa-0086",
+		"code": "walls-and-gates",
+		"slug": "walls-and-gates",
+		"name": "Islands and Treasure",
+		"difficulty": "M",
+		"url": "https://neetcode.io/problems/islands-and-treasure",
+		"locked": false,
+		"hints": [
+			"Similar shape to Rotting Oranges — every gate can act as a BFS source simultaneously.",
+			"Push all gates into a queue together, then BFS outward, filling in distances as you reach each empty room.",
+			"A room only needs updating the first time it's reached, since BFS guarantees that's the shortest distance."
+		]
+	},
+	{
+		"id": "dsa-0189",
+		"code": "wildcard-matching",
+		"slug": "wildcard-matching",
+		"name": "Wildcard Matching",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/wildcard-matching/",
+		"locked": false,
+		"hints": [
+			"'?' matches any one character, '*' matches any sequence (including empty) — similar shape to regex matching but simpler rules.",
+			"dp[i][j] represents whether the first i characters of s match the first j characters of the pattern.",
+			"On a '*', consider both \"matches empty\" (dp[i][j-1]) and \"matches one more character of s\" (dp[i-1][j])."
+		]
+	},
+	{
+		"id": "dsa-0108",
+		"code": "word-break",
+		"slug": "word-break",
+		"name": "Word Break",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/word-break/",
+		"locked": false,
+		"hints": [
+			"You want to know, for every prefix of the string, whether it can be fully segmented into dictionary words.",
+			"canBreak(i) is true if some earlier index j has canBreak(j) true and the substring from j to i is in the dictionary.",
+			"A hash set for O(1) dictionary lookups keeps this efficient across many substring checks."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/word-break1352/1"
+	},
+	{
+		"id": "dsa-0092",
+		"code": "word-ladder",
+		"slug": "word-ladder",
+		"name": "Word Ladder",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/word-ladder/",
+		"locked": false,
+		"hints": [
+			"Treat every valid word as a graph node, connected to other words one letter apart — then it's shortest path.",
+			"BFS naturally finds the shortest transformation sequence, since it explores level by level.",
+			"Generate neighbors by trying every letter substitution at every position, checking each candidate against the word set."
+		]
+	},
+	{
+		"id": "dsa-0076",
+		"code": "word-search",
+		"slug": "word-search",
+		"name": "Word Search",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/word-search/",
+		"locked": false,
+		"hints": [
+			"This is a grid DFS where you also need to avoid revisiting a cell within the current path.",
+			"Mark a cell as visited before recursing into its neighbors, then unmark it on the way back (backtrack).",
+			"Exit early the moment a full match is found rather than exploring further unnecessarily."
+		],
+		"gfgUrl": "https://www.geeksforgeeks.org/problems/word-search/1"
+	},
+	{
+		"id": "dsa-0063",
+		"code": "word-search-ii",
+		"slug": "word-search-ii",
+		"name": "Word Search II",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/word-search-ii/",
+		"locked": false,
+		"hints": [
+			"Searching for each word separately over the board is far too slow with many words.",
+			"Put all words into a trie, then do one DFS over the board following trie paths instead of one search per word.",
+			"Prune trie branches once a word is found so future searches skip already-completed paths."
+		]
+	},
+	{
+		"id": "dsa-0157",
+		"code": "zigzag-conversion",
+		"slug": "zigzag-conversion",
+		"name": "Zigzag Conversion",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/zigzag-conversion/",
+		"locked": false,
+		"hints": [
+			"Simulating character-by-character placement is easier than deriving a closed-form index formula.",
+			"Track a current row and a direction (down or up), flipping direction at the top and bottom rows.",
+			"Append each character to a list of row-strings as you go, then join all rows at the end."
+		]
+	}
+]

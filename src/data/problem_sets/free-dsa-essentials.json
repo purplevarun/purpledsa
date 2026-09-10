@@ -1,0 +1,166 @@
+{
+	"slug": "free-dsa-essentials",
+	"title": "Free DSA Essentials",
+	"description": "100 handpicked exercises across 7 platforms, from foundations to advanced patterns. Free code submissions; no paid subscription required.",
+	"access": "free",
+	"curation": {
+		"verifiedAt": "2026-09-10",
+		"selection": "Core interview and competitive-programming patterns, ordered from foundations to advanced data structures. No lessons, duplicate padding, or premium-only exercises.",
+		"sources": [
+			"https://leetcode.com/api/problems/all/",
+			"https://neetcode.io/practice",
+			"https://practiceapi.geeksforgeeks.org/api/vr/problems/",
+			"https://www.spoj.com/problems/classical/",
+			"https://www.codechef.com/practice",
+			"https://codeforces.com/api/problemset.problems",
+			"https://cses.fi/problemset/"
+		]
+	},
+	"topics": [
+		{
+			"name": "Foundations and Number Theory",
+			"problemCodes": [
+				"largest-element",
+				"count-all-digits-of-a-number",
+				"codechef-intest",
+				"codechef-prb01",
+				"codechef-fctrl",
+				"spoj-prime1",
+				"codeforces-230-b",
+				"codeforces-546-a",
+				"cses-1068"
+			]
+		},
+		{
+			"name": "Arrays, Hashing, and Prefix Sums",
+			"problemCodes": [
+				"two-sum",
+				"group-anagrams",
+				"product-of-array-except-self",
+				"count-subarrays-with-given-sum",
+				"longest-consecutive-sequence",
+				"largest-subarray-with-sum-0",
+				"leaders-in-an-array",
+				"find-the-repeating-and-missing-number",
+				"codechef-tsort",
+				"codeforces-363-b",
+				"encode-and-decode-strings"
+			]
+		},
+		{
+			"name": "Two Pointers and Sliding Window",
+			"problemCodes": [
+				"3sum",
+				"trapping-rain-water",
+				"longest-substring-without-repeating-characters",
+				"minimum-window-substring",
+				"codechef-lapin",
+				"codeforces-279-b",
+				"cses-1084",
+				"cses-1090"
+			]
+		},
+		{
+			"name": "Binary Search and Greedy",
+			"problemCodes": [
+				"search-in-rotated-sorted-array",
+				"koko-eating-bananas",
+				"find-minimum-in-rotated-sorted-array",
+				"book-allocation-problem",
+				"minimum-number-of-platforms-required-for-a-railway",
+				"spoj-aggrcow",
+				"spoj-eko",
+				"codeforces-371-c",
+				"codeforces-1352-c",
+				"codeforces-706-b",
+				"codeforces-474-b",
+				"codechef-cielrcpt",
+				"meeting-rooms",
+				"meeting-rooms-ii"
+			]
+		},
+		{
+			"name": "Linked Lists, Stacks, and Queues",
+			"problemCodes": [
+				"reverse-linked-list",
+				"linked-list-cycle",
+				"merge-two-sorted-lists",
+				"lru-cache",
+				"valid-parentheses",
+				"daily-temperatures",
+				"largest-rectangle-in-histogram",
+				"infix-to-postfix-conversion",
+				"spoj-stpar"
+			]
+		},
+		{
+			"name": "Trees and Tries",
+			"problemCodes": [
+				"maximum-depth-of-binary-tree",
+				"validate-binary-search-tree",
+				"lowest-common-ancestor-of-a-binary-tree",
+				"serialize-and-deserialize-binary-tree",
+				"binary-tree-level-order-traversal",
+				"kth-smallest-element-in-a-bst",
+				"implement-trie-prefix-tree",
+				"word-search-ii",
+				"top-view-of-bt",
+				"bottom-view-of-bt"
+			]
+		},
+		{
+			"name": "Graphs and Shortest Paths",
+			"problemCodes": [
+				"number-of-islands",
+				"course-schedule",
+				"rotting-oranges",
+				"redundant-connection",
+				"walls-and-gates",
+				"alien-dictionary",
+				"dijkstras-algorithm",
+				"prims-algorithm",
+				"spoj-buglife",
+				"spoj-pt07y",
+				"cses-1193",
+				"cses-1667",
+				"codeforces-580-c",
+				"codechef-firesc"
+			]
+		},
+		{
+			"name": "Dynamic Programming and Backtracking",
+			"problemCodes": [
+				"house-robber",
+				"house-robber-ii",
+				"coin-change-ii",
+				"edit-distance",
+				"longest-common-subsequence",
+				"longest-increasing-subsequence",
+				"n-queens",
+				"combination-sum",
+				"frog-jump",
+				"ninjas-training",
+				"subset-sum-equals-to-target",
+				"spoj-coins",
+				"spoj-acode",
+				"codeforces-455-a",
+				"cses-1158",
+				"cses-1746"
+			]
+		},
+		{
+			"name": "Range Queries and Advanced Data Structures",
+			"problemCodes": [
+				"spoj-gss1",
+				"spoj-brckts",
+				"spoj-invcnt",
+				"cses-1646",
+				"cses-1648",
+				"cses-1649",
+				"sliding-window-maximum",
+				"find-median-from-data-stream",
+				"k-closest-points-to-origin"
+			]
+		}
+	]
+}
