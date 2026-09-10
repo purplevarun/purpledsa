@@ -55,9 +55,7 @@ a {
 }
 
 .dashboard-shell {
-	height: 100vh;
-	max-height: 100vh;
-	overflow: hidden;
+	min-height: 100dvh;
 	display: flex;
 	flex-direction: column;
 	padding-bottom: 14px;
@@ -96,14 +94,30 @@ a {
 .dashboard-set-link {
 	text-decoration: none;
 	color: inherit;
+	position: relative;
+	border-radius: 8px;
+	min-width: 0;
 	min-height: 0;
 }
 
-.dashboard-set-card {
-	padding: 12px;
+.card.dashboard-set-card {
+	height: 100%;
+	min-height: 156px;
+	padding: 16px;
+	border-radius: 8px;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 10px;
+}
+
+.dashboard-set-link:hover .dashboard-set-card,
+.dashboard-set-link:focus-visible .dashboard-set-card {
+	border-color: var(--fg);
+}
+
+.dashboard-set-link:focus-visible {
+	outline: 2px solid var(--fg);
+	outline-offset: 4px;
 }
 
 .dashboard-set-card h3,
@@ -115,19 +129,27 @@ a {
 .dashboard-set-card h3 {
 	font-size: 15px;
 	line-height: 1.25;
+	min-height: 2.5em;
+	overflow-wrap: anywhere;
 }
 
 .dashboard-set-card p {
 	font-size: 12px;
-	line-height: 1.3;
+	line-height: 1.5;
+	min-height: 3em;
+	color: var(--muted);
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 3;
+	-webkit-line-clamp: 2;
+	overflow-wrap: anywhere;
 	overflow: hidden;
 }
 
 .dashboard-set-card small {
+	margin-top: auto;
 	font-size: 12px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
 	color: var(--muted);
 }
 
@@ -189,7 +211,8 @@ a {
 
 .header-link-chip::after,
 .user-icon-chip::after,
-.sync-icon-button::after {
+.sync-icon-button::after,
+.dashboard-set-link::after {
 	content: "";
 	position: absolute;
 	top: 0;
@@ -223,6 +246,12 @@ a {
 .sync-icon-button:not(:disabled):focus-visible::after {
 	opacity: 1;
 	animation: header-dot-race 1.05s linear infinite;
+}
+
+.dashboard-set-link:hover::after,
+.dashboard-set-link:focus-visible::after {
+	opacity: 1;
+	animation: header-dot-race 3s linear infinite;
 }
 
 .user-icon-chip,
@@ -286,7 +315,8 @@ a {
 @media (prefers-reduced-motion: reduce) {
 	.header-link-chip::after,
 	.user-icon-chip::after,
-	.sync-icon-button::after {
+	.sync-icon-button::after,
+	.dashboard-set-link::after {
 		animation: none !important;
 	}
 }

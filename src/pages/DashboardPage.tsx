@@ -10,6 +10,17 @@ import {
 import { fetchAcceptedSubmissions } from "../lib/leetcodeApi";
 import { supabase, supabaseConfigError } from "../lib/supabase";
 
+const tileDescriptions: Record<string, string> = {
+	"all-dsa-questions": "Every coding problem, without duplicates.",
+	"free-dsa-essentials": "100 free exercises across seven platforms.",
+	"neetcode-150": "Core interview patterns, step by step.",
+	"top-interview": "Frequently asked coding interview problems.",
+	"blind-75": "High-frequency interview fundamentals.",
+	cses: "Competitive programming essentials.",
+	lld: "Object-oriented design and machine coding.",
+	hld: "System design, diagrams, and expert resources.",
+};
+
 type ProgressCountRow = {
 	setSlug: string;
 	problemSlug: string;
@@ -293,8 +304,8 @@ export const DashboardPage = () => {
 					>
 						<div className="card dashboard-set-card">
 							<h3>{set.title}</h3>
-							<p style={{ color: "var(--muted)" }}>
-								{set.description}
+							<p title={set.description}>
+								{tileDescriptions[set.slug] ?? set.description}
 							</p>
 							<small>
 								{solvedCountBySet[set.slug] || 0}/
