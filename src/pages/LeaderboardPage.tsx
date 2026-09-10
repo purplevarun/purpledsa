@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppHeader } from "../app/AppHeader";
+import { countUniqueSolvedByUser, type ProgressRow } from "../lib/progress";
 import { supabase, supabaseConfigError } from "../lib/supabase";
 
 type LeaderboardUser = {
 	id: string;
 	username: string;
 	name?: string | null;
-};
-
-type ProgressRow = {
-	userId: string;
-	solved: boolean;
 };
 
 type LeaderboardEntry = {
@@ -41,20 +37,17 @@ export function LeaderboardPage() {
 					{ data: progress, error: progressError },
 				] = await Promise.all([
 					supabase.from("user").select("id, username, name"),
-					supabase.from("progress").select("userId, solved"),
+					supabase
+						.from("progress")
+						.select("userId, problemSlug, solved"),
 				]);
 
 				if (userError) throw new Error("Could not load users");
 				if (progressError) throw new Error("Could not load progress");
 
-				const solvedCountByUserId = new Map<string, number>();
-				for (const row of (progress ?? []) as ProgressRow[]) {
-					if (!row.solved) continue;
-					solvedCountByUserId.set(
-						row.userId,
-						(solvedCountByUserId.get(row.userId) ?? 0) + 1,
-					);
-				}
+				const solvedCountByUserId = countUniqueSolvedByUser(
+					(progress ?? []) as ProgressRow[],
+				);
 
 				const next = ((users ?? []) as LeaderboardUser[])
 					.map((u) => ({
@@ -93,7 +86,7 @@ export function LeaderboardPage() {
 			<section className="card">
 				<h1 style={{ marginTop: 0 }}>Leaderboard</h1>
 				<p style={{ color: "var(--muted)" }}>
-					Ranking by total solved problems.
+					Ranking by unique solved problems.
 				</p>
 
 				{loading && <p>Loading leaderboard...</p>}
