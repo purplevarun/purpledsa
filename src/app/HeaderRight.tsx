@@ -1,4 +1,6 @@
+import { Search, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useGlobalSearch } from "./GlobalSearch";
 
 type HeaderRightProps = {
 	isSignedIn: boolean;
@@ -33,6 +35,7 @@ const HeaderRight = ({
 	syncing = false,
 	lastSyncedAt = null,
 }: HeaderRightProps) => {
+	const { openSearch, isOpen } = useGlobalSearch();
 	const lastSyncedLabel = lastSyncedAt
 		? new Date(lastSyncedAt).toLocaleString()
 		: "Never";
@@ -42,8 +45,25 @@ const HeaderRight = ({
 
 	return (
 		<div className="header-right">
-			<Link to="/leaderboard" className="header-link-chip">
-				Leaderboard
+			<button
+				type="button"
+				className="user-icon-chip"
+				onClick={openSearch}
+				aria-label="Search"
+				title="Search"
+				aria-haspopup="dialog"
+				aria-expanded={isOpen}
+				aria-keyshortcuts="Meta+K Control+K"
+			>
+				<Search aria-hidden="true" />
+			</button>
+			<Link
+				to="/leaderboard"
+				className="user-icon-chip"
+				aria-label="Leaderboard"
+				title="Leaderboard"
+			>
+				<Trophy aria-hidden="true" />
 			</Link>
 			{isSignedIn && (
 				<button

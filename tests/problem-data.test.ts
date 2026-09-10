@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import test from "node:test";
-import type { StudyGuide } from "../src/types/problems.ts";
+import type { ProblemSet, StudyGuide } from "../src/types/problems.ts";
+import { createSearchIndex, searchCatalog } from "../src/lib/search.ts";
 
 import {
 	getPracticePlatform,
@@ -287,6 +288,101 @@ test("HLD video selections retain their reviewed topic mappings", () => {
 			code,
 		);
 	}
+});
+
+const searchDirectory = new URL("../src/data/problem_sets/", import.meta.url);
+const searchSets: ProblemSet[] = readdirSync(searchDirectory)
+	.filter((filename) => filename.endsWith(".json"))
+	.map((filename) => {
+		const sheet: SheetReference = JSON.parse(
+			readFileSync(new URL(filename, searchDirectory), "utf8"),
+		);
+		return {
+			slug: sheet.slug,
+			title: sheet.title,
+			description: sheet.title,
+			topics: sheet.topics.map((topic) => ({
+				name: topic.name,
+				problems: topic.problemCodes.map((code, order) => ({
+					...byCode.get(code)!,
+					order,
+					slug: code,
+					difficulty: "M" as const,
+					hints: [],
+					studyGuide: sheet.guides?.[code],
+				})),
+			})),
+		};
+	});
+const searchIndex = createSearchIndex(searchSets);
+
+test("global search indexes each problem once across collections", () => {
+	const entries = searchIndex.filter(
+		(entry) => entry.kind === "problem" || entry.kind === "guide",
+	);
+	assert.equal(entries.length, problems.length);
+	assert.equal(
+		new Set(entries.map((entry) => entry.id)).size,
+		entries.length,
+	);
+	assert.equal(
+		searchIndex.filter((entry) => entry.kind === "collection").length,
+		searchSets.length,
+	);
+	assert.equal(entries.filter((entry) => entry.kind === "guide").length, 15);
+});
+
+test("global search prioritizes titles and finds topics and guide concepts", () => {
+	assert.equal(searchCatalog(searchIndex, "  TWO-SUM  ")[0].title, "Two Sum");
+	assert.equal(
+		searchCatalog(searchIndex, "leetcode two sum")[0].href,
+		"https://leetcode.com/problems/two-sum/",
+	);
+	const guide = searchCatalog(searchIndex, "URL shortener")[0];
+	assert.equal(guide.kind, "guide");
+	assert.equal(guide.external, false);
+	assert.equal(
+		guide.href,
+		"/sets/hld?guide=design-url-shortener&section=guide",
+	);
+	assert.ok(
+		searchCatalog(searchIndex, "Kafka").some(
+			(entry) => entry.id === "problem:design-pub-sub-messaging-platform",
+		),
+	);
+	assert.ok(
+		searchCatalog(searchIndex, "binary tree").some(
+			(entry) => entry.kind === "problem",
+		),
+	);
+	assert.equal(
+		searchCatalog(searchIndex, "leaderboard")[0].href,
+		"/leaderboard",
+	);
+	assert.equal(
+		searchCatalog(searchIndex, "neetcode 150")[0].href,
+		"/sets/neetcode-150",
+	);
+});
+
+test("global search handles empty queries, missing results, and result limits", () => {
+	const defaults = searchCatalog(searchIndex, "   ");
+	assert.ok(defaults.length);
+	assert.ok(
+		defaults.every(
+			(entry) => entry.kind === "page" || entry.kind === "collection",
+		),
+	);
+	assert.deepEqual(
+		searchCatalog(searchIndex, "no-such-catalog-entry-12345"),
+		[],
+	);
+	assert.equal(searchCatalog(searchIndex, "design", 3).length, 3);
+	assert.deepEqual(searchCatalog(searchIndex, "design", 0), []);
+	assert.deepEqual(searchCatalog(searchIndex, "design", -1), []);
+	const problem = searchCatalog(searchIndex, "two sum")[0];
+	assert.equal(problem.external, true);
+	assert.equal(problem.href, byCode.get("two-sum")?.url);
 });
 
 test("Free DSA Essentials has 100 unique exercises across all seven platforms", () => {
