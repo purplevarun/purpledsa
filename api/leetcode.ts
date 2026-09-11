@@ -2,7 +2,7 @@ export const config = {
 	runtime: "edge",
 };
 
-export default async function handler(request: Request) {
+const handler = async (request: Request) => {
 	if (request.method !== "POST") {
 		return new Response(JSON.stringify({ error: "Method not allowed" }), {
 			status: 405,
@@ -55,4 +55,6 @@ export default async function handler(request: Request) {
 			"Content-Type": "application/json",
 		},
 	});
-}
+};
+
+export default handler;

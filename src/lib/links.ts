@@ -104,7 +104,8 @@ const getSystemDesignWebsite = (value: string) => {
 		const hostname = url.hostname.replace(/^www\./, "");
 		return systemDesignWebsites.find(
 			(website) =>
-				website.hostname === hostname && website.path.test(url.pathname),
+				website.hostname === hostname &&
+				website.path.test(url.pathname),
 		);
 	} catch {
 		return undefined;
