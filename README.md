@@ -38,6 +38,10 @@ VITE_SUPABASE_URL="https://your-project.supabase.co"
 VITE_SUPABASE_ANON_KEY="your-anon-key"
 ```
 
+The app also accepts `VITE_PUBLIC_SUPABASE_URL` and `VITE_PUBLIC_SUPABASE_ANON_KEY`. If both naming styles are set, the `VITE_PUBLIC_*` values take precedence.
+
+These `VITE_*` values are bundled into the browser app. Use only the public anon key, never a Supabase service-role key.
+
 Use the exact same values in both places if you want local and production to share one database:
 
 1. Local `.env.local`
