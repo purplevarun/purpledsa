@@ -950,213 +950,283 @@
 		]
 	},
 	{
-		"id": "dsa-0233",
-		"code": "design-a-bounded-blocking-queue",
-		"slug": "design-a-bounded-blocking-queue",
-		"name": "Design a Bounded Blocking Queue",
+		"id": "9ae91618-07d7-4b03-a10e-de6122bc1ec3",
+		"code": "building-h2o",
+		"slug": "building-h2o",
+		"name": "Building H2O",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Bounded%20Blocking%20Queue%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/building-h2o/",
 		"locked": false,
 		"hints": [
-			"Producers block when full, consumers block when empty — classic producer-consumer.",
-			"Use a mutex plus two condition variables (not-full, not-empty), or a language-native construct (e.g. Java's `ReentrantLock` + `Condition`).",
-			"Handle spurious wakeups by re-checking the condition in a while-loop, not an if-check."
+			"Each group needs exactly two hydrogen threads and one oxygen thread. Represent those permits separately.",
+			"Use a barrier or equivalent phase state so the next molecule cannot release atoms before the current group finishes.",
+			"Waiting threads should block on synchronization primitives rather than relying on scheduling order or timed sleeps."
 		]
 	},
 	{
-		"id": "dsa-0246",
-		"code": "design-a-car-rental-system",
-		"slug": "design-a-car-rental-system",
-		"name": "Design a Car Rental System",
+		"id": "9ca2ff53-2bda-4822-8dd4-6509a6c58500",
+		"code": "design-a-food-rating-system",
+		"slug": "design-a-food-rating-system",
+		"name": "Design a Food Rating System",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Car%20Rental%20System%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/design-a-food-rating-system/",
 		"locked": false,
 		"hints": [
-			"Core entities: Vehicle, Branch (location + inventory), Reservation (date range + vehicle category).",
-			"Availability search should filter by branch, date range, and vehicle category simultaneously.",
-			"Pricing depends on rental duration and vehicle category — model it as a separate pricing strategy, not inline logic."
+			"Keep food metadata by name and a separate ranking index for each cuisine.",
+			"Rank by descending rating and then ascending food name; ties are part of the contract.",
+			"Updating a rating must invalidate its old ranking entry. An ordered set or a heap with stale-entry checks can support this."
 		]
 	},
 	{
-		"id": "dsa-0250",
-		"code": "design-a-chess-game",
-		"slug": "design-a-chess-game",
-		"name": "Design a Chess Game",
+		"id": "beb3ac5f-535d-414b-8458-5495cde90017",
+		"code": "design-a-text-editor",
+		"slug": "design-a-text-editor",
+		"name": "Design a Text Editor",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20a%20Chess%20Game%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/design-a-text-editor/",
 		"locked": false,
 		"hints": [
-			"Core classes: Board, Piece (abstract, with subclasses per piece type implementing move validation), Move, Player.",
-			"Each piece subclass implements its own `isValidMove()` — this is the textbook Strategy/polymorphism example for LLD interviews.",
-			"Check/checkmate detection is the hardest part: after any candidate move, simulate it and verify the player's own king isn't left in check."
+			"Represent text on the two sides of the cursor separately so edits do not repeatedly copy the whole document.",
+			"Two stacks let cursor movement transfer characters between sides while insertion and deletion operate at the left boundary.",
+			"Clamp movement and deletion to available characters, and return only the required final ten characters to the cursor's left."
 		]
 	},
 	{
-		"id": "dsa-0235",
-		"code": "design-a-circuit-breaker",
-		"slug": "design-a-circuit-breaker",
-		"name": "Design a Circuit Breaker",
+		"id": "08e325d8-dafe-46f1-9396-f5e6d84eb0a9",
+		"code": "design-authentication-manager",
+		"slug": "design-authentication-manager",
+		"name": "Design Authentication Manager",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Circuit%20Breaker%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/design-authentication-manager/",
 		"locked": false,
 		"hints": [
-			"Three states: Closed (calls flow normally), Open (calls fail fast), Half-Open (a trial call tests recovery).",
-			"Track a rolling failure count/rate to decide when to trip from Closed to Open.",
-			"After a cooldown period, allow one trial request through (Half-Open) — success closes the circuit, failure reopens it."
+			"Store each token's expiration time rather than repeatedly computing its age from creation.",
+			"A token expiring at the current timestamp is already invalid and cannot be renewed.",
+			"Keep generation, renewal, and counting consistent about expiration; the judge's operation limit determines whether scanning is sufficient."
 		]
 	},
 	{
-		"id": "dsa-0231",
-		"code": "design-a-distributed-cache",
-		"slug": "design-a-distributed-cache",
-		"name": "Design a Distributed Cache",
-		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20a%20Distributed%20Cache%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Think about consistent hashing to shard keys across nodes without a full rehash on scale-out.",
-			"Core components: Node ring, hash function, replication factor for fault tolerance.",
-			"Consider cache invalidation strategy (TTL vs. write-through vs. write-back) as a first-class design decision."
-		]
-	},
-	{
-		"id": "dsa-0244",
-		"code": "design-a-hotel-booking-system",
-		"slug": "design-a-hotel-booking-system",
-		"name": "Design a Hotel Booking System",
+		"id": "eeeeadd8-5129-4e65-a5a5-9d5338aa1625",
+		"code": "design-browser-history",
+		"slug": "design-browser-history",
+		"name": "Design Browser History",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Hotel%20Booking%20System%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/design-browser-history/",
 		"locked": false,
 		"hints": [
-			"Core entities: Hotel, RoomType, Room, Reservation — a Reservation spans a date range, not just a single day.",
-			"Availability checking is a range-overlap problem per room — index reservations by room and date range for fast lookups.",
-			"Keep pricing (seasonal/dynamic rates) as a pluggable strategy separate from the reservation/availability logic."
+			"Track both the current position and the end of valid history; they are different after moving backward.",
+			"Visiting a new URL discards the forward branch instead of appending to the old future.",
+			"Clamp back and forward operations to the valid bounds, including requests larger than the stored history."
 		]
 	},
 	{
-		"id": "dsa-0240",
-		"code": "design-a-logging-framework",
-		"slug": "design-a-logging-framework",
-		"name": "Design a Logging Framework",
+		"id": "da0be8d8-48b5-4639-ab41-ad11e507e9dc",
+		"code": "design-circular-queue",
+		"slug": "design-circular-queue",
+		"name": "Design Circular Queue",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Logging%20Framework%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/design-circular-queue/",
 		"locked": false,
 		"hints": [
-			"Core interface: `Logger.log(level, message)`, with a chain of LogAppenders (console, file, network) that can be added independently.",
-			"Use the Chain of Responsibility pattern for log level filtering — each handler decides whether to pass a message along.",
-			"Make the log format and destination configurable without changing call sites — that's the whole point of the abstraction."
+			"A fixed array, a head index, and a size counter are enough to distinguish full from empty without shifting elements.",
+			"Compute insertion and rear positions modulo capacity, taking special care when the queue is empty.",
+			"Failed enqueue or dequeue operations must leave every index and the size unchanged."
 		]
 	},
 	{
-		"id": "dsa-0243",
-		"code": "design-a-movie-ticket-booking-system",
-		"slug": "design-a-movie-ticket-booking-system",
-		"name": "Design a Movie Ticket Booking System",
-		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20a%20Movie%20Ticket%20Booking%20System%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Core entities: Theater, Screen, Show (a Movie at a Screen at a time), Seat, Booking.",
-			"Concurrent seat selection is the crux of the design — use pessimistic locking (or a short-lived \"hold\" with expiry) to prevent double-booking.",
-			"Separate seat pricing (category-based) from booking/payment flow so pricing rules can evolve independently."
-		]
-	},
-	{
-		"id": "dsa-0242",
-		"code": "design-a-notification-system",
-		"slug": "design-a-notification-system",
-		"name": "Design a Notification System",
-		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Notification%20System%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Core interface: `NotificationService.send(user, message, channel)`, with channel as a strategy (email/SMS/push).",
-			"Use the Observer pattern if notifications are triggered by domain events (e.g. \"order shipped\") rather than called directly.",
-			"Consider retry/fallback: if push fails, fall back to email — that's a decorator or chain around the base strategy."
-		]
-	},
-	{
-		"id": "dsa-0236",
-		"code": "design-a-parking-lot-system",
-		"slug": "design-a-parking-lot-system",
-		"name": "Design a Parking Lot System",
-		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Parking%20Lot%20System%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Model spot types (compact/large/handicap) and vehicle types, and match them via a strategy for spot assignment.",
-			"Core classes: ParkingLot, Level, Spot, Vehicle, Ticket — a Ticket ties a Vehicle to a Spot with an entry timestamp.",
-			"Fee calculation is a separate strategy/interface so pricing rules can change without touching the core allocation logic."
-		]
-	},
-	{
-		"id": "dsa-0232",
-		"code": "design-a-rate-limiter",
-		"slug": "design-a-rate-limiter",
-		"name": "Design a Rate Limiter",
-		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Rate%20Limiter%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Multiple algorithms fit: token bucket, leaky bucket, fixed window, sliding window log/counter — pick one and justify it.",
-			"Core interface: `boolean allowRequest(clientId)`, backed by per-client state (tokens remaining, last refill time).",
-			"Token bucket needs a thread-safe refill calculation based on elapsed time, not a background timer, to stay simple and testable."
-		]
-	},
-	{
-		"id": "dsa-0249",
-		"code": "design-a-snake-and-ladder-game",
-		"slug": "design-a-snake-and-ladder-game",
-		"name": "Design a Snake and Ladder Game",
-		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20Snake%20and%20Ladder%20Game%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Core classes: Board (cells with snake/ladder jump targets), Player, Dice, Game (turn loop).",
-			"Model snakes and ladders uniformly as a single map of \"jump-from cell → jump-to cell\".",
-			"The turn loop is simple, but handle the exact-landing-on-100 rule (or equivalent) as an explicit edge case if required."
-		]
-	},
-	{
-		"id": "dsa-0234",
-		"code": "design-a-thread-pool",
-		"slug": "design-a-thread-pool",
-		"name": "Design a Thread Pool",
-		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20a%20Thread%20Pool%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Core pieces: a task queue, a fixed set of worker threads, and a shutdown mechanism.",
-			"Workers loop: pull a task from the queue (blocking if empty) and execute it, catching exceptions so one bad task doesn't kill a worker.",
-			"Support graceful shutdown (finish queued tasks) vs. immediate shutdown (drop queued tasks) as two distinct modes."
-		]
-	},
-	{
-		"id": "dsa-0247",
-		"code": "design-a-url-shortener",
-		"slug": "design-a-url-shortener",
-		"name": "Design a URL Shortener",
-		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20a%20URL%20Shortener%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Core operation: map a long URL to a short code and back — a key-value store is the backbone.",
-			"Short code generation: either a counter encoded in base62, or a hash of the URL truncated and checked for collisions.",
-			"Decide read vs. write ratio assumptions up front — this is a heavy-read system, so caching hot redirects matters."
-		]
-	},
-	{
-		"id": "dsa-0238",
-		"code": "design-a-vending-machine",
-		"slug": "design-a-vending-machine",
-		"name": "Design a Vending Machine",
+		"id": "92b1cc00-a91a-48c6-8774-fe3c80cd86e6",
+		"code": "design-hashmap",
+		"slug": "design-hashmap",
+		"name": "Design HashMap",
 		"difficulty": "E",
-		"url": "https://github.com/search?q=Design%20a%20Vending%20Machine%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/design-hashmap/",
 		"locked": false,
 		"hints": [
-			"Model as a state machine: Idle → Has Money → Dispensing → Idle, with clear transitions.",
-			"Core classes: Inventory (item → count/price), Product, PaymentStrategy (cash/card as interchangeable strategies).",
-			"Handle edge cases explicitly: insufficient funds, out-of-stock item, and making change."
+			"Implement the storage yourself rather than wrapping the language's built-in hash map.",
+			"Separate bucket selection from collision handling, and update an existing key instead of inserting a second copy.",
+			"Use the key-range constraints to compare direct addressing with bucketed storage; preserve the required missing-key sentinel."
+		]
+	},
+	{
+		"id": "08e1d837-270b-4d57-931e-78cd13b882bb",
+		"code": "design-hit-counter-multithreaded",
+		"slug": "design-hit-counter-multithreaded",
+		"name": "Design a Hit Counter - Multi-Threaded",
+		"difficulty": "M",
+		"url": "https://codezym.com/question/6-design-hit-counter-multithreaded",
+		"locked": false,
+		"hints": [
+			"Store an independent counter per page and initialize every page to zero when init is called.",
+			"Concurrent increments to the same page must be atomic; consider per-page synchronization or atomic counters instead of a global bottleneck.",
+			"The Java judge is multithreaded; Python is single-threaded. Counts are cumulative, with no sliding time window or expiry."
+		]
+	},
+	{
+		"id": "657e9b17-8db9-4e5f-bc3e-819757f8d7cb",
+		"code": "design-movie-rental-system",
+		"slug": "design-movie-rental-system",
+		"name": "Design Movie Rental System",
+		"difficulty": "H",
+		"url": "https://leetcode.com/problems/design-movie-rental-system/",
+		"locked": false,
+		"hints": [
+			"Identify each copy by its shop and movie IDs, with separate indexes for available copies and all rented copies.",
+			"Search orders available copies by price then shop; reports also need the movie ID as a tie breaker.",
+			"Rent and drop must move the same copy between indexes atomically so queries never report stale availability."
+		]
+	},
+	{
+		"id": "c5ca026f-6b90-4345-a56c-2f2c2ab65441",
+		"code": "design-parking-system",
+		"slug": "design-parking-system",
+		"name": "Design Parking System",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/design-parking-system/",
+		"locked": false,
+		"hints": [
+			"This exercise tracks capacity for three car sizes; it does not ask for tickets, floors, or parking fees.",
+			"Encapsulate the remaining capacity by car type and validate availability before decrementing it.",
+			"A rejected car must not change capacity, including when a category starts with zero spaces."
+		]
+	},
+	{
+		"id": "421592fa-05e5-4dce-984f-795077312287",
+		"code": "design-underground-system",
+		"slug": "design-underground-system",
+		"name": "Design Underground System",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/design-underground-system/",
+		"locked": false,
+		"hints": [
+			"Keep active check-ins keyed by passenger separately from completed-trip statistics keyed by ordered station pairs.",
+			"A route only needs total travel time and trip count to answer average queries; storing every completed trip is unnecessary.",
+			"Remove the active check-in after checkout and keep opposite directions as distinct routes."
+		]
+	},
+	{
+		"id": "24cfbd30-768a-4a20-b7a0-3745d03fd636",
+		"code": "my-calendar-i",
+		"slug": "my-calendar-i",
+		"name": "My Calendar I",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/my-calendar-i/",
+		"locked": false,
+		"hints": [
+			"Bookings are half-open intervals: an event ending exactly when another starts is allowed.",
+			"Two intervals overlap only when each one's start is strictly before the other's end.",
+			"Check conflicts before inserting. With an ordered structure, the nearest earlier and later bookings are enough."
+		]
+	},
+	{
+		"id": "12aeb298-5198-4cb4-855e-1ec06b0e0c64",
+		"code": "my-calendar-ii",
+		"slug": "my-calendar-ii",
+		"name": "My Calendar II",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/my-calendar-ii/",
+		"locked": false,
+		"hints": [
+			"Track accepted bookings and the intervals already covered twice.",
+			"Reject a new event if it intersects any double-booked interval; otherwise its overlaps with existing events become new double bookings.",
+			"Do not leave partial overlap records after a rejected request. Half-open boundaries apply here too."
+		]
+	},
+	{
+		"id": "1dbf9443-d717-4f26-b30f-cd655baa9632",
+		"code": "print-foobar-alternately",
+		"slug": "print-foobar-alternately",
+		"name": "Print FooBar Alternately",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/print-foobar-alternately/",
+		"locked": false,
+		"hints": [
+			"Treat alternation as handing a permit from one thread to the other.",
+			"Initially only foo may print; after printing, each thread releases the other thread's permit.",
+			"Do not rely on thread start order or sleeps. The required sequence must hold under arbitrary scheduling."
+		]
+	},
+	{
+		"id": "87c91f26-dce7-4fef-a7da-b3661f840e44",
+		"code": "print-in-order",
+		"slug": "print-in-order",
+		"name": "Print in Order",
+		"difficulty": "E",
+		"url": "https://leetcode.com/problems/print-in-order/",
+		"locked": false,
+		"hints": [
+			"The dependency is completion of the first callback before the second, and completion of the second before the third.",
+			"Two one-shot synchronization signals can encode those dependencies regardless of thread start order.",
+			"Signal completion after invoking the callback, not merely after entering its method."
+		]
+	},
+	{
+		"id": "96437ab7-7c4b-4ab9-b1b3-4c8baa0fd8c5",
+		"code": "print-zero-even-odd",
+		"slug": "print-zero-even-odd",
+		"name": "Print Zero Even Odd",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/print-zero-even-odd/",
+		"locked": false,
+		"hints": [
+			"Model whose turn it is explicitly: zero, odd, or even.",
+			"After zero prints, release the number thread matching the next value's parity; that thread returns control to zero.",
+			"Check the final iteration so no thread waits for a signal that will never be sent."
+		]
+	},
+	{
+		"id": "fb5cfd93-96e1-45ef-8694-8ec0f57fe48c",
+		"code": "seat-reservation-manager",
+		"slug": "seat-reservation-manager",
+		"name": "Seat Reservation Manager",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/seat-reservation-manager/",
+		"locked": false,
+		"hints": [
+			"The API always reserves the smallest available seat, so a queue in insertion order is insufficient.",
+			"Use a min-heap for returned seats and a counter for seats that have never been reserved.",
+			"Keep reservation and unreservation as inverse state changes without inserting a seat into the available pool twice."
+		]
+	},
+	{
+		"id": "e331c012-f178-4246-b069-94bdfa0bcea3",
+		"code": "simple-bank-system",
+		"slug": "simple-bank-system",
+		"name": "Simple Bank System",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/simple-bank-system/",
+		"locked": false,
+		"hints": [
+			"Convert the API's one-based account numbers carefully and validate both accounts before a transfer.",
+			"A transfer is one operation: check funds and validity before changing either balance.",
+			"Use a numeric type large enough for the constraints, and keep failed withdrawals or transfers free of side effects."
+		]
+	},
+	{
+		"id": "44113759-7fb1-4c5e-948e-2b2503efc49c",
+		"code": "snapshot-array",
+		"slug": "snapshot-array",
+		"name": "Snapshot Array",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/snapshot-array/",
+		"locked": false,
+		"hints": [
+			"Store a versioned history per array index instead of copying the entire array for every snapshot.",
+			"Multiple writes at the same snapshot ID can replace the last history entry for that index.",
+			"A lookup needs the latest recorded version at or before the requested snapshot; binary search that boundary."
+		]
+	},
+	{
+		"id": "a0da44f8-c688-4498-b026-bed6dafa7cad",
+		"code": "the-dining-philosophers",
+		"slug": "the-dining-philosophers",
+		"name": "The Dining Philosophers",
+		"difficulty": "M",
+		"url": "https://leetcode.com/problems/the-dining-philosophers/",
+		"locked": false,
+		"hints": [
+			"Acquiring the left fork first in every thread creates a circular wait; break that cycle deliberately.",
+			"A global fork acquisition order or a limit on simultaneous contenders can prevent deadlock.",
+			"Protect each fork's ownership and pair every acquisition with a release, keeping callbacks within the correct ownership interval."
 		]
 	},
 	{
@@ -1179,40 +1249,12 @@
 		"slug": "design-an-atm-machine",
 		"name": "Design an ATM Machine",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20an%20ATM%20Machine%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/design-an-atm-machine/",
 		"locked": false,
 		"hints": [
-			"Model as a state machine similar to a vending machine: Idle → Card Inserted → PIN Entered → Transaction → Dispensing.",
-			"Core classes: Account, Card, CashDispenser (tracks denominations available), Transaction (Withdraw/Deposit/CheckBalance as a strategy/command).",
-			"The cash dispenser's \"minimum number of notes\" calculation is a small greedy sub-problem worth isolating into its own method."
-		]
-	},
-	{
-		"id": "dsa-0237",
-		"code": "design-an-elevator-system",
-		"slug": "design-an-elevator-system",
-		"name": "Design an Elevator System",
-		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20an%20Elevator%20System%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Model elevator state (idle, moving up, moving down, door open) and pending requests (external floor calls + internal floor selections).",
-			"The scheduling algorithm (e.g. SCAN/LOOK — [REDACTED_SQL_PASSWORD_1]ing floors in one direction before reversing) is the core interesting design decision.",
-			"Separate the Elevator (single car) from an ElevatorController (assigns requests to the best car in a multi-elevator building)."
-		]
-	},
-	{
-		"id": "dsa-0241",
-		"code": "design-an-in-memory-file-system",
-		"slug": "design-an-in-memory-file-system",
-		"name": "Design an In-Memory File System",
-		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20an%20In-Memory%20File%20System%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Model directories and files as a tree — a Directory node holds a map of name → (File | Directory).",
-			"Core operations: mkdir, addFile/writeFile, ls, and a path-resolution helper that walks the tree from root.",
-			"Decide whether paths are absolute-only or need to support relative paths and \"..\" — that changes the resolution logic significantly."
+			"Track counts for the five supported denominations; this judge covers deposits and withdrawals, not card or PIN sessions.",
+			"Withdraw greedily from the largest denomination exactly as specified. Do not search for a different combination when that policy fails.",
+			"Compute a proposed withdrawal against temporary counts, then commit only when the entire amount can be dispensed."
 		]
 	},
 	{
@@ -1273,7 +1315,7 @@
 		"slug": "design-lfu-cache",
 		"name": "Design LFU Cache",
 		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20LFU%20Cache%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/lfu-cache/",
 		"locked": false,
 		"hints": [
 			"Eviction needs least-frequently-used, ties broken by least-recently-used.",
@@ -1287,7 +1329,7 @@
 		"slug": "design-lru-cache",
 		"name": "Design LRU Cache",
 		"difficulty": "M",
-		"url": "https://github.com/search?q=Design%20LRU%20Cache%20low%20level%20design&type=repositories",
+		"url": "https://leetcode.com/problems/lru-cache/",
 		"locked": false,
 		"hints": [
 			"Needs O(1) get/put — combine a hash map (key → node) with a doubly linked list ordered by recency.",
@@ -1410,34 +1452,6 @@
 		"hints": [
 			"Offline indexing pipeline plus low-latency serving tier.",
 			"Ranking signals and typo tolerance are key differentiators."
-		]
-	},
-	{
-		"id": "dsa-0245",
-		"code": "design-splitwise-expense-sharing",
-		"slug": "design-splitwise-expense-sharing",
-		"name": "Design Splitwise (Expense Sharing)",
-		"difficulty": "H",
-		"url": "https://github.com/search?q=Design%20Splitwise%20(Expense%20Sharing)%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Core entities: User, Group, Expense (paid-by + split-among with a SplitStrategy: equal/exact/percentage).",
-			"Maintain a balance sheet (who-owes-whom) as a graph, and simplify debts by netting out cycles (minimize total transactions).",
-			"The \"simplify debts\" step is the interesting algorithmic sub-problem — greedy settle-up using max-owed/max-owes pairing."
-		]
-	},
-	{
-		"id": "dsa-0248",
-		"code": "design-tic-tac-toe",
-		"slug": "design-tic-tac-toe",
-		"name": "Design Tic-Tac-Toe",
-		"difficulty": "E",
-		"url": "https://github.com/search?q=Design%20Tic-Tac-Toe%20low%20level%20design&type=repositories",
-		"locked": false,
-		"hints": [
-			"Core classes: Board (grid + win-check), Player, Game (turn management).",
-			"Win-checking after every move only needs to check the row/column/diagonal through the just-played cell, not the whole board.",
-			"Keep the board size configurable (n×n) so the win-check logic doesn't hardcode 3."
 		]
 	},
 	{

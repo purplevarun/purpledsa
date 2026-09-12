@@ -62,6 +62,15 @@ export const practicePlatforms = [
 		path: /^\/problemset\/task\/\d+\/?$/,
 		focus: "Graphs, dynamic programming, and range queries",
 	},
+	{
+		id: "codezym",
+		label: "CodeZym",
+		name: "CodeZym",
+		url: "https://codezym.com/",
+		hostname: "codezym.com",
+		path: /^\/question\/[1-9]\d*-[a-z0-9]+(?:-[a-z0-9]+)*\/?$/,
+		focus: "Low-level design and machine coding",
+	},
 ];
 
 export const getPracticePlatform = (value: string) => {
@@ -127,10 +136,4 @@ export const problemPlatformLinks = (problem: {
 		}
 	}
 	return links;
-};
-
-// LLD/machine-coding problems have no canonical problem page, so link to a
-// real GitHub code search instead of guessing a specific repo.
-export const githubSearchUrl = (query: string): string => {
-	return `https://github.com/search?q=${encodeURIComponent(query)}&type=repositories`;
 };

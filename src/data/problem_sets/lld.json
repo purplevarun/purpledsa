@@ -1,53 +1,68 @@
 {
 	"slug": "lld",
 	"title": "Low-Level Design (LLD)",
-	"description": "Machine-coding / object-oriented design problems — rate limiters, LRU caches, parking lots, and more.",
+	"description": "Free judged class-design and concurrency exercises: stateful APIs, caches, bookings, and thread coordination. LeetCode and CodeZym; free accounts required to submit.",
+	"access": "free",
+	"curation": {
+		"reviewedAt": "2026-09-12",
+		"sources": [
+			"https://codezym.com/about",
+			"https://codezym.com/questionsApi/allQuestions",
+			"https://codezym.com/questionsApi/question/6",
+			"https://leetcode.com/api/problems/all/"
+		],
+		"verification": "All 24 selected LeetCode questions reported paid_only=false. CodeZym question 6 reported type=0, isPrivate=false, and java,python support; the public client permits signed-in non-premium users to submit type=0 questions. Public type=1 questions require premium and are excluded. Authenticated submissions were not performed.",
+		"scope": "External judges test functional behavior, not overall OO design quality. These are focused class-design and concurrency exercises, not full open-ended LLD interviews. CodeZym's counter uses multithreaded Java tests and single-threaded Python tests. LeetCode language availability varies, especially for concurrency."
+	},
 	"topics": [
 		{
-			"name": "Caching",
+			"name": "Stateful APIs & Collections",
+			"problemCodes": [
+				"design-parking-system",
+				"design-hashmap",
+				"design-circular-queue",
+				"design-browser-history"
+			]
+		},
+		{
+			"name": "Caching & Versioned State",
 			"problemCodes": [
 				"design-lru-cache",
 				"design-lfu-cache",
-				"design-a-distributed-cache"
+				"time-based-key-value-store",
+				"snapshot-array",
+				"design-authentication-manager"
 			]
 		},
 		{
-			"name": "Concurrency Primitives",
+			"name": "Bookings & Transactions",
 			"problemCodes": [
-				"design-a-rate-limiter",
-				"design-a-bounded-blocking-queue",
-				"design-a-thread-pool",
-				"design-a-circuit-breaker"
-			]
-		},
-		{
-			"name": "Classic Machine Coding Systems",
-			"problemCodes": [
-				"design-a-parking-lot-system",
-				"design-an-elevator-system",
-				"design-a-vending-machine",
+				"simple-bank-system",
 				"design-an-atm-machine",
-				"design-a-logging-framework",
-				"design-an-in-memory-file-system",
-				"design-a-notification-system"
+				"seat-reservation-manager",
+				"my-calendar-i",
+				"my-calendar-ii"
 			]
 		},
 		{
-			"name": "Booking & Marketplace Systems",
+			"name": "Services & Editors",
 			"problemCodes": [
-				"design-a-movie-ticket-booking-system",
-				"design-a-hotel-booking-system",
-				"design-splitwise-expense-sharing",
-				"design-a-car-rental-system",
-				"design-a-url-shortener"
+				"design-underground-system",
+				"design-twitter",
+				"design-a-food-rating-system",
+				"design-movie-rental-system",
+				"design-a-text-editor"
 			]
 		},
 		{
-			"name": "Games",
+			"name": "Concurrency & Coordination",
 			"problemCodes": [
-				"design-tic-tac-toe",
-				"design-a-snake-and-ladder-game",
-				"design-a-chess-game"
+				"print-in-order",
+				"print-foobar-alternately",
+				"print-zero-even-odd",
+				"building-h2o",
+				"the-dining-philosophers",
+				"design-hit-counter-multithreaded"
 			]
 		}
 	]

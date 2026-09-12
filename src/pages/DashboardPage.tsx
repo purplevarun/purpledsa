@@ -17,7 +17,7 @@ const tileDescriptions: Record<string, string> = {
 	"top-interview": "Frequently asked coding interview problems.",
 	"blind-75": "High-frequency interview fundamentals.",
 	cses: "Competitive programming essentials.",
-	lld: "Object-oriented design and machine coding.",
+	lld: "Judged class design and concurrency practice.",
 	hld: "System design, diagrams, and expert resources.",
 };
 

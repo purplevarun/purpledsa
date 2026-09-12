@@ -8,12 +8,14 @@ import { getPracticePlatform, practicePlatforms } from "../lib/links";
 const freePracticeSet = getProblemSet(FREE_PRACTICE_SET_SLUG);
 const freeProblems =
 	freePracticeSet?.topics.flatMap((topic) => topic.problems) ?? [];
-const platformCounts = practicePlatforms.map((platform) => ({
-	...platform,
-	count: freeProblems.filter(
-		(problem) => getPracticePlatform(problem.url)?.id === platform.id,
-	).length,
-}));
+const platformCounts = practicePlatforms
+	.map((platform) => ({
+		...platform,
+		count: freeProblems.filter(
+			(problem) => getPracticePlatform(problem.url)?.id === platform.id,
+		).length,
+	}))
+	.filter((platform) => platform.count > 0);
 
 export const SettingsPage = () => {
 	const { user, loading, updateLeetCodeUsername, signOut } = useAuth();

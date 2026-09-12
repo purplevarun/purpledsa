@@ -48,11 +48,104 @@ const hld: SheetReference = JSON.parse(
 		"utf8",
 	),
 );
+const lld: SheetReference = JSON.parse(
+	readFileSync(
+		new URL("../src/data/problem_sets/lld.json", import.meta.url),
+		"utf8",
+	),
+);
 const hldCodes = hld.topics.flatMap((topic) => topic.problemCodes);
+const lldCodes = lld.topics.flatMap((topic) => topic.problemCodes);
 const byCode = new Map(problems.map((problem) => [problem.code, problem]));
 const essentialsCodes = essentials.topics.flatMap(
 	(topic) => topic.problemCodes,
 );
+
+test("LLD entries are unlocked judge problems with direct practice links", () => {
+	assert.equal(lld.access, "free");
+	assert.equal(lldCodes.length, 25);
+	assert.equal(lld.topics.length, 5);
+	assert.equal(new Set(lldCodes).size, lldCodes.length);
+	const urls = new Set<string>();
+	for (const code of lldCodes) {
+		const problem = byCode.get(code);
+		assert.ok(problem, `${code}: missing problem`);
+		assert.equal(problem.locked, false, code);
+		const platform = getPracticePlatform(problem.url);
+		assert.ok(
+			platform,
+			`${code}: expected a supported online judge, got ${problem.url}`,
+		);
+		if (platform.id === "codezym") {
+			assert.equal(
+				problem.url,
+				"https://codezym.com/question/6-design-hit-counter-multithreaded",
+				`${code}: only CodeZym question 6 has verified free submissions (type=0)`,
+			);
+		}
+		assert.equal(new URL(problem.url).search, "", code);
+		assert.ok(
+			problemPlatformLinks(problem).some(
+				(link) =>
+					link.label === platform.label && link.url === problem.url,
+			),
+			`${code}: missing judge button`,
+		);
+		urls.add(problem.url);
+	}
+	assert.equal(urls.size, lldCodes.length);
+});
+
+test("LLD retains the reviewed class-design and concurrency judge mappings", () => {
+	const leetcodeCodes = [
+		"design-parking-system",
+		"design-hashmap",
+		"design-circular-queue",
+		"design-browser-history",
+		"design-lru-cache",
+		"design-lfu-cache",
+		"time-based-key-value-store",
+		"snapshot-array",
+		"design-authentication-manager",
+		"simple-bank-system",
+		"design-an-atm-machine",
+		"seat-reservation-manager",
+		"my-calendar-i",
+		"my-calendar-ii",
+		"design-underground-system",
+		"design-twitter",
+		"design-a-food-rating-system",
+		"design-movie-rental-system",
+		"design-a-text-editor",
+		"print-in-order",
+		"print-foobar-alternately",
+		"print-zero-even-odd",
+		"building-h2o",
+		"the-dining-philosophers",
+	];
+	assert.deepEqual(lldCodes, [
+		...leetcodeCodes,
+		"design-hit-counter-multithreaded",
+	]);
+	const legacySlugs: Record<string, string> = {
+		"design-lru-cache": "lru-cache",
+		"design-lfu-cache": "lfu-cache",
+	};
+	for (const code of leetcodeCodes) {
+		assert.equal(
+			byCode.get(code)?.url,
+			`https://leetcode.com/problems/${legacySlugs[code] ?? code}/`,
+			code,
+		);
+	}
+	for (const [code, id] of [
+		["design-lru-cache", "dsa-0229"],
+		["design-lfu-cache", "dsa-0230"],
+		["design-an-atm-machine", "dsa-0239"],
+	]) {
+		assert.equal(byCode.get(code)?.id, id, code);
+	}
+});
 
 test("HLD entries use direct system-design resources with website labels", () => {
 	const resources: Array<[string, string, string]> = [
@@ -411,10 +504,11 @@ test("Free DSA Essentials has 100 unique exercises across all seven platforms", 
 		leetcode: 42,
 		neetcode: 5,
 	});
-	assert.deepEqual(
-		Object.keys(counts).sort(),
-		practicePlatforms.map((platform) => platform.id).sort(),
-	);
+	for (const platformId of Object.keys(counts)) {
+		assert.ok(
+			practicePlatforms.some((platform) => platform.id === platformId),
+		);
+	}
 });
 
 test("the retired sheet is removed, including its registration", () => {
@@ -615,6 +709,7 @@ test("platform buttons use exact supplied practice links and matching labels", (
 		["CodeChef", "https://www.codechef.com/problems/TSORT"],
 		["Codeforces", "https://codeforces.com/problemset/problem/580/C"],
 		["CSES", "https://cses.fi/problemset/task/1192/"],
+		["CodeZym", "https://codezym.com/question/7-design-a-parking-lot"],
 	]) {
 		assert.deepEqual(problemPlatformLinks({ url }), [{ label, url }]);
 	}
@@ -631,6 +726,13 @@ test("platform buttons never use searches, invented destinations, or unrelated h
 		"https://www.codechef.com/practice",
 		"https://codeforces.com/problemset",
 		"https://cses.fi/problemset/",
+		"https://codezym.com/",
+		"https://codezym.com/premium",
+		"https://codezym.com/question/",
+		"https://codezym.com/question/design-a-parking-lot",
+		"https://codezym.com/question/0-design-a-parking-lot",
+		"https://codezym.com.example.org/question/7-design-a-parking-lot",
+		"http://codezym.com/question/7-design-a-parking-lot",
 		"https://github.com/example/design-problem",
 		"https://github.com/search?q=system-design&type=repositories",
 		"https://www.hellointerview.com/learn/system-design",
