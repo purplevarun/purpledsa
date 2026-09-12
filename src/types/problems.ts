@@ -2,8 +2,21 @@ export type Difficulty = "E" | "M" | "H";
 
 export interface StudyGuide {
 	summary: string;
+	aliases?: string[];
 	reviewedAt: string;
 	prerequisites: string[];
+	clarifyingQuestions: string[];
+	deepDives: Array<{
+		title: string;
+		paragraphs: string[];
+		invariant: string;
+		followUp: { question: string; answer: string };
+	}>;
+	operations: {
+		signals: Array<{ name: string; measure: string; response: string }>;
+		security: string[];
+		validation: string[];
+	};
 	requirements: {
 		functional: string[];
 		nonFunctional: string[];

@@ -235,8 +235,10 @@ html.dark .hld-shell {
 
 .study-tabs {
 	display: flex;
+	flex-wrap: wrap;
 	border-bottom: 1px solid var(--border);
 	gap: 22px;
+	row-gap: 0;
 	overflow-x: auto;
 	scrollbar-width: thin;
 }
@@ -559,6 +561,10 @@ html.dark .hld-shell {
 	outline-offset: 3px;
 }
 
+.hld-shell .study-tabs button:focus-visible {
+	outline-offset: -2px;
+}
+
 @media (max-width: 900px) {
 	.study-layout {
 		grid-template-columns: 208px minmax(0, 1fr);
@@ -620,8 +626,10 @@ html.dark .hld-shell {
 		padding-top: 22px;
 	}
 	.study-tabs {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 0;
-		justify-content: space-between;
+		overflow: visible;
 	}
 	.study-tabs button {
 		gap: 5px;

@@ -1,11 +1,10 @@
 import {
-	ArrowLeft,
-	ArrowRight,
 	BookOpen,
 	Check,
 	CirclePlay,
 	Download,
 	ExternalLink,
+	Layers,
 	ListChecks,
 	Maximize2,
 	Search,
@@ -204,12 +203,21 @@ const StudyDiagram = ({ source, title }: { source: string; title: string }) => {
 const sections = [
 	{ id: "guide", label: "Guide", icon: BookOpen },
 	{ id: "architecture", label: "Architecture", icon: Workflow },
+	{ id: "deep-dives", label: "Deep Dives", icon: Layers },
 	{ id: "review", label: "Review", icon: ListChecks },
 	{ id: "resources", label: "Resources", icon: CirclePlay },
 ] as const;
 
 const GuideOverview = ({ guide }: { guide: StudyGuide }) => (
 	<>
+		<section className="study-section">
+			<h3>Clarifying Questions</h3>
+			<ul>
+				{guide.clarifyingQuestions.map((question) => (
+					<li key={question}>{question}</li>
+				))}
+			</ul>
+		</section>
 		<section className="study-section">
 			<h3>Prerequisites</h3>
 			<ul>
@@ -290,6 +298,54 @@ const GuideOverview = ({ guide }: { guide: StudyGuide }) => (
 	</>
 );
 
+const GuideDeepDives = ({ guide }: { guide: StudyGuide }) => (
+	<>
+		{guide.deepDives.map((dive) => (
+			<section className="study-section" key={dive.title}>
+				<h3>{dive.title}</h3>
+				{dive.paragraphs.map((paragraph) => (
+					<p key={paragraph}>{paragraph}</p>
+				))}
+				<p className="study-tradeoff">
+					<strong>Invariant</strong> {dive.invariant}
+				</p>
+			</section>
+		))}
+		<section className="study-section">
+			<h3>Operations &amp; Monitoring</h3>
+			<dl className="study-contracts">
+				{guide.operations.signals.map((signal) => (
+					<div key={signal.name}>
+						<dt>{signal.name}</dt>
+						<dd>
+							<p>{signal.measure}</p>
+							<p>
+								<strong>Response:</strong> {signal.response}
+							</p>
+						</dd>
+					</div>
+				))}
+			</dl>
+		</section>
+		<section className="study-section">
+			<h3>Security &amp; Privacy</h3>
+			<ul>
+				{guide.operations.security.map((item) => (
+					<li key={item}>{item}</li>
+				))}
+			</ul>
+		</section>
+		<section className="study-section">
+			<h3>Validation &amp; Rollout</h3>
+			<ul>
+				{guide.operations.validation.map((item) => (
+					<li key={item}>{item}</li>
+				))}
+			</ul>
+		</section>
+	</>
+);
+
 const GuideReview = ({ guide }: { guide: StudyGuide }) => (
 	<>
 		<section className="study-section">
@@ -317,7 +373,10 @@ const GuideReview = ({ guide }: { guide: StudyGuide }) => (
 		</section>
 		<section className="study-section">
 			<h3>Self-check</h3>
-			{guide.selfCheck.map((check, index) => (
+			{[
+				...guide.selfCheck,
+				...guide.deepDives.map((dive) => dive.followUp),
+			].map((check, index) => (
 				<details className="study-question" key={check.question}>
 					<summary>
 						<span>{String(index + 1).padStart(2, "0")}</span>
@@ -394,7 +453,6 @@ const HldStudyView = ({
 }) => {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [query, setQuery] = useState("");
-	const guideHeading = useRef<HTMLHeadingElement>(null);
 	const allProblems = set.topics.flatMap((topic) => topic.problems);
 	const requestedCode = searchParams.get("guide");
 	const selected = requestedCode
@@ -414,14 +472,16 @@ const HldStudyView = ({
 	const studiedCount = allProblems.filter((problem) =>
 		solvedCodes.has(problem.code),
 	).length;
-	const normalizedQuery = query.trim().toLowerCase();
+	const queryTerms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
 	const visibleTopics = set.topics
 		.map((topic) => ({
 			...topic,
 			problems: topic.problems.filter((problem) =>
-				`${problem.name} ${topic.name}`
-					.toLowerCase()
-					.includes(normalizedQuery),
+				queryTerms.every((term) =>
+					`${problem.name} ${topic.name} ${(problem.studyGuide?.aliases ?? []).join(" ")}`
+						.toLowerCase()
+						.includes(term),
+				),
 			),
 		}))
 		.filter((topic) => topic.problems.length);
@@ -459,14 +519,6 @@ const HldStudyView = ({
 		event.currentTarget.parentElement
 			?.querySelectorAll<HTMLButtonElement>('[role="tab"]')
 			[nextIndex]?.focus();
-	};
-
-	const moveGuide = (offset: number) => {
-		const next = allProblems[selectedIndex + offset];
-		if (!next) return;
-		setSearchParams(guideLink(next.code).slice(1));
-		guideHeading.current?.focus({ preventScroll: true });
-		guideHeading.current?.scrollIntoView({ block: "start" });
 	};
 
 	return (
@@ -574,9 +626,7 @@ const HldStudyView = ({
 						<article className="study-article" key={selected.code}>
 							<header className="study-guide-heading">
 								<p className="study-topic-label">{topicName}</p>
-								<h2 ref={guideHeading} tabIndex={-1}>
-									{selected.name}
-								</h2>
+								<h2>{selected.name}</h2>
 								<p className="study-summary">{guide.summary}</p>
 								<div className="study-guide-actions">
 									<button
@@ -610,29 +660,6 @@ const HldStudyView = ({
 											)}{" "}
 											/ {allProblems.length}
 										</span>
-										<button
-											type="button"
-											className="study-icon"
-											aria-label="Previous topic"
-											title="Previous topic"
-											disabled={selectedIndex === 0}
-											onClick={() => moveGuide(-1)}
-										>
-											<ArrowLeft size={18} />
-										</button>
-										<button
-											type="button"
-											className="study-icon"
-											aria-label="Next topic"
-											title="Next topic"
-											disabled={
-												selectedIndex ===
-												allProblems.length - 1
-											}
-											onClick={() => moveGuide(1)}
-										>
-											<ArrowRight size={18} />
-										</button>
 									</div>
 								</div>
 							</header>
@@ -707,6 +734,9 @@ const HldStudyView = ({
 											)}
 										</section>
 									</>
+								)}
+								{section === "deep-dives" && (
+									<GuideDeepDives guide={guide} />
 								)}
 								{section === "review" && (
 									<GuideReview guide={guide} />

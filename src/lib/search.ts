@@ -11,6 +11,7 @@ export type SearchResult = {
 
 type SearchEntry = SearchResult & {
 	titleText: string;
+	aliasTexts: string[];
 	keywords: string;
 };
 
@@ -24,10 +25,15 @@ const normalize = (value: string) =>
 
 export const createSearchIndex = (sets: ProblemSet[]): SearchEntry[] => {
 	const entries: SearchEntry[] = [];
-	const add = (result: SearchResult, keywords: string) => {
+	const add = (
+		result: SearchResult,
+		keywords: string,
+		aliases: string[] = [],
+	) => {
 		const entry = {
 			...result,
 			titleText: normalize(result.title),
+			aliasTexts: aliases.map(normalize),
 			keywords: normalize(keywords),
 		};
 		entries.push(entry);
@@ -79,7 +85,7 @@ export const createSearchIndex = (sets: ProblemSet[]): SearchEntry[] => {
 					"",
 				);
 				const guideKeywords = guide
-					? `${guide.summary} ${guide.prerequisites.join(" ")} ${guide.decisions.map((decision) => decision.topic).join(" ")} ${guide.resources.map((resource) => resource.title).join(" ")}`
+					? `${(guide.aliases ?? []).join(" ")} ${guide.summary} ${guide.prerequisites.join(" ")} ${guide.deepDives.map((dive) => dive.title).join(" ")} ${guide.decisions.map((decision) => decision.topic).join(" ")} ${guide.resources.map((resource) => resource.title).join(" ")}`
 					: "";
 				const entry = add(
 					{
@@ -95,6 +101,7 @@ export const createSearchIndex = (sets: ProblemSet[]): SearchEntry[] => {
 						external: !guide,
 					},
 					`${context} ${problem.code} ${problem.url} ${guideKeywords}`,
+					guide?.aliases,
 				);
 				problems.set(problem.code, entry);
 			}
@@ -133,7 +140,11 @@ export const searchCatalog = (
 			const titlePhrase = titleTerms.join(" ");
 			const titles =
 				entry.kind === "guide"
-					? [entry.titleText, entry.titleText.replace(/^design /, "")]
+					? [
+							entry.titleText,
+							entry.titleText.replace(/^design /, ""),
+							...entry.aliasTexts,
+						]
 					: [entry.titleText];
 			return {
 				entry,

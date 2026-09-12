@@ -147,8 +147,54 @@ test("LLD retains the reviewed class-design and concurrency judge mappings", () 
 	}
 });
 
+test("HLD covers popular named interview systems", () => {
+	for (const [code, name] of [
+		["design-amazon-marketplace", "Amazon"],
+		["design-netflix", "Netflix"],
+		["design-bookmyshow", "BookMyShow"],
+		["design-instagram", "Instagram"],
+		["design-google-drive", "Google Drive"],
+		["design-real-time-chat", "WhatsApp"],
+		["design-video-streaming-platform", "YouTube"],
+		["design-ride-sharing-platform", "Uber"],
+		["design-news-feed", "Twitter"],
+	]) {
+		assert.ok(hldCodes.includes(code), `${name}: missing HLD topic`);
+		assert.ok(
+			byCode.get(code)?.name.includes(name),
+			`${name}: missing title`,
+		);
+		assert.ok(hld.guides?.[code], `${name}: missing study guide`);
+	}
+});
+
 test("HLD entries use direct system-design resources with website labels", () => {
 	const resources: Array<[string, string, string]> = [
+		[
+			"design-amazon-marketplace",
+			"AWS Builders' Library",
+			"https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+		],
+		[
+			"design-netflix",
+			"GFG",
+			"https://www.geeksforgeeks.org/system-design/system-design-netflix-a-complete-architecture/",
+		],
+		[
+			"design-bookmyshow",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/ticketmaster",
+		],
+		[
+			"design-instagram",
+			"GFG",
+			"https://www.geeksforgeeks.org/system-design/design-instagram-a-system-design-interview-question/",
+		],
+		[
+			"design-google-drive",
+			"Hello Interview",
+			"https://www.hellointerview.com/learn/system-design/problem-breakdowns/dropbox",
+		],
 		[
 			"design-url-shortener",
 			"Hello Interview",
@@ -225,7 +271,7 @@ test("HLD entries use direct system-design resources with website labels", () =>
 			"https://stripe.dev/blog/payment-api-design",
 		],
 	];
-	assert.equal(hldCodes.length, 15);
+	assert.equal(hldCodes.length, 20);
 	assert.deepEqual(
 		hldCodes,
 		resources.map(([code]) => code),
@@ -263,6 +309,55 @@ for (const code of hldCodes) {
 		assert.ok(guide.summary.length >= 100, `${code}: summary`);
 		assert.match(guide.reviewedAt, /^\d{4}-\d{2}-\d{2}$/, code);
 		assert.ok(guide.prerequisites.length >= 2, `${code}: prerequisites`);
+		assert.ok(
+			guide.clarifyingQuestions?.length >= 3,
+			`${code}: interview scope`,
+		);
+		assert.ok(
+			guide.deepDives?.length >= 3,
+			`${code}: detailed design analysis`,
+		);
+		assert.equal(
+			new Set(guide.deepDives.map((dive) => dive.title)).size,
+			guide.deepDives.length,
+			code,
+		);
+		for (const dive of guide.deepDives) {
+			assert.ok(
+				dive.title && dive.paragraphs.length >= 3,
+				`${code}: ${dive.title}`,
+			);
+			assert.ok(
+				dive.paragraphs.every((paragraph) => paragraph.length >= 120),
+				`${code}: shallow deep dive`,
+			);
+			assert.ok(
+				dive.invariant.length >= 40,
+				`${code}: correctness invariant`,
+			);
+			assert.ok(
+				dive.followUp.question && dive.followUp.answer.length >= 100,
+				`${code}: answered follow-up`,
+			);
+		}
+		assert.ok(
+			guide.operations?.signals.length >= 3,
+			`${code}: operational signals`,
+		);
+		for (const signal of guide.operations.signals) {
+			assert.ok(
+				signal.name && signal.measure && signal.response,
+				`${code}: actionable monitoring`,
+			);
+		}
+		assert.ok(
+			guide.operations.security.length >= 3,
+			`${code}: security and privacy`,
+		);
+		assert.ok(
+			guide.operations.validation.length >= 3,
+			`${code}: testing and rollout`,
+		);
 		assert.ok(
 			guide.requirements.functional.length >= 3,
 			`${code}: functional requirements`,
@@ -355,6 +450,11 @@ for (const code of hldCodes) {
 
 test("HLD video selections retain their reviewed topic mappings", () => {
 	const videoIds: Record<string, string> = {
+		"design-amazon-marketplace": "GAe5oB742dw",
+		"design-netflix": "IUrQ5_g3XKs",
+		"design-bookmyshow": "fhdPyoO6aXI",
+		"design-instagram": "Qj4-GruzyDU",
+		"design-google-drive": "_UZ1ngy-kOI",
 		"design-url-shortener": "iUU4O1sWtJA",
 		"design-rate-limiter-at-scale": "MIJFyUPG4Z4",
 		"design-distributed-cache": "fmT5nlEkl3U",
@@ -422,7 +522,44 @@ test("global search indexes each problem once across collections", () => {
 		searchIndex.filter((entry) => entry.kind === "collection").length,
 		searchSets.length,
 	);
-	assert.equal(entries.filter((entry) => entry.kind === "guide").length, 15);
+	assert.equal(
+		entries.filter((entry) => entry.kind === "guide").length,
+		hldCodes.length,
+	);
+});
+
+test("global search finds HLD product aliases and deeper concepts", () => {
+	for (const [query, code] of [
+		["Amazon", "design-amazon-marketplace"],
+		["Netflix", "design-netflix"],
+		["OTT", "design-netflix"],
+		["Book My Show", "design-bookmyshow"],
+		["Ticketmaster", "design-bookmyshow"],
+		["Instagram", "design-instagram"],
+		["Dropbox", "design-google-drive"],
+		["WhatsApp", "design-real-time-chat"],
+		["Twitter", "design-news-feed"],
+		["Uber", "design-ride-sharing-platform"],
+	]) {
+		const result = searchCatalog(searchIndex, query)[0];
+		assert.equal(result?.id, `problem:${code}`, query);
+		assert.equal(result.kind, "guide", query);
+		assert.equal(result.external, false, query);
+		assert.equal(
+			result.href,
+			`/sets/hld?guide=${code}&section=guide`,
+			query,
+		);
+	}
+	assert.ok(
+		searchCatalog(searchIndex, "regional budgets").some(
+			(entry) => entry.id === "problem:design-rate-limiter-at-scale",
+		),
+	);
+	assert.equal(
+		searchCatalog(searchIndex, "Design Twitter")[0].href,
+		"https://leetcode.com/problems/design-twitter/",
+	);
 });
 
 test("global search prioritizes titles and finds topics and guide concepts", () => {
@@ -746,6 +883,10 @@ test("platform buttons never use searches, invented destinations, or unrelated h
 		"https://www.geeksforgeeks.org/courses/system-design-training-program",
 		"https://stripe.dev/blog",
 		"https://stripe.dev.example.org/blog/payment-api-design",
+		"https://aws.amazon.com/",
+		"https://aws.amazon.com/builders-library/",
+		"https://aws.amazon.com.example.org/builders-library/making-retries-safe-with-idempotent-APIs/",
+		"https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/?search=checkout",
 		"javascript:alert(1)",
 		"not a URL",
 	]) {

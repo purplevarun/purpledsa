@@ -104,6 +104,11 @@ const systemDesignWebsites = [
 		hostname: "stripe.dev",
 		path: /^\/blog\/payment-api-design\/?$/,
 	},
+	{
+		label: "AWS Builders' Library",
+		hostname: "aws.amazon.com",
+		path: /^\/builders-library\/making-retries-safe-with-idempotent-APIs\/?$/,
+	},
 ];
 
 const getSystemDesignWebsite = (value: string) => {

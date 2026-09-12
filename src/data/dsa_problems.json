@@ -1258,6 +1258,19 @@
 		]
 	},
 	{
+		"id": "21596462-ee1c-41cf-b71b-e8852cbf5c85",
+		"code": "design-amazon-marketplace",
+		"slug": "design-amazon-marketplace",
+		"name": "Design Amazon (E-commerce Marketplace)",
+		"difficulty": "H",
+		"url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/",
+		"locked": false,
+		"hints": [
+			"Keep catalog discovery separate from authoritative inventory and checkout.",
+			"Use durable reservations, idempotent payment attempts, and an order state machine with compensations."
+		]
+	},
+	{
 		"id": "dsa-0261",
 		"code": "design-analytics-event-pipeline",
 		"slug": "design-analytics-event-pipeline",
@@ -1338,10 +1351,62 @@
 		]
 	},
 	{
+		"id": "df2979cf-17c9-483c-b51b-fa02b9572faa",
+		"code": "design-netflix",
+		"slug": "design-netflix",
+		"name": "Design Netflix (Video on Demand)",
+		"difficulty": "H",
+		"url": "https://www.geeksforgeeks.org/system-design/system-design-netflix-a-complete-architecture/",
+		"locked": false,
+		"hints": [
+			"Separate entitlement and playback-session APIs from the CDN media path.",
+			"Publish immutable renditions only after validation; measure startup time and rebuffering by device and network."
+		]
+	},
+	{
+		"id": "06057245-2cdf-4ad5-9428-0422806bb7ec",
+		"code": "design-bookmyshow",
+		"slug": "design-bookmyshow",
+		"name": "Design BookMyShow (Ticket Booking)",
+		"difficulty": "H",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/ticketmaster",
+		"locked": false,
+		"hints": [
+			"Keep seat ownership authoritative per show, with atomic all-or-none holds for a requested seat group.",
+			"Fence expired holds and reconcile delayed payments instead of allowing a stale callback to sell a seat twice."
+		]
+	},
+	{
+		"id": "e62f1841-4f9c-4738-a35d-b3671ae0150f",
+		"code": "design-instagram",
+		"slug": "design-instagram",
+		"name": "Design Instagram (Photo Sharing)",
+		"difficulty": "H",
+		"url": "https://www.geeksforgeeks.org/system-design/design-instagram-a-system-design-interview-question/",
+		"locked": false,
+		"hints": [
+			"Separate media ingestion and moderation from feed fan-out and read-time authorization.",
+			"Treat timeline entries as disposable references; privacy changes and deletions must still be enforced when serving media."
+		]
+	},
+	{
+		"id": "825ee2c2-ec16-4105-becf-5a32fe31cd3b",
+		"code": "design-google-drive",
+		"slug": "design-google-drive",
+		"name": "Design Google Drive / Dropbox",
+		"difficulty": "H",
+		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/dropbox",
+		"locked": false,
+		"hints": [
+			"Upload immutable bytes separately from transactional file metadata and permission changes.",
+			"Use version preconditions and a durable change cursor to preserve conflicting offline edits and recover missed notifications."
+		]
+	},
+	{
 		"id": "dsa-0259",
 		"code": "design-news-feed",
 		"slug": "design-news-feed",
-		"name": "Design News Feed",
+		"name": "Design Twitter / X (News Feed)",
 		"difficulty": "H",
 		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/fb-news-feed",
 		"locked": false,
@@ -1406,7 +1471,7 @@
 		"id": "dsa-0255",
 		"code": "design-real-time-chat",
 		"slug": "design-real-time-chat",
-		"name": "Design Real-time Chat",
+		"name": "Design WhatsApp (Messaging)",
 		"difficulty": "M",
 		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/whatsapp",
 		"locked": false,
@@ -1432,7 +1497,7 @@
 		"id": "dsa-0262",
 		"code": "design-ride-sharing-platform",
 		"slug": "design-ride-sharing-platform",
-		"name": "Design Ride Sharing Platform",
+		"name": "Design Uber (Ride Sharing)",
 		"difficulty": "H",
 		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/uber",
 		"locked": false,
@@ -1486,7 +1551,7 @@
 		"id": "dsa-0264",
 		"code": "design-video-streaming-platform",
 		"slug": "design-video-streaming-platform",
-		"name": "Design Video Streaming Platform",
+		"name": "Design YouTube (Video Sharing)",
 		"difficulty": "H",
 		"url": "https://www.hellointerview.com/learn/system-design/problem-breakdowns/youtube",
 		"locked": false,

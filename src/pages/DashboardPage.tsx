@@ -18,7 +18,7 @@ const tileDescriptions: Record<string, string> = {
 	"blind-75": "High-frequency interview fundamentals.",
 	cses: "Competitive programming essentials.",
 	lld: "Judged class design and concurrency practice.",
-	hld: "System design, diagrams, and expert resources.",
+	hld: "Amazon, Netflix, BookMyShow, and system design.",
 };
 
 type ProgressCountRow = {
