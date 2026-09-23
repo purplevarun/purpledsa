@@ -17,6 +17,11 @@ html.dark {
 	--border: #404040;
 }
 
+html {
+	background: var(--bg);
+	color: var(--fg);
+}
+
 * {
 	box-sizing: border-box;
 	font-family: "JetBrains Mono", monospace;
@@ -195,7 +200,8 @@ a {
 
 .header-link-chip,
 .user-icon-chip,
-.sync-icon-button {
+.sync-icon-button,
+.theme-toggle-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -212,6 +218,7 @@ a {
 .header-link-chip::after,
 .user-icon-chip::after,
 .sync-icon-button::after,
+.theme-toggle-button::after,
 .dashboard-set-link::after {
 	content: "";
 	position: absolute;
@@ -242,6 +249,8 @@ a {
 .header-link-chip:focus-visible::after,
 .user-icon-chip:hover::after,
 .user-icon-chip:focus-visible::after,
+.theme-toggle-button:hover::after,
+.theme-toggle-button:focus-visible::after,
 .sync-icon-button:not(:disabled):hover::after,
 .sync-icon-button:not(:disabled):focus-visible::after {
 	opacity: 1;
@@ -255,14 +264,16 @@ a {
 }
 
 .user-icon-chip,
-.sync-icon-button {
+.sync-icon-button,
+.theme-toggle-button {
 	width: var(--control-height);
 	min-width: var(--control-height);
 	padding: 0;
 }
 
 .user-icon-chip svg,
-.sync-icon-button svg {
+.sync-icon-button svg,
+.theme-toggle-button svg {
 	width: 18px;
 	height: 18px;
 	stroke: currentColor;
@@ -272,13 +283,15 @@ a {
 	stroke-linejoin: round;
 }
 
-.user-icon-chip:hover {
+.user-icon-chip:hover,
+.theme-toggle-button:hover {
 	border-color: var(--fg);
 }
 
 .sync-icon-button:not(:disabled):hover,
 .sync-icon-button:not(:disabled):focus-visible,
 .user-icon-chip:focus-visible,
+.theme-toggle-button:focus-visible,
 .header-link-chip:focus-visible {
 	border-color: var(--fg);
 }
@@ -316,6 +329,7 @@ a {
 	.header-link-chip::after,
 	.user-icon-chip::after,
 	.sync-icon-button::after,
+	.theme-toggle-button::after,
 	.dashboard-set-link::after {
 		animation: none !important;
 	}

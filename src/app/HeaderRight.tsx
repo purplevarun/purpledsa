@@ -1,5 +1,11 @@
-import { Search, Trophy } from "lucide-react";
+import { MoonStar, Search, SunMedium, Trophy } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+	getStoredTheme,
+	resolveThemePreference,
+	applyTheme,
+} from "../lib/theme";
 import { useGlobalSearch } from "./GlobalSearch";
 
 type HeaderRightProps = {
@@ -36,6 +42,18 @@ const HeaderRight = ({
 	lastSyncedAt = null,
 }: HeaderRightProps) => {
 	const { openSearch, isOpen } = useGlobalSearch();
+	const [isDark, setIsDark] = useState(() => {
+		const storedTheme = getStoredTheme();
+		const prefersDark = window.matchMedia(
+			"(prefers-color-scheme: dark)",
+		).matches;
+		return resolveThemePreference({ storedTheme, prefersDark });
+	});
+
+	useEffect(() => {
+		applyTheme(isDark);
+	}, [isDark]);
+
 	const lastSyncedLabel = lastSyncedAt
 		? new Date(lastSyncedAt).toLocaleString()
 		: "Never";
@@ -56,6 +74,16 @@ const HeaderRight = ({
 				aria-keyshortcuts="Meta+K Control+K"
 			>
 				<Search aria-hidden="true" />
+			</button>
+			<button
+				type="button"
+				className="user-icon-chip theme-toggle-button"
+				onClick={() => setIsDark((current) => !current)}
+				aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+				title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+				aria-pressed={isDark}
+			>
+				{isDark ? <SunMedium aria-hidden="true" /> : <MoonStar aria-hidden="true" />}
 			</button>
 			<Link
 				to="/leaderboard"
