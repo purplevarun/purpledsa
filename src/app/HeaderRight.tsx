@@ -79,11 +79,17 @@ const HeaderRight = ({
 				type="button"
 				className="user-icon-chip theme-toggle-button"
 				onClick={() => setIsDark((current) => !current)}
-				aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+				aria-label={
+					isDark ? "Switch to light mode" : "Switch to dark mode"
+				}
 				title={isDark ? "Switch to light mode" : "Switch to dark mode"}
 				aria-pressed={isDark}
 			>
-				{isDark ? <SunMedium aria-hidden="true" /> : <MoonStar aria-hidden="true" />}
+				{isDark ? (
+					<SunMedium aria-hidden="true" />
+				) : (
+					<MoonStar aria-hidden="true" />
+				)}
 			</button>
 			<Link
 				to="/leaderboard"
